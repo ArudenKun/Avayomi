@@ -19,7 +19,7 @@
     <ItemGroup>
         <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
-        <Folder Include="ViewModels\Abstractions\" />
+        <Folder Include="ViewModels\Abstractions\"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -45,10 +45,23 @@
         <PackageReference Include="LucideAvalonia" Version="1.2.0"/>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
         <PackageReference Include="Nito.AsyncEx" Version="5.1.2"/>
+        <PackageReference Include="Serilog.Enrichers.ClassName" Version="0.2.0"/>
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0"/>
+        <PackageReference Include="Serilog.Sinks.Async" Version="2.0.0"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
+        <PackageReference Include="Serilog.Sinks.FileEx" Version="5.1.8"/>
         <PackageReference Include="SukiUI" Version="6.0.0-beta7"/>
+        <PackageReference Include="ThisAssembly" Version="1.4.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Velopack" Version="0.0.359"/>
         <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="1.2.0"/>
     </ItemGroup>
+
+    <PropertyGroup Label="Warnings">
+        <NoWarn>${NoWarn};AVLN3001;</NoWarn>
+    </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Avayomi.Generators\Avayomi.Generators.csproj" OutputItemType="analyzer" ReferenceOutputAssembly="false"/>
@@ -72,5 +85,4 @@
             <DependentUpon>Local.resx</DependentUpon>
         </Compile>
     </ItemGroup>
-
 </Project>

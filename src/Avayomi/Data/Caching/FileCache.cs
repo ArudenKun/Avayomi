@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -16,7 +15,7 @@ using Nito.AsyncEx;
 
 namespace Avayomi.Data.Caching;
 
-[AutoInterface(Inheritance = [typeof(IDistributedCache), typeof(IDisposable)])]
+[AutoInterface(Inheritance = [typeof(IDistributedCache), typeof(IAsyncDisposable)])]
 public sealed class FileCache : IFileCache
 {
     private bool _disposed;
@@ -34,7 +33,7 @@ public sealed class FileCache : IFileCache
     private ConcurrentDictionary<string, ManifestEntry>? _cacheManifest;
     private readonly ConcurrentDictionary<string, AsyncReaderWriterLock> _fileLock;
 
-    private readonly JsonTypeInfo _rootTypeInfo;
+    private readonly JsonTypeInfo _jsonTypeInfo;
 
     public FileCache(
         FileCacheOptions options,
@@ -43,7 +42,7 @@ public sealed class FileCache : IFileCache
     )
     {
         _options = options;
-        _rootTypeInfo = jsonSerializerOptions.GetTypeInfo(typeof(ManifestEntry));
+        _jsonTypeInfo = jsonSerializerOptions.GetTypeInfo(typeof(ConcurrentDictionary<string, ManifestEntry>));
         _logger = logger ?? NullLogger<FileCache>.Instance;
         _manifestPath = Path.Combine(options.DirectoryPath, "manifest.json");
         _fileLock = new ConcurrentDictionary<string, AsyncReaderWriterLock>(StringComparer.Ordinal);
@@ -54,42 +53,24 @@ public sealed class FileCache : IFileCache
         _backgroundManifestSavingTask = BackgroundManifestSaving();
     }
 
-    public FileCache(FileCacheOptions options, IJsonTypeInfoResolver jsonTypeInfoResolver,
-        ILogger<FileCache>? logger) : this(options,
-        new JsonSerializerOptions { WriteIndented = true, TypeInfoResolver = jsonTypeInfoResolver }, logger)
-    {
-    }
-
-    [RequiresUnreferencedCode(
-        "This constructor initializes the FileCache with reflection-based serialization, which is incompatible with assembly trimming."
-    )]
-    [RequiresDynamicCode(
-        "This constructor initializes the FileCache with reflection-based serialization, which is incompatible with ahead-of-time compilation."
-    )]
-    public FileCache(FileCacheOptions options, ILogger<FileCache> logger)
-        : this(options, new DefaultJsonTypeInfoResolver(), logger)
-    {
-    }
-
-
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (_disposed)
             return;
 
-        _removingExpiredCancellationTokenSource.Cancel();
+        await _removingExpiredCancellationTokenSource.CancelAsync();
         if (!_backgroundRemovingExpiredTask.IsFaulted)
         {
-            _backgroundRemovingExpiredTask.Wait();
+            await _backgroundRemovingExpiredTask;
         }
 
-        _manifestSavingCancellationTokenSource.Cancel();
+        await _manifestSavingCancellationTokenSource.CancelAsync();
         if (!_backgroundManifestSavingTask.IsFaulted)
         {
-            _backgroundManifestSavingTask.Wait();
+            await _backgroundManifestSavingTask;
         }
 
-        SaveManifest();
+        await SaveManifestAsync();
         _manifestLock.Dispose();
         _disposed = true;
     }
@@ -135,8 +116,44 @@ public sealed class FileCache : IFileCache
     }
 
 
-    public Task<byte[]?> GetAsync(string key, CancellationToken token = new()) =>
-        Task.Run(() => Get(key), token);
+    public async Task<byte[]?> GetAsync(string key, CancellationToken token = new())
+    {
+        await TryLoadManifestAsync();
+
+        if (_cacheManifest is null)
+            return default;
+
+        if (!_cacheManifest.TryGetValue(key, out var manifestEntry))
+            return default;
+
+        var lockObj = _fileLock.GetOrAdd(
+            manifestEntry.FileName,
+            static _ => new AsyncReaderWriterLock()
+        );
+
+        using (await lockObj.ReaderLockAsync(token))
+        {
+            //By the time we have the lock, confirm we still have a cache
+            if (!_cacheManifest.ContainsKey(key))
+                return default;
+
+            var path = Path.Combine(_options.DirectoryPath, manifestEntry.FileName);
+            if (File.Exists(path))
+            {
+                await using var stream = File.OpenRead(path);
+                using var memStream = new MemoryStream((int)stream.Length);
+                await stream.CopyToAsync(memStream, token);
+                memStream.Seek(0, SeekOrigin.Begin);
+                return memStream.ToArray();
+            }
+
+            //Mismatch between manifest and file system - remove from manifest
+            _cacheManifest.TryRemove(key, out _);
+            _fileLock.TryRemove(key, out _);
+        }
+
+        return default;
+    }
 
 
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
@@ -191,13 +208,61 @@ public sealed class FileCache : IFileCache
     }
 
 
-    public Task SetAsync(
+    public async Task SetAsync(
         string key,
         byte[] value,
         DistributedCacheEntryOptions options,
         CancellationToken token = new()
-    ) => Task.Run(() => Set(key, value, options), token);
+    )
+    {
+        await TryLoadManifestAsync();
 
+        if (_cacheManifest is null)
+            return;
+
+        DateTimeOffset? expiry = null;
+        TimeSpan? renewal = null;
+
+        if (options.AbsoluteExpiration.HasValue)
+        {
+            expiry = options.AbsoluteExpiration.Value.ToUniversalTime();
+        }
+        else if (options.AbsoluteExpirationRelativeToNow.HasValue)
+        {
+            expiry = DateTimeOffset.UtcNow.Add(options.AbsoluteExpirationRelativeToNow.Value);
+        }
+
+        if (options.SlidingExpiration.HasValue)
+        {
+            renewal = options.SlidingExpiration.Value;
+            expiry = (expiry ?? DateTimeOffset.UtcNow) + renewal;
+        }
+
+        //Update the manifest entry with the new expiry
+        if (_cacheManifest.TryGetValue(key, out var manifestEntry))
+        {
+            manifestEntry = manifestEntry with { Expiry = expiry, Renewal = renewal };
+        }
+        else
+        {
+            manifestEntry = new ManifestEntry(MD5HashHelper.ComputeHash(key), expiry, renewal);
+        }
+
+        _cacheManifest[key] = manifestEntry;
+
+        var lockObj = _fileLock.GetOrAdd(
+            manifestEntry.FileName,
+            static _ => new AsyncReaderWriterLock()
+        );
+
+        using (await lockObj.WriterLockAsync(token))
+        {
+            var path = Path.Combine(_options.DirectoryPath, manifestEntry.FileName);
+            await using var fileStream = File.OpenWrite(path);
+            using var memStream = new MemoryStream(value);
+            await memStream.CopyToAsync(fileStream, token);
+        }
+    }
 
     public void Refresh(string key)
     {
@@ -221,8 +286,26 @@ public sealed class FileCache : IFileCache
     }
 
 
-    public Task RefreshAsync(string key, CancellationToken token = new()) =>
-        Task.Run(() => Refresh(key), token);
+    public async Task RefreshAsync(string key, CancellationToken token = new())
+    {
+        await TryLoadManifestAsync();
+
+        if (_cacheManifest is null)
+            return;
+
+        if (!_cacheManifest.TryGetValue(key, out var manifestEntry))
+            return;
+
+        if (!(manifestEntry.Expiry >= DateTimeOffset.UtcNow) && manifestEntry.Renewal == null)
+            return;
+
+        manifestEntry = manifestEntry with
+        {
+            Expiry = DateTimeOffset.UtcNow + manifestEntry.Renewal
+        };
+
+        _cacheManifest[key] = manifestEntry;
+    }
 
 
     public void Remove(string key)
@@ -249,8 +332,28 @@ public sealed class FileCache : IFileCache
     }
 
 
-    public Task RemoveAsync(string key, CancellationToken token = new()) =>
-        Task.Run(() => Remove(key), token);
+    public async Task RemoveAsync(string key, CancellationToken token = new())
+    {
+        await TryLoadManifestAsync();
+
+        if (_cacheManifest is null)
+            return;
+
+        if (!_cacheManifest.TryRemove(key, out var manifestEntry))
+            return;
+
+        if (!_fileLock.TryRemove(manifestEntry.FileName, out var lockObj))
+            return;
+
+        using (await lockObj.WriterLockAsync(token))
+        {
+            var path = Path.Combine(_options.DirectoryPath, manifestEntry.FileName);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+    }
 
     /// <summary>
     /// Saves the cache manifest to the file system.
@@ -266,7 +369,7 @@ public sealed class FileCache : IFileCache
                 Directory.CreateDirectory(_options.DirectoryPath);
             }
 
-            SerializeFile(_manifestPath, _cacheManifest);
+            SerializeFile();
         }
         finally
         {
@@ -274,6 +377,27 @@ public sealed class FileCache : IFileCache
         }
     }
 
+    /// <summary>
+    /// Saves the cache manifest to the file system.
+    /// </summary>
+    /// <returns></returns>
+    public async Task SaveManifestAsync()
+    {
+        await _manifestLock.WaitAsync();
+        try
+        {
+            if (!Directory.Exists(_options.DirectoryPath))
+            {
+                Directory.CreateDirectory(_options.DirectoryPath);
+            }
+
+            await SerializeFileAsync();
+        }
+        finally
+        {
+            _manifestLock.Release();
+        }
+    }
 
     public void RemoveExpired()
     {
@@ -311,36 +435,80 @@ public sealed class FileCache : IFileCache
         }
     }
 
-    public Task RemoveExpiredAsync() => Task.Run(RemoveExpired);
-
-    private void SerializeFile(string path, ConcurrentDictionary<string, ManifestEntry>? manifestEntries)
+    public async Task RemoveExpiredAsync()
     {
-        using var stream = new FileStream(
-            path,
-            FileMode.Create,
-            FileAccess.Write,
-            FileShare.None,
-            1024
-        );
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(manifestEntries, _rootTypeInfo);
-        using var memStream = new MemoryStream(bytes);
-        memStream.Seek(0, SeekOrigin.Begin);
-        memStream.CopyTo(stream);
+        await TryLoadManifestAsync();
+
+        if (_cacheManifest is null)
+            return;
+
+        var removed = 0;
+        foreach (var (key, manifestEntry) in _cacheManifest)
+        {
+            if (manifestEntry.Expiry != null && manifestEntry.Expiry >= DateTimeOffset.UtcNow)
+                continue;
+
+            if (!_fileLock.TryRemove(manifestEntry.FileName, out var lockObj))
+                continue;
+
+            using (await lockObj.WriterLockAsync())
+            {
+                var path = Path.Combine(_options.DirectoryPath, manifestEntry.FileName);
+                if (!File.Exists(path))
+                    continue;
+                File.Delete(path);
+                _cacheManifest.Remove(key, out _);
+                removed++;
+            }
+        }
+
+        if (removed > 0)
+        {
+            _logger.LogDebug(
+                "Evicted {DeletedCacheEntryCount} expired entries from cache",
+                removed
+            );
+        }
     }
 
-    private ConcurrentDictionary<string, ManifestEntry>? DeserializeFile(string path)
+    private void SerializeFile()
     {
-        using var stream = new FileStream(
-            path,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read,
-            1024
-        );
-        using var memStream = new MemoryStream((int)stream.Length);
-        stream.CopyTo(memStream);
+        using var fileStream = File.OpenWrite(_manifestPath);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(_cacheManifest,
+            _jsonTypeInfo);
+        using var memStream = new MemoryStream(bytes);
         memStream.Seek(0, SeekOrigin.Begin);
-        return (ConcurrentDictionary<string, ManifestEntry>?)JsonSerializer.Deserialize(memStream, _rootTypeInfo);
+        memStream.CopyTo(fileStream);
+    }
+
+    private async Task SerializeFileAsync()
+    {
+        await using var fileStream = File.OpenWrite(_manifestPath);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(_cacheManifest,
+            _jsonTypeInfo);
+        using var memStream = new MemoryStream(bytes);
+        memStream.Seek(0, SeekOrigin.Begin);
+        await memStream.CopyToAsync(fileStream);
+    }
+
+    private ConcurrentDictionary<string, ManifestEntry>? DeserializeFile()
+    {
+        using var fileStream = File.OpenRead(_manifestPath);
+        using var memStream = new MemoryStream((int)fileStream.Length);
+        fileStream.CopyTo(memStream);
+        memStream.Seek(0, SeekOrigin.Begin);
+        return (ConcurrentDictionary<string, ManifestEntry>?)JsonSerializer.Deserialize(memStream,
+            _jsonTypeInfo);
+    }
+
+    private async Task<ConcurrentDictionary<string, ManifestEntry>?> DeserializeFileAsync()
+    {
+        await using var fileStream = File.OpenRead(_manifestPath);
+        using var memStream = new MemoryStream((int)fileStream.Length);
+        await fileStream.CopyToAsync(memStream);
+        memStream.Seek(0, SeekOrigin.Begin);
+        return (ConcurrentDictionary<string, ManifestEntry>?)await JsonSerializer.DeserializeAsync(memStream,
+            _jsonTypeInfo);
     }
 
     private void TryLoadManifest()
@@ -358,9 +526,7 @@ public sealed class FileCache : IFileCache
 
             if (File.Exists(_manifestPath))
             {
-                _cacheManifest = DeserializeFile(
-                    _manifestPath
-                );
+                _cacheManifest = DeserializeFile();
                 _cacheManifest ??= new ConcurrentDictionary<string, ManifestEntry>();
             }
             else
@@ -371,7 +537,42 @@ public sealed class FileCache : IFileCache
                 }
 
                 _cacheManifest = new ConcurrentDictionary<string, ManifestEntry>();
-                SerializeFile(_manifestPath, _cacheManifest);
+                SerializeFile();
+            }
+        }
+        finally
+        {
+            _manifestLock.Release();
+        }
+    }
+
+    private async Task TryLoadManifestAsync()
+    {
+        //Avoid unnecessary lock contention way after manifest is loaded by checking before lock
+        if (_cacheManifest is not null)
+            return;
+
+        await _manifestLock.WaitAsync();
+        try
+        {
+            //Check that once we have lock (due to a race condition on the outer check) that we still need to load the manifest
+            if (_cacheManifest is not null)
+                return;
+
+            if (File.Exists(_manifestPath))
+            {
+                _cacheManifest = await DeserializeFileAsync();
+                _cacheManifest ??= new ConcurrentDictionary<string, ManifestEntry>();
+            }
+            else
+            {
+                if (!Directory.Exists(_options.DirectoryPath))
+                {
+                    Directory.CreateDirectory(_options.DirectoryPath);
+                }
+
+                _cacheManifest = new ConcurrentDictionary<string, ManifestEntry>();
+                await SerializeFileAsync();
             }
         }
         finally
@@ -393,7 +594,7 @@ public sealed class FileCache : IFileCache
                     cancellationToken
                 );
                 await RemoveExpiredAsync();
-                _logger.LogInformation("Removed expired entries");
+                _logger.LogInformation("[Background] Removed expired entries");
             }
         }
         catch (OperationCanceledException)
@@ -413,8 +614,8 @@ public sealed class FileCache : IFileCache
                     _options.ManifestSaveInterval ?? _options.DefaultManifestSaveInterval,
                     cancellationToken
                 );
-                await Task.Run(SaveManifest);
-                _logger.LogInformation("FileCache manifest saved");
+                await SaveManifestAsync();
+                _logger.LogInformation("[Background] FileCache manifest saved");
             }
         }
         catch (OperationCanceledException)

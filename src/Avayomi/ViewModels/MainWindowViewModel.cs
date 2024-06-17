@@ -1,20 +1,26 @@
-﻿using Avalonia;
+﻿using System.Collections.Generic;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avayomi.Core.Attributes;
 using Avayomi.ViewModels.Abstractions;
 using CommunityToolkit.Mvvm.Input;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi.ViewModels;
 
+[Singleton]
 public sealed partial class MainWindowViewModel : BaseViewModel
 {
-    public string Greeting => "Welcome to Avalonia!";
+    private readonly IFusionCache _fusionCache;
+
+    public MainWindowViewModel(IFusionCache fusionCache)
+    {
+        _fusionCache = fusionCache;
+    }
 
     [RelayCommand]
     private void ShuwtDown()
     {
-        if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime applicationLifetime)
-        {
-            applicationLifetime.Shutdown();
-        }
+        var a = _fusionCache.GetOrSet("key", new Dictionary<string, string> { ["hello"] = "YEEEET" });
     }
 }

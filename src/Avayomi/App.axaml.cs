@@ -1,16 +1,23 @@
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avayomi.ViewModels;
-using Avayomi.Views;
 using HotAvalonia;
 
 namespace Avayomi;
 
 public class App : Application
 {
+    private readonly MainWindowViewModel _mainWindowViewModel;
+
+    public App(MainWindowViewModel mainWindowViewModel)
+    {
+        _mainWindowViewModel = mainWindowViewModel;
+    }
+
     public override void Initialize()
     {
         this.EnableHotReload();
@@ -27,10 +34,7 @@ public class App : Application
             // Line below is needed to remove Avalonia data validation.
             // Without this line you will get duplicate validations from both Avalonia and CT
             BindingPlugins.DataValidators.RemoveAt(0);
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            desktop.MainWindow = DataTemplates[0].Build(_mainWindowViewModel) as Window;
         }
 
         base.OnFrameworkInitializationCompleted();

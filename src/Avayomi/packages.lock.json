@@ -21,32 +21,11 @@
           "Avalonia.X11": "11.1.0-beta2"
         }
       },
-      "Avalonia.Diagnostics": {
-        "type": "Direct",
-        "requested": "[11.1.0-beta2, )",
-        "resolved": "11.1.0-beta2",
-        "contentHash": "B96Oy5DxjSb9WHdjLYoC7ekq2c8jF8UpVgRiFLkCjjx8mXzbiIvqDPn5Y1zgmQUyZFm+3pjnwe5hCgTZ0Aze4g==",
-        "dependencies": {
-          "Avalonia": "11.1.0-beta2",
-          "Avalonia.Controls.ColorPicker": "11.1.0-beta2",
-          "Avalonia.Controls.DataGrid": "11.1.0-beta2",
-          "Avalonia.Themes.Simple": "11.1.0-beta2"
-        }
-      },
       "Avalonia.Fonts.Inter": {
         "type": "Direct",
         "requested": "[11.1.0-beta2, )",
         "resolved": "11.1.0-beta2",
         "contentHash": "bWyoOkhXqQT8A6d/i1a2Js3DUQ9MeTYSkPcN8kzc6kawOwjuDrDCn5ol6XRLz7skcqShwpchzguwT/mVnPNYsw==",
-        "dependencies": {
-          "Avalonia": "11.1.0-beta2"
-        }
-      },
-      "Avalonia.Markup.Xaml.Loader": {
-        "type": "Direct",
-        "requested": "[11.1.0-beta2, )",
-        "resolved": "11.1.0-beta2",
-        "contentHash": "2eIG1KM7WQkyTK76hB7mFSLvBL+vJ0G34h5gTyxFq15e7VKjRj+D2lJyJwbLCDbzIKd4A4UTC8xu/EKFO1082g==",
         "dependencies": {
           "Avalonia": "11.1.0-beta2"
         }
@@ -94,12 +73,6 @@
           "Flurl.Http": "4.0.2",
           "Macross.Json.Extensions": "3.0.0"
         }
-      },
-      "HotAvalonia": {
-        "type": "Direct",
-        "requested": "[1.1.1, )",
-        "resolved": "1.1.1",
-        "contentHash": "w76G7DbIMixwgvCVf/AQSRY3ryhpJV9BudNZyOyTZKiJCB83HsLLHXvh2rpKDPoQqSqbsVjw9a1+j1sY84rwSA=="
       },
       "HotAvalonia.Extensions": {
         "type": "Direct",
@@ -172,6 +145,55 @@
           "Nito.Cancellation": "1.1.2"
         }
       },
+      "Serilog.Enrichers.ClassName": {
+        "type": "Direct",
+        "requested": "[0.2.0, )",
+        "resolved": "0.2.0",
+        "contentHash": "8igSzN67Xdsn3Ge4KfE3qZFojYsTNkzw5g57P8FQdCKEPo6uEWPH90H7EmjLgJXd1wPGlN306M1u9mKxl/KXPg==",
+        "dependencies": {
+          "Serilog": "2.12.0"
+        }
+      },
+      "Serilog.Extensions.Hosting": {
+        "type": "Direct",
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "db0OcbWeSCvYQkHWu6n0v40N4kKaTAXNjlM3BKvcbwvNzYphQFcBR+36eQ/7hMMwOkJvAyLC2a9/jNdUL5NjtQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
+          "Serilog": "3.1.1",
+          "Serilog.Extensions.Logging": "8.0.0"
+        }
+      },
+      "Serilog.Sinks.Async": {
+        "type": "Direct",
+        "requested": "[2.0.0, )",
+        "resolved": "2.0.0",
+        "contentHash": "a+kTyUUxPAOZWKJiNbDqCPMiP0BWBWzObyTpRmGLrgCecgc/YJ+HqYGjsQoS6Sj9cRVXB9hH5O1mTZ0DiewG2w==",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        }
+      },
+      "Serilog.Sinks.Console": {
+        "type": "Direct",
+        "requested": "[6.0.0, )",
+        "resolved": "6.0.0",
+        "contentHash": "fQGWqVMClCP2yEyTXPIinSr5c+CBGUvBybPxjAGcf7ctDhadFhrQw03Mv8rJ07/wR5PDfFjewf2LimvXCDzpbA==",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        }
+      },
+      "Serilog.Sinks.FileEx": {
+        "type": "Direct",
+        "requested": "[5.1.8, )",
+        "resolved": "5.1.8",
+        "contentHash": "p5FEbn/YAOanKqzoNlUwLdAP1MP/9SmArWpjmQOK6EB/s7xLBR/wxMaBEfm8vmI8DyQ9ljDxYHixEdFfT5SEkA==",
+        "dependencies": {
+          "Serilog": "2.12.0"
+        }
+      },
       "SukiUI": {
         "type": "Direct",
         "requested": "[6.0.0-beta7, )",
@@ -184,6 +206,21 @@
           "Avalonia.Themes.Simple": "11.1.0-beta2",
           "ReactiveUI": "19.6.12",
           "SkiaSharp": "2.88.8"
+        }
+      },
+      "ThisAssembly": {
+        "type": "Direct",
+        "requested": "[1.4.3, )",
+        "resolved": "1.4.3",
+        "contentHash": "46mg9Sqj6mnyVAQYtq6aBNwlf750LOiKqYMEAymBfi5dMb0Oi8fGfV2dr9C8zFqYOnOmeK26d4NWU5x7i2erdQ==",
+        "dependencies": {
+          "ThisAssembly.AssemblyInfo": "1.4.3",
+          "ThisAssembly.Constants": "1.4.3",
+          "ThisAssembly.Git": "1.4.3",
+          "ThisAssembly.Metadata": "1.4.3",
+          "ThisAssembly.Project": "1.4.3",
+          "ThisAssembly.Resources": "1.4.3",
+          "ThisAssembly.Strings": "1.4.3"
         }
       },
       "Velopack": {
@@ -225,15 +262,6 @@
         "type": "Transitive",
         "resolved": "0.0.29",
         "contentHash": "U4eJLQdoDNHXtEba7MZUCwrBErBTxFp6sUewXBOdAhU0Kwzwaa/EKFcYm8kpcysjzKtfB4S0S9n0uxKZFz/ikw=="
-      },
-      "Avalonia.Controls.ColorPicker": {
-        "type": "Transitive",
-        "resolved": "11.1.0-beta2",
-        "contentHash": "yZVF+Qubz2uCptX9hgoHBZWvHpchE8wLHHQDlWjkHMksDQX81X2bby6v8BEd9hZMklf4Npo0u6OmNWdtGg8Vdg==",
-        "dependencies": {
-          "Avalonia": "11.1.0-beta2",
-          "Avalonia.Remote.Protocol": "11.1.0-beta2"
-        }
       },
       "Avalonia.Controls.DataGrid": {
         "type": "Transitive",
@@ -433,6 +461,11 @@
         "type": "Transitive",
         "resolved": "0.11.0",
         "contentHash": "MEnrZ3UIiH40hjzMDsxrTyi8dtqB5ziv3iBeeU4bXsL/7NLSal9F1lZKpK+tfBRnUoDSdtcW3KufE4yhATOMCA=="
+      },
+      "Microsoft.CSharp": {
+        "type": "Transitive",
+        "resolved": "4.7.0",
+        "contentHash": "pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA=="
       },
       "Microsoft.Extensions.Caching.Abstractions": {
         "type": "Transitive",
@@ -785,6 +818,20 @@
           "System.Text.Json": "8.0.3"
         }
       },
+      "Serilog": {
+        "type": "Transitive",
+        "resolved": "4.0.0",
+        "contentHash": "2jDkUrSh5EofOp7Lx5Zgy0EB+7hXjjxE2ktTb1WVQmU00lDACR2TdROGKU0K1pDTBSJBN1PqgYpgOZF8mL7NJw=="
+      },
+      "Serilog.Extensions.Logging": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "YEAMWu1UnWgf1c1KP85l1SgXGfiVo0Rz6x08pCiPOIBt2Qe18tcZLvdBUuV5o1QHvrs8FAry9wTIhgBRtjIlEg==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "8.0.0",
+          "Serilog": "3.1.1"
+        }
+      },
       "SkiaSharp": {
         "type": "Transitive",
         "resolved": "2.88.8",
@@ -875,6 +922,68 @@
         "resolved": "4.5.4",
         "contentHash": "zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg=="
       },
+      "ThisAssembly.AssemblyInfo": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "WbfymV0/HNJuYtmhk0OH3c4k+l07lyB3DE5e82EapAJb9NrOeFywu3xttGhc8AchT8Bm+yQVfGsB4emKnf7Hjw==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.7.0",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
+      "ThisAssembly.Constants": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "2bMjff1QBHk7M9TZJ0xvCvvquCcOhSMqUmN2twvPHctGgCWEP8Qi8NiJJ9xPdkNdXRrWZzHZYpWn9gnK1aA6tw==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.7.0",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
+      "ThisAssembly.Git": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "SXfbP/QsvvT5JTqUeLGhmSBxDWsqWbQJwpTMigj54pOUOAZYgN/6b5v9TgVI67xR5xPD4tGQLAILl4y60K3/Rw==",
+        "dependencies": {
+          "ThisAssembly.Constants": "1.4.3"
+        }
+      },
+      "ThisAssembly.Metadata": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "nGBReL37KwNOlyVN/JtjZDOcN0neiguuoUwIYSfqubb+cywOS+VhQMx+bicjr0DNvGyV5aJx8hWEiRkEWEO84A==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.7.0",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
+      "ThisAssembly.Project": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "4ScH3VCgwC34rcmvntkhje8XrATuopyXMETpZSvzE56y+2NEAIvT9QgEAbppzSfGfXTfhkn14sRIiSiGf5rmDg==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.7.0",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
+      "ThisAssembly.Resources": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "8qEIuy5AFgCwFwLw6Ap3bwRHgISoTH0yoTAqIM++QNPa2whNFUza0AzQzcj5FyGav6mDidsBhObsQNxByWPxZQ==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.7.0",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
+      "ThisAssembly.Strings": {
+        "type": "Transitive",
+        "resolved": "1.4.3",
+        "contentHash": "F4QEnlGUV69wdt77do6wvVmQAFlF2lUFXWO+jVR79ZEABF+8JVeb0FV5K3cSC1hgc5wEhU6W+MwasqnnTRQRRw==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.7.0",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
       "Tmds.DBus.Protocol": {
         "type": "Transitive",
         "resolved": "0.16.0",
@@ -892,9 +1001,6 @@
           "System.Diagnostics.DiagnosticSource": "8.0.0",
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
-      },
-      "avayomi.generators": {
-        "type": "Project"
       }
     },
     "net8.0/linux-x64": {

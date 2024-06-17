@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using Flurl;
 
 namespace Avayomi.Helpers;
@@ -14,8 +13,7 @@ public static class EnvironmentHelper
     /// <summary>
     /// Returns the version of executing assembly.
     /// </summary>
-    public static Version AppVersion =>
-        Assembly.GetEntryAssembly()?.GetName().Version ?? new Version();
+    public static Version AppVersion => new(ThisAssembly.Info.Version);
 
     /// <summary>
     /// Returns the friendly name of this application.
