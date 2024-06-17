@@ -41,14 +41,9 @@ public class UiThread : BaseUiThread<UiContext>
             );
             SynchronizationContext.SetSynchronizationContext(context);
         }
-#if DEBUG
-        catch (Exception ex) when (ex is not PlatformNotSupportedException)
-#else
         catch (Exception ex)
-#endif
         {
             Logger.LogCritical(ex, "An error occured in the UiThread");
-            throw;
         }
 
         /*

@@ -16,7 +16,7 @@ using Nito.AsyncEx;
 namespace Avayomi.Data.Caching;
 
 [AutoInterface(Inheritance = [typeof(IDistributedCache), typeof(IAsyncDisposable)])]
-public sealed class FileCache : IFileCache
+public sealed partial class FileCache : IFileCache
 {
     private bool _disposed;
     private readonly FileCacheOptions _options;
@@ -374,6 +374,7 @@ public sealed class FileCache : IFileCache
         finally
         {
             _manifestLock.Release();
+            LogManifestSaved();
         }
     }
 
@@ -396,6 +397,7 @@ public sealed class FileCache : IFileCache
         finally
         {
             _manifestLock.Release();
+            LogManifestSaved();
         }
     }
 
@@ -432,6 +434,8 @@ public sealed class FileCache : IFileCache
                 "Evicted {DeletedCacheEntryCount} expired entries from cache",
                 removed
             );
+
+            LogRemovedExpiredEntries();
         }
     }
 
@@ -468,45 +472,37 @@ public sealed class FileCache : IFileCache
                 "Evicted {DeletedCacheEntryCount} expired entries from cache",
                 removed
             );
+
+            LogRemovedExpiredEntries();
         }
     }
 
     private void SerializeFile()
     {
-        using var fileStream = File.OpenWrite(_manifestPath);
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(_cacheManifest,
+        var data = JsonSerializer.SerializeToUtf8Bytes(_cacheManifest,
             _jsonTypeInfo);
-        using var memStream = new MemoryStream(bytes);
-        memStream.Seek(0, SeekOrigin.Begin);
-        memStream.CopyTo(fileStream);
+        File.WriteAllBytes(_manifestPath, data);
     }
 
     private async Task SerializeFileAsync()
     {
-        await using var fileStream = File.OpenWrite(_manifestPath);
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(_cacheManifest,
+        var data = JsonSerializer.SerializeToUtf8Bytes(_cacheManifest,
             _jsonTypeInfo);
-        using var memStream = new MemoryStream(bytes);
-        memStream.Seek(0, SeekOrigin.Begin);
-        await memStream.CopyToAsync(fileStream);
+        await File.WriteAllBytesAsync(_manifestPath, data);
     }
 
     private ConcurrentDictionary<string, ManifestEntry>? DeserializeFile()
     {
-        using var fileStream = File.OpenRead(_manifestPath);
-        using var memStream = new MemoryStream((int)fileStream.Length);
-        fileStream.CopyTo(memStream);
-        memStream.Seek(0, SeekOrigin.Begin);
+        var data = File.ReadAllBytes(_manifestPath);
+        using var memStream = new MemoryStream(data);
         return (ConcurrentDictionary<string, ManifestEntry>?)JsonSerializer.Deserialize(memStream,
             _jsonTypeInfo);
     }
 
     private async Task<ConcurrentDictionary<string, ManifestEntry>?> DeserializeFileAsync()
     {
-        await using var fileStream = File.OpenRead(_manifestPath);
-        using var memStream = new MemoryStream((int)fileStream.Length);
-        await fileStream.CopyToAsync(memStream);
-        memStream.Seek(0, SeekOrigin.Begin);
+        var data = await File.ReadAllBytesAsync(_manifestPath);
+        using var memStream = new MemoryStream(data);
         return (ConcurrentDictionary<string, ManifestEntry>?)await JsonSerializer.DeserializeAsync(memStream,
             _jsonTypeInfo);
     }
@@ -594,7 +590,6 @@ public sealed class FileCache : IFileCache
                     cancellationToken
                 );
                 await RemoveExpiredAsync();
-                _logger.LogInformation("[Background] Removed expired entries");
             }
         }
         catch (OperationCanceledException)
@@ -615,11 +610,16 @@ public sealed class FileCache : IFileCache
                     cancellationToken
                 );
                 await SaveManifestAsync();
-                _logger.LogInformation("[Background] FileCache manifest saved");
             }
         }
         catch (OperationCanceledException)
         {
         }
     }
+
+    [LoggerMessage(Message = "Manifest saved", SkipEnabledCheck = true, Level = LogLevel.Information)]
+    partial void LogManifestSaved();
+
+    [LoggerMessage(Message = "Removed expired entries", SkipEnabledCheck = true, Level = LogLevel.Information)]
+    partial void LogRemovedExpiredEntries();
 }
