@@ -11,9 +11,10 @@ jobs:
   get-props:
     name: Get Props
     runs-on: ubuntu-latest
-    outputs: 
+    outputs:
       version: ${{ steps.get-version.outputs.version }}
       hash: ${{ steps.get-hash.outputs.hash }}
+      repo_url: ${{ steps.get-repo-url.ouputs.repo_url }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -25,27 +26,30 @@ jobs:
       - name: Get Hash
         id: get-hash
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get Repo Url
+        id: get-repo-url
+        run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_ENV
   
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: get-props
-    permissions:
-      contents: write
-    steps:
-      - uses: dev-drprasad/delete-tag-and-release@v1.1
-        with:
-          delete_release: true
-          tag_name: dev-build
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: softprops/action-gh-release@v2
-        with:
-          name: Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}
-          tag_name: dev-build
-          prerelease: true
+  #  create-release:
+  #    name: Create Release
+  #    runs-on: ubuntu-latest
+  #    needs: get-props
+  #    permissions:
+  #      contents: write
+  #    steps:
+  #      - uses: dev-drprasad/delete-tag-and-release@v1.1
+  #        with:
+  #          delete_release: true
+  #          tag_name: dev-build
+  #          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #      - uses: softprops/action-gh-release@v2
+  #        with:
+  #          name: Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}
+  #          tag_name: dev-build
+  #          prerelease: true
   build:
     name: Build Avayomi
-    needs: [ get-props, create-release ]
+    needs: get-props
     strategy:
       fail-fast: true
       matrix:
@@ -93,8 +97,7 @@ jobs:
       - name: Install Velopack
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: |
-          dotnet new tool-manifest
-          dotnet tool install vpk
+          dotnet tool install vpk -g
       - name: Restore
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet restore
@@ -103,17 +106,25 @@ jobs:
       - name: Pack Release
         shell: bash
         run: >
-          dotnet vpk pack 
+          vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }}
+          vpk pack 
           -u Avayomi 
           -v ${{ needs.get-props.outputs.version }} 
           -p publish 
-          -o dist
           -c ${{ matrix.channel }} 
           ${{ matrix.target-platform == 'linux' && '-i src/Avayomi/Assets/faviconlogo.png' || '' }}
       - name: Upload Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: dev-build
-          files: |
-            dist/*!(*assets*)*
-            dist/*!(*RELEASES*)*
+        run: >
+          vpk upload github 
+          --pre
+          --repoUrl ${{ needs.get-props.outputs.repo_url }}
+          --publish 
+          --releaseName "Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}" 
+          --tag ${{ needs.get-props.outputs.version }}
+
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          tag_name: dev-build
+#          files: |
+#            dist/*!(*assets*)*
+#            dist/*!(*RELEASES*)*
