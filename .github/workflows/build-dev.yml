@@ -14,7 +14,7 @@ jobs:
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       hash: ${{ steps.get-hash.outputs.hash }}
-      repo_url: ${{ steps.get-repo-url.ouputs.repo_url }}
+      repo_url: ${{ steps.get-repo-url.outputs.repo_url }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Get Repo Url
         id: get-repo-url
-        run: echo "repo_url=https://github.com/${{ github.repository }}" >> $GITHUB_OUTPUT
+        run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_OUTPUT
   
   #  create-release:
   #    name: Create Release
