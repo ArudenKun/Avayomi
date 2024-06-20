@@ -97,7 +97,8 @@ jobs:
       - name: Install Velopack
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: |
-          dotnet tool install vpk -g
+          dotnet new tool-manifest
+          dotnet tool install vpk
       - name: Restore
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet restore
@@ -106,8 +107,8 @@ jobs:
       - name: Pack Release
         shell: bash
         run: >
-          vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }}
-          vpk pack 
+          dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }}
+          dotnet vpk pack 
           -u Avayomi 
           -v ${{ needs.get-props.outputs.version }} 
           -p publish 
@@ -115,7 +116,7 @@ jobs:
           ${{ matrix.target-platform == 'linux' && '-i src/Avayomi/Assets/faviconlogo.png' || '' }}
       - name: Upload Release
         run: >
-          vpk upload github 
+          dotnet vpk upload github 
           --pre
           --repoUrl ${{ needs.get-props.outputs.repo_url }}
           --publish 
