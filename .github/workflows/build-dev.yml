@@ -28,7 +28,7 @@ jobs:
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Get Repo Url
         id: get-repo-url
-        run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_ENV
+        run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_OUTPUT
   
   #  create-release:
   #    name: Create Release
@@ -119,8 +119,8 @@ jobs:
         run: >
           dotnet vpk upload github 
           --pre
-          --repoUrl ${{ needs.get-props.outputs.repo_url }}
           --publish 
+          --repoUrl ${{ needs.get-props.outputs.repo_url }}
           --releaseName "Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}" 
           --tag ${{ needs.get-props.outputs.version }}
 
