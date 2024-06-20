@@ -104,7 +104,7 @@ jobs:
         run: >
           dotnet vpk pack 
           -u Avayomi 
-          -v ${{ steps.get-props.outputs.version }} 
+          -v ${{ needs.get-props.outputs.version }} 
           -p publish 
           -c ${{ matrix.channel }} 
           ${{ matrix.target-platform == 'linux' && '-i src/Avayomi/Assets/faviconlogo.png' || '' }}
