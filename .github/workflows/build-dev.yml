@@ -104,10 +104,12 @@ jobs:
         run: dotnet restore
       - name: Publish
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
+      - name: Download Previous Release
+        shell: bash
+        run: dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }}
       - name: Pack Release
         shell: bash
         run: >
-          dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }}
           dotnet vpk pack 
           -u Avayomi 
           -v ${{ needs.get-props.outputs.version }} 
