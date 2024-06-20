@@ -33,7 +33,7 @@ jobs:
           delete_release: true
           tag_name: dev-build
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: ncipollo/release-action@v1
+      - uses: softprops/action-gh-release@v2
         with:
           name: Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}
           tag_name: dev-build
