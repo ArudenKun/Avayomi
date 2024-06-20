@@ -124,6 +124,7 @@ jobs:
           --repoUrl ${{ needs.get-props.outputs.repo_url }}
           --releaseName "Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}" 
           --tag ${{ needs.get-props.outputs.version }}
+          --token ${{ secrets.GITHUB_TOKEN }}
 
 #        uses: softprops/action-gh-release@v2
 #        with:
