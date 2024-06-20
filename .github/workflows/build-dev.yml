@@ -1,20 +1,42 @@
 name: Build and Upload Dev Release
-
-permissions:
-  contents: write
-
 on:
-#  push:
-#    branches:
-#      - master
+  #  push:
+  #    branches:
+  #      - master
   workflow_dispatch:
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
+  get-props:
+    name: Get Props
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Version
+        run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
+      - name: Get Hash
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+  
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: get-props
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          delete_release: true
+          tag_name: dev-build
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ncipollo/release-action@v1
+        with:
+          name: Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}
+          tag_name: dev-build
+          prerelease: true
   build:
+    needs: [ get-props, create-release ]
     strategy:
       fail-fast: true
       matrix:
@@ -35,20 +57,14 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_NOLOGO: true
       NUGET_CERT_REVOCATION_MODE: offline
-    outputs:
-      version: ${{ steps.get-version.outputs.version }}
+    permissions:
+      contents: write
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           submodules: true
-
-      - name: Get Version
-        id: get-version
-        shell: bash
-        run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
-
       - name: Check Cache
         id: check-cache
         uses: actions/cache@v4
@@ -60,26 +76,21 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget
-
       - name: Install FUSE
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo add-apt-repository universe
           sudo apt install libfuse2
-
       - name: Install Velopack
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: |
           dotnet new tool-manifest
           dotnet tool install vpk
-
       - name: Restore
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet restore
-
       - name: Publish
-        run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ steps.get-version.outputs.version }}
-
+        run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
       - name: Pack Release
         shell: bash
         run: >
@@ -89,43 +100,11 @@ jobs:
           -p publish 
           -c ${{ matrix.channel }} 
           ${{ matrix.target-platform == 'linux' && '-i src/Avayomi/Assets/faviconlogo.png' || '' }}
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: ${{ matrix.target-platform }}-build
-          path: |
+          tag_name: dev-build
+          files: |
             Releases/
             !Releases/assets.*.json
             !Releases/RELEASES-*
-
-  release:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Get Hash
-        id: get-hash
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - uses: actions/download-artifact@v4
-        with:
-          path: Releases
-          merge-multiple: true
-
-      - uses: dev-drprasad/delete-tag-and-release@v1.1
-        with:
-          delete_release: true
-          tag_name: dev-build
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: Dev ${{ steps.get-hash.outputs.sha_short }}-${{ needs.build.outputs.version }}
-          prerelease: true
-          tag_name: dev-build
-          files: |
-            Releases/*

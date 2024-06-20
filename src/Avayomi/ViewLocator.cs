@@ -51,7 +51,6 @@ public sealed partial class ViewLocator
         [RequiresUnreferencedCode(
             "Calls Rake.Desktop.ViewModels.Abstractions.IActivatable.Activate()"
         )]
-        
         void Loaded(object? sender, RoutedEventArgs e)
         {
             activatableViewModel?.Activate();

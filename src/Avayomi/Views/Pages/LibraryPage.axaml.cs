@@ -1,12 +1,10 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Controls;
 
 namespace Avayomi.Views.Pages;
 
-public partial class LibraryView : UserControl
+public partial class LibraryPage : UserControl
 {
-    public LibraryView()
+    public LibraryPage()
     {
         InitializeComponent();
     }

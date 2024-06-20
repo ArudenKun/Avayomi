@@ -15,11 +15,9 @@
         <DefineConstants>$(DefineConstants);HAS_AVALONIA</DefineConstants>
         <DefineConstants Condition="$(Configuration) == 'Debug'">$(DefineConstants);ENABLE_XAML_HOT_RELOAD</DefineConstants>
     </PropertyGroup>
-    
+
     <ItemGroup>
-        <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
-        <Folder Include="ViewModels\Abstractions\"/>
     </ItemGroup>
 
     <ItemGroup>
