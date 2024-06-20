@@ -115,6 +115,6 @@ jobs:
         with:
           tag_name: dev-build
           files: |
-            release/
+            release/*
             !release/assets.*.json
             !release/RELEASES-*
