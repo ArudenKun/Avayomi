@@ -11,14 +11,19 @@ jobs:
   get-props:
     name: Get Props
     runs-on: ubuntu-latest
+    outputs: 
+      version: ${{ steps.get-version.outputs.version }}
+      hash: ${{ steps.get-hash.outputs.hash }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           submodules: true
       - name: Get Version
+        id: get-version
         run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
       - name: Get Hash
+        id: get-hash
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
   
   create-release:
