@@ -120,6 +120,7 @@ jobs:
           dotnet vpk upload github 
           --pre
           --publish 
+          --channel ${{ matrix.channel }} 
           --repoUrl ${{ needs.get-props.outputs.repo_url }}
           --releaseName "Dev ${{ needs.get-props.outputs.hash }}-${{ needs.get-props.outputs.version }}" 
           --tag ${{ needs.get-props.outputs.version }}
