@@ -116,5 +116,5 @@ jobs:
           tag_name: dev-build
           files: |
             release/*
-            !release/assets.*.json
-            !release/RELEASES-*
+            release/assets.!(*).json
+            release/RELEASES-!(*)
