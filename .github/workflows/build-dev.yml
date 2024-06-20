@@ -28,7 +28,7 @@ jobs:
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Get Repo Url
         id: get-repo-url
-        run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_OUTPUT
+        run: echo "repo_url=https://github.com/${{ github.repository }}" >> $GITHUB_OUTPUT
   
   #  create-release:
   #    name: Create Release
