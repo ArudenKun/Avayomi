@@ -44,6 +44,7 @@ jobs:
           tag_name: dev-build
           prerelease: true
   build:
+    name: Build Avayomi
     needs: [ get-props, create-release ]
     strategy:
       fail-fast: true
@@ -106,6 +107,7 @@ jobs:
           -u Avayomi 
           -v ${{ needs.get-props.outputs.version }} 
           -p publish 
+          -o release
           -c ${{ matrix.channel }} 
           ${{ matrix.target-platform == 'linux' && '-i src/Avayomi/Assets/faviconlogo.png' || '' }}
       - name: Upload Release
@@ -113,6 +115,6 @@ jobs:
         with:
           tag_name: dev-build
           files: |
-            Releases/
-            !Releases/assets.*.json
-            !Releases/RELEASES-*
+            releases/
+            !releases/assets.*.json
+            !releases/RELEASES-*
