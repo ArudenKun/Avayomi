@@ -12,6 +12,10 @@ jobs:
     name: Get Props
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Get Version
         run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
       - name: Get Hash
@@ -24,7 +28,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
       - uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           delete_release: true
