@@ -1,3 +1,5 @@
+@echo off
+
 set publishFolder="publish"
 if exist %publishFolder% (
     echo Deleting %publishFolder%
@@ -18,4 +20,5 @@ setlocal enableextensions disabledelayedexpansion
 
 echo.
 echo Compiling %appName%
-dotnet publish %proj% -c Release -o publish
+dotnet publish %proj% -c Release -o publish -p:PublishAot=false -p:PublishSingleFile=true --self-contained
+pause

@@ -1,3 +1,5 @@
+@echo off
+
 set releaseFolder="release"
 set publishFolder="publish"
 if exist %releaseFolder% (
@@ -36,7 +38,8 @@ if not defined version (
 
 echo.
 echo Compiling %appName%
-dotnet publish %proj% -c Release -o publish
+dotnet publish %proj% -c Release -o publish -p:PublishAot=false -p:PublishSingleFile=true --self-contained
 echo.
 echo Building Velopack Release v%version%
 vpk pack -u %appName% -o release -p publish -v %version%-dev.1 -c win-x64-dev
+pause
