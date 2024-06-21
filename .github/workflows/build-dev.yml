@@ -85,7 +85,10 @@ jobs:
           sudo apt install libfuse2
 
       - name: Install Velopack
-        run: dotnet tool install vpk -g
+        if: ${{ steps.check-cache.outputs.cache-hit == false }}
+        run: |
+          dotnet new tool-manifest
+          dotnet tool install vpk
 
       - name: Restore
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
@@ -95,12 +98,12 @@ jobs:
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
 
       - name: Download Previous Release
-        run: vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }} --pre
+        run: dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }} --pre
         
       - name: Pack Release
         shell: bash
         run: >
-          vpk pack  
+          dotnet vpk pack  
           -u Avayomi  
           -v ${{ needs.get-props.outputs.version }}  
           -p publish 

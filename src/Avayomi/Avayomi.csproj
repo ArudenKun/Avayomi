@@ -10,9 +10,14 @@
         <ApplicationIcon>Assets\faviconlogo.ico</ApplicationIcon>
         <Version>0.1.0</Version>
         <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
-        <PublishAot>true</PublishAot>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <DefineConstants>$(DefineConstants);HAS_AVALONIA</DefineConstants>
+    </PropertyGroup>
+    
+    <PropertyGroup Label="Publishing">
+        <PublishTrimmed>true</PublishTrimmed>
+        <PublishReadyToRun>true</PublishReadyToRun>
+        <SelfContained>true</SelfContained>
     </PropertyGroup>
 
     <ItemGroup>
