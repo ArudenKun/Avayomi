@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avayomi.Core.Attributes;
 using Avayomi.ViewModels.Abstractions;
 using CommunityToolkit.Mvvm.Input;

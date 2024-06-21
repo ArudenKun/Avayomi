@@ -21,6 +21,18 @@
           "Avalonia.X11": "11.1.0-beta2"
         }
       },
+      "Avalonia.Diagnostics": {
+        "type": "Direct",
+        "requested": "[11.1.0-beta2, )",
+        "resolved": "11.1.0-beta2",
+        "contentHash": "B96Oy5DxjSb9WHdjLYoC7ekq2c8jF8UpVgRiFLkCjjx8mXzbiIvqDPn5Y1zgmQUyZFm+3pjnwe5hCgTZ0Aze4g==",
+        "dependencies": {
+          "Avalonia": "11.1.0-beta2",
+          "Avalonia.Controls.ColorPicker": "11.1.0-beta2",
+          "Avalonia.Controls.DataGrid": "11.1.0-beta2",
+          "Avalonia.Themes.Simple": "11.1.0-beta2"
+        }
+      },
       "Avalonia.Fonts.Inter": {
         "type": "Direct",
         "requested": "[11.1.0-beta2, )",
@@ -74,12 +86,6 @@
           "Macross.Json.Extensions": "3.0.0"
         }
       },
-      "HotAvalonia.Extensions": {
-        "type": "Direct",
-        "requested": "[1.1.1, )",
-        "resolved": "1.1.1",
-        "contentHash": "igciE4VgPLLgTNT3QoCR+pwObCp9IWFkubqcE1X1LvQX8vnvq8yN8ibZocN/E5/4CR0ZQrfN4k/NrKOXjOt6Aw=="
-      },
       "LucideAvalonia": {
         "type": "Direct",
         "requested": "[1.2.0, )",
@@ -88,6 +94,12 @@
         "dependencies": {
           "Avalonia": "11.1.0-beta1"
         }
+      },
+      "Microsoft.DotNet.ILCompiler": {
+        "type": "Direct",
+        "requested": "[8.0.5, )",
+        "resolved": "8.0.5",
+        "contentHash": "tfdncRQLXNpATB4Ykj11O5+fbkBAHoeLi6XfyxAWmilU4rwC3apT612RIuhqB6tBGE69G7Dl1g7HeydsH3Wz1w=="
       },
       "Microsoft.Extensions.Hosting": {
         "type": "Direct",
@@ -256,6 +268,15 @@
         "type": "Transitive",
         "resolved": "0.0.29",
         "contentHash": "U4eJLQdoDNHXtEba7MZUCwrBErBTxFp6sUewXBOdAhU0Kwzwaa/EKFcYm8kpcysjzKtfB4S0S9n0uxKZFz/ikw=="
+      },
+      "Avalonia.Controls.ColorPicker": {
+        "type": "Transitive",
+        "resolved": "11.1.0-beta2",
+        "contentHash": "yZVF+Qubz2uCptX9hgoHBZWvHpchE8wLHHQDlWjkHMksDQX81X2bby6v8BEd9hZMklf4Npo0u6OmNWdtGg8Vdg==",
+        "dependencies": {
+          "Avalonia": "11.1.0-beta2",
+          "Avalonia.Remote.Protocol": "11.1.0-beta2"
+        }
       },
       "Avalonia.Controls.DataGrid": {
         "type": "Transitive",
@@ -998,6 +1019,15 @@
       }
     },
     "net8.0/linux-x64": {
+      "Microsoft.DotNet.ILCompiler": {
+        "type": "Direct",
+        "requested": "[8.0.5, )",
+        "resolved": "8.0.5",
+        "contentHash": "tfdncRQLXNpATB4Ykj11O5+fbkBAHoeLi6XfyxAWmilU4rwC3apT612RIuhqB6tBGE69G7Dl1g7HeydsH3Wz1w==",
+        "dependencies": {
+          "runtime.linux-x64.Microsoft.DotNet.ILCompiler": "8.0.5"
+        }
+      },
       "Avalonia.Angle.Windows.Natives": {
         "type": "Transitive",
         "resolved": "2.1.22045.20230930",
@@ -1028,6 +1058,11 @@
         "type": "Transitive",
         "resolved": "7.3.0.2",
         "contentHash": "DpF9JBzwws2dupOLnjME65hxQWWbN/GD40AoTkwB4S05WANvxo3n81AnQJKxWDCnrWfWhLPB36OF27TvEqzb/A=="
+      },
+      "runtime.linux-x64.Microsoft.DotNet.ILCompiler": {
+        "type": "Transitive",
+        "resolved": "8.0.5",
+        "contentHash": "NKZfSjoUctSt7HVrxDQx38trQcvOm+O1HtevTH2BYsP2wjHkxguig9nPmlIqk9Vq76p+iqrprw5LfkNtfEjdWg=="
       },
       "SkiaSharp.NativeAssets.Linux": {
         "type": "Transitive",
@@ -1059,6 +1094,15 @@
       }
     },
     "net8.0/win-x64": {
+      "Microsoft.DotNet.ILCompiler": {
+        "type": "Direct",
+        "requested": "[8.0.5, )",
+        "resolved": "8.0.5",
+        "contentHash": "tfdncRQLXNpATB4Ykj11O5+fbkBAHoeLi6XfyxAWmilU4rwC3apT612RIuhqB6tBGE69G7Dl1g7HeydsH3Wz1w==",
+        "dependencies": {
+          "runtime.win-x64.Microsoft.DotNet.ILCompiler": "8.0.5"
+        }
+      },
       "Avalonia.Angle.Windows.Natives": {
         "type": "Transitive",
         "resolved": "2.1.22045.20230930",
@@ -1089,6 +1133,11 @@
         "type": "Transitive",
         "resolved": "7.3.0.2",
         "contentHash": "DpF9JBzwws2dupOLnjME65hxQWWbN/GD40AoTkwB4S05WANvxo3n81AnQJKxWDCnrWfWhLPB36OF27TvEqzb/A=="
+      },
+      "runtime.win-x64.Microsoft.DotNet.ILCompiler": {
+        "type": "Transitive",
+        "resolved": "8.0.5",
+        "contentHash": "tb0bL36K+FfXdErkSb3xiJLzbnuXHv09dF+XOS76SLTGbWgNUJlC7aSAg4Z7c5nRAh6BRoqC932H4r/3502w5A=="
       },
       "SkiaSharp.NativeAssets.Linux": {
         "type": "Transitive",

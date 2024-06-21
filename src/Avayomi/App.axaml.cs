@@ -6,10 +6,6 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avayomi.ViewModels;
 
-#if ENABLE_XAML_HOT_RELOAD
-using HotAvalonia;
-#endif
-
 namespace Avayomi;
 
 public class App : Application
@@ -21,13 +17,7 @@ public class App : Application
         _mainWindowViewModel = mainWindowViewModel;
     }
 
-    public override void Initialize()
-    {
-#if ENABLE_XAML_HOT_RELOAD
-        this.EnableHotReload();
-#endif
-        AvaloniaXamlLoader.Load(this);
-    }
+    public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     [UnconditionalSuppressMessage("Trimming",
         "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
