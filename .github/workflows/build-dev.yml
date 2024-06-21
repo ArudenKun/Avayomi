@@ -98,6 +98,7 @@ jobs:
 
       - name: Download Previous Release
         run: dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
+        
       - name: Pack Release
         shell: bash
         run: >
@@ -130,6 +131,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: Releases
+          merge-multiple: true
 
       - name: Delete Old Dev Build Release
         run: gh release delete dev-build -y --cleanup-tag
