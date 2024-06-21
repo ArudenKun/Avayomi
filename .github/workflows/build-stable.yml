@@ -122,6 +122,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -137,20 +140,22 @@ jobs:
       - name: Windows Release
         run: >
           dotnet vpk upload github 
-          --channel win-x64 
+          --channel win-x64
           --outputDir Releases
           --repoUrl ${{ needs.get-props.outputs.repo_url }} 
           --tag v${{ needs.get-props.outputs.version }}
           --releaseName "Stable Build v${{ needs.get-props.outputs.version }}"
           --token ${{ secrets.GITHUB_TOKEN }}
+          --publish
 
       - name: Linux Release
         run: >
           dotnet vpk upload github 
-          --channel linux-x64
+          --channel win-x64
           --outputDir Releases
           --repoUrl ${{ needs.get-props.outputs.repo_url }} 
           --tag v${{ needs.get-props.outputs.version }}
           --releaseName "Stable Build v${{ needs.get-props.outputs.version }}"
           --token ${{ secrets.GITHUB_TOKEN }}
+          --publish
           --merge
