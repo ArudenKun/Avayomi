@@ -20,6 +20,10 @@
         <SelfContained>true</SelfContained>
     </PropertyGroup>
 
+    <PropertyGroup Label="Warnings">
+        <NoWarn>${NoWarn};AVLN3001;</NoWarn>
+    </PropertyGroup>
+
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
@@ -59,10 +63,6 @@
         <PackageReference Include="Velopack" Version="0.0.359"/>
         <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="1.2.0"/>
     </ItemGroup>
-
-    <PropertyGroup Label="Warnings">
-        <NoWarn>${NoWarn};AVLN3001;</NoWarn>
-    </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Avayomi.Generators\Avayomi.Generators.csproj" OutputItemType="analyzer" ReferenceOutputAssembly="false"/>

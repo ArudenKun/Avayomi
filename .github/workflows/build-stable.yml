@@ -1,8 +1,8 @@
-name: Dev build
+﻿name: Stable build
 on:
   push:
     branches:
-      - master
+      - stable
   workflow_dispatch:
 
 concurrency:
@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
-      hash: ${{ steps.get-hash.outputs.hash }}
       repo_url: ${{ steps.get-repo-url.outputs.repo_url }}
     steps:
       - name: Checkout Repository
@@ -25,11 +24,7 @@ jobs:
 
       - name: Get Version
         id: get-version
-        run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
-
-      - name: Get Hash
-        id: get-hash
-        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')" >> $GITHUB_OUTPUT
 
       - name: Get Repo Url
         id: get-repo-url
@@ -49,10 +44,10 @@ jobs:
         include:
           - target-platform: windows
             os: windows-latest
-            channel: win-x64-dev
+            channel: win-x64
           - target-platform: linux
             os: ubuntu-latest
-            channel: linux-x64-dev
+            channel: linux-x64
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -95,7 +90,10 @@ jobs:
         run: dotnet restore
 
       - name: Publish
-        run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
+        run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish
+
+      - name: Download Previous Release
+        run: dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pack Release
         shell: bash
@@ -113,7 +111,6 @@ jobs:
           name: ${{ matrix.channel }}-build
           path: |
             Releases/
-            !Releases/assets.*.json
             !Releases/RELEASES-*
   
   release:
@@ -125,29 +122,33 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: Releases
           merge-multiple: true
 
-      - name: Delete Last Dev Build
-        run: gh release delete dev-build -y --cleanup-tag
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Velopack
+        if: ${{ steps.check-cache.outputs.cache-hit == false }}
+        run: |
+          dotnet new tool-manifest
+          dotnet tool install vpk
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        with:
-          bodyFile: .github/dev-build-release.md
-          name: Dev Build ${{ needs.get-props.outputs.hash }}
-          prerelease: true
-          draft: false
-          tag: dev-build
-          artifacts: Releases/*
+      - name: Windows Release
+        run: >
+          dotnet vpk upload github 
+          --channel win-x64 
+          --repoUrl ${{ needs.get-props.outputs.repo_url }} 
+          --tag v${{ needs.get-props.outputs.version }}
+          --releaseName "Stable Build v${{ needs.get-props.outputs.version }}"
+          --token ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Linux Release
+        run: >
+          dotnet vpk upload github 
+          --channel linux-x64
+          --repoUrl ${{ needs.get-props.outputs.repo_url }} 
+          --tag v${{ needs.get-props.outputs.version }}
+          --releaseName "Stable Build v${{ needs.get-props.outputs.version }}"
+          --token ${{ secrets.GITHUB_TOKEN }}
+          --merge
