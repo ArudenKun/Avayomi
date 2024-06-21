@@ -151,6 +151,12 @@
           "Nito.Cancellation": "1.1.2"
         }
       },
+      "Riok.Mapperly": {
+        "type": "Direct",
+        "requested": "[3.6.0, )",
+        "resolved": "3.6.0",
+        "contentHash": "eQkT3evicd5fdb8HgAJjJ+uvbhfA76ozZZsBtounFrOvk0mj+9tozv1hCYV0f0cTmXIZsxtU93FMWPzd76wSaw=="
+      },
       "Serilog.Enrichers.ClassName": {
         "type": "Direct",
         "requested": "[0.2.0, )",

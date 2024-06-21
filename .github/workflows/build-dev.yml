@@ -85,9 +85,7 @@ jobs:
 
       - name: Install Velopack
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
-        run: |
-          dotnet new tool-manifest
-          dotnet tool install vpk
+        run: dotnet tool install vpk -g
 
       - name: Restore
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
@@ -97,12 +95,12 @@ jobs:
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
 
       - name: Download Previous Release
-        run: dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
+        run: vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }} --pre
         
       - name: Pack Release
         shell: bash
         run: >
-          dotnet vpk pack  
+          vpk pack  
           -u Avayomi  
           -v ${{ needs.get-props.outputs.version }}  
           -p publish 
@@ -142,11 +140,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
       
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
+          bodyFile: .github/dev-build-release.md
           name: Dev Build ${{ needs.get-props.outputs.hash }}
-          draft: false
           prerelease: true
-          tag_name: dev-build
-          files: Releases/*
-          body_path: .github/dev-build-release.md
+          draft: false
+          tag: dev-build
+          artifacts: Releases/*
