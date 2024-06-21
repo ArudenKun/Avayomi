@@ -72,6 +72,7 @@ jobs:
           path: |
             ~/.nuget/packages
             ~/.dotnet/toolResolverCache
+            ~/.dotnet/tools
             ${{ github.workspace }}/.config
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
@@ -84,7 +85,6 @@ jobs:
           sudo apt install libfuse2
 
       - name: Install Velopack
-        if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet tool install vpk -g
 
       - name: Restore
@@ -133,7 +133,7 @@ jobs:
           path: Releases
           merge-multiple: true
 
-      - name: Delete Old Dev Build Release
+      - name: Delete Last Dev Build
         run: gh release delete dev-build -y --cleanup-tag
         continue-on-error: true
         env:
