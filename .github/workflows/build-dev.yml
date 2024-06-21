@@ -1,8 +1,8 @@
-name: Build and Upload Dev Release
+name: Dev build
 on:
-  #  push:
-  #    branches:
-  #      - master
+  push:
+    branches:
+      - master
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,12 +20,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
+
       - name: Get Version
         id: get-version
         run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
+
       - name: Get Hash
         id: get-hash
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Get Repo Url
         id: get-repo-url
         run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_OUTPUT
@@ -61,6 +64,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
+
       - name: Check Cache
         id: check-cache
         uses: actions/cache@v4
@@ -72,21 +76,26 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget
+
       - name: Install FUSE
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           sudo add-apt-repository universe
           sudo apt install libfuse2
+
       - name: Install Velopack
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: |
           dotnet new tool-manifest
           dotnet tool install vpk
+
       - name: Restore
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet restore
+
       - name: Publish
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
+
       - name: Download Previous Release
         run: dotnet vpk download github --repoUrl ${{ needs.get-props.outputs.repo_url }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
       - name: Pack Release
@@ -114,6 +123,9 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
