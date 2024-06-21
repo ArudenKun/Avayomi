@@ -123,18 +123,17 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: Releases
 
       - name: Delete Old Dev Build Release
-        run: gh release delete dev-build -y --cleanup-tag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          delete_release: true
+          tag_name: dev-build
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
