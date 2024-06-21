@@ -70,6 +70,12 @@
         "resolved": "8.2.2",
         "contentHash": "r0g0k9tGYdrnz8R7T3x5UiokDffeevzK/2P/9SBL6fqLgN8B157MIi/bVUWI1KAz6ZorZrK9AdABCWUeXZZsvA=="
       },
+      "DebounceThrottle": {
+        "type": "Direct",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "5Kuor4ym0rG9x1n/nhDwBGyl19dRfWougnkqZo9Sj91NsEDKREfWPE97y6tNtZBRWkMBX7kjECVh5zPz0kFY5w=="
+      },
       "DependencyPropertyGenerator": {
         "type": "Direct",
         "requested": "[1.4.0, )",
