@@ -133,8 +133,9 @@ jobs:
 
       - name: Delete Old Dev Build Release
         run: gh release delete dev-build -y --cleanup-tag
+        continue-on-error: true
         env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Create Release
         uses: softprops/action-gh-release@v2
