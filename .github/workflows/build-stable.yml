@@ -138,6 +138,7 @@ jobs:
         run: >
           dotnet vpk upload github 
           --channel win-x64 
+          --outputDir Releases
           --repoUrl ${{ needs.get-props.outputs.repo_url }} 
           --tag v${{ needs.get-props.outputs.version }}
           --releaseName "Stable Build v${{ needs.get-props.outputs.version }}"
@@ -147,6 +148,7 @@ jobs:
         run: >
           dotnet vpk upload github 
           --channel linux-x64
+          --outputDir Releases
           --repoUrl ${{ needs.get-props.outputs.repo_url }} 
           --tag v${{ needs.get-props.outputs.version }}
           --releaseName "Stable Build v${{ needs.get-props.outputs.version }}"
