@@ -56,8 +56,6 @@ jobs:
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_NOLOGO: true
       NUGET_CERT_REVOCATION_MODE: offline
-    permissions:
-      contents: write
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
@@ -123,6 +121,8 @@ jobs:
       - get-props
       - build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4  
