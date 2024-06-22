@@ -15,15 +15,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        channel: [ linux-x64-dev, win-x64-dev ]
+        runtime: [ linux-x64, win-x64 ]
         target-arch:
           - x64
         include:
-          - channel: linux-x64-dev
-            runtime: linux-x64
+          - runtime: linux-x64
+            channel: linux-x64-dev
             os: linux
-          - channel: win-x64-dev
-            runtime: win-x64
+          - runtime: win-x64
+            channel: win-x64-dev
             os: win
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -49,11 +49,6 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget
-      
-      #      - name: Install FUSE
-      #        run: |
-      #          sudo add-apt-repository universe
-      #          sudo apt install libfuse2
 
       - name: Install Velopack
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
@@ -89,7 +84,7 @@ jobs:
           -v ${{ steps.get-version.outputs.version }}  
           -p publish 
           -c ${{ matrix.channel }}  
-          -i src/Avayomi/Assets/faviconlogo.png
+          -i src/Avayomi/Assets/faviconlogo.${{ matrix.os == 'linux' && 'png' || 'ico' }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
