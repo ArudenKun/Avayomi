@@ -68,7 +68,7 @@ jobs:
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -r ${{ matrix.runtime }} -o publish -p:Version=${{ steps.get-version.outputs.version }}
 
       - name: Download Previous Release
-        run: dotnet vpk download github --pre --repoUrl ${{ github.server_url }}/${{ github.repository }}" -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet vpk download github --pre --repoUrl ${{ github.server_url }}/${{ github.repository }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pack Release
         shell: bash
