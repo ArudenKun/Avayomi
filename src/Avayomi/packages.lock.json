@@ -21,18 +21,6 @@
           "Avalonia.X11": "11.1.0-beta2"
         }
       },
-      "Avalonia.Diagnostics": {
-        "type": "Direct",
-        "requested": "[11.1.0-beta2, )",
-        "resolved": "11.1.0-beta2",
-        "contentHash": "B96Oy5DxjSb9WHdjLYoC7ekq2c8jF8UpVgRiFLkCjjx8mXzbiIvqDPn5Y1zgmQUyZFm+3pjnwe5hCgTZ0Aze4g==",
-        "dependencies": {
-          "Avalonia": "11.1.0-beta2",
-          "Avalonia.Controls.ColorPicker": "11.1.0-beta2",
-          "Avalonia.Controls.DataGrid": "11.1.0-beta2",
-          "Avalonia.Themes.Simple": "11.1.0-beta2"
-        }
-      },
       "Avalonia.Fonts.Inter": {
         "type": "Direct",
         "requested": "[11.1.0-beta2, )",
@@ -274,15 +262,6 @@
         "type": "Transitive",
         "resolved": "0.0.29",
         "contentHash": "U4eJLQdoDNHXtEba7MZUCwrBErBTxFp6sUewXBOdAhU0Kwzwaa/EKFcYm8kpcysjzKtfB4S0S9n0uxKZFz/ikw=="
-      },
-      "Avalonia.Controls.ColorPicker": {
-        "type": "Transitive",
-        "resolved": "11.1.0-beta2",
-        "contentHash": "yZVF+Qubz2uCptX9hgoHBZWvHpchE8wLHHQDlWjkHMksDQX81X2bby6v8BEd9hZMklf4Npo0u6OmNWdtGg8Vdg==",
-        "dependencies": {
-          "Avalonia": "11.1.0-beta2",
-          "Avalonia.Remote.Protocol": "11.1.0-beta2"
-        }
       },
       "Avalonia.Controls.DataGrid": {
         "type": "Transitive",

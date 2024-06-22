@@ -10,55 +10,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  get-props:
-    name: Get Props
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.get-version.outputs.version }}
-      hash: ${{ steps.get-hash.outputs.hash }}
-      repo_url: ${{ steps.get-repo-url.outputs.repo_url }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-
-      - name: Get Version
-        id: get-version
-        run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
-
-      - name: Get Hash
-        id: get-hash
-        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Get Repo Url
-        id: get-repo-url
-        run: echo "repo_url=${{ github.server_url }}/${{ github.repository }}" >> $GITHUB_OUTPUT
-  
   build:
     name: Build Avayomi
-    needs: get-props
     strategy:
       fail-fast: true
       matrix:
-        target-platform:
-          - windows
-          - linux
+        channel: [ linux-x64-dev, win-x64-dev ]
         target-arch:
           - x64
         include:
-          - target-platform: windows
-            os: windows-latest
-            channel: win-x64-dev
-          - target-platform: linux
-            os: ubuntu-latest
-            channel: linux-x64-dev
+          - channel: linux-x64-dev
+            runtime: linux-x64
+            os: linux
+          - channel: win-x64-dev
+            runtime: win-x64
+            os: win
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_NOLOGO: true
       NUGET_CERT_REVOCATION_MODE: offline
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -77,25 +49,28 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget
-
-      - name: Install FUSE
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          sudo add-apt-repository universe
-          sudo apt install libfuse2
+      
+      #      - name: Install FUSE
+      #        run: |
+      #          sudo add-apt-repository universe
+      #          sudo apt install libfuse2
 
       - name: Install Velopack
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: |
           dotnet new tool-manifest
-          dotnet tool install vpk
+          dotnet tool install vpk --prerelease
 
       - name: Restore
         if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet restore
 
+      - name: Get Version
+        id: get-version
+        run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
+
       - name: Publish
-        run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
+        run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -r ${{ matrix.runtime }} -o publish -p:Version=${{ steps.get-version.outputs.version }}
 
       - name: Download Latest Assets File
         uses: robinraju/release-downloader@v1
@@ -109,12 +84,12 @@ jobs:
       - name: Pack Release
         shell: bash
         run: >
-          dotnet vpk pack  
+          dotnet vpk [${{ matrix.os }}] pack  
           -u Avayomi  
-          -v ${{ needs.get-props.outputs.version }}  
+          -v ${{ steps.get-version.outputs.version }}  
           -p publish 
           -c ${{ matrix.channel }}  
-          ${{ matrix.target-platform == 'linux' && '-i src/Avayomi/Assets/faviconlogo.png' || '' }}
+          -i src/Avayomi/Assets/faviconlogo.png'
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -127,7 +102,6 @@ jobs:
   release:
     name: Release
     needs:
-      - get-props
       - build
     runs-on: ubuntu-latest
     permissions:
@@ -135,6 +109,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Get Hash
+        id: get-hash
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
@@ -154,7 +132,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           bodyFile: .github/dev-build-release.md
-          name: Dev Build ${{ needs.get-props.outputs.hash }}
+          name: Dev Build ${{ steps.get-props.outputs.hash }}
           prerelease: true
           draft: false
           tag: dev-build
