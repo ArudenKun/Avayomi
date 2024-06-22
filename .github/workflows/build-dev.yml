@@ -118,7 +118,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Dev ${{ steps.get-hash.outputs.sha_short }}
+          name: Dev ${{ steps.get-hash.outputs.hash }}
           body_path: .github/dev-build-release.md
           prerelease: true
           draft: false
