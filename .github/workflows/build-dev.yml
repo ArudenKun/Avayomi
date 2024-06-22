@@ -116,13 +116,23 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          bodyFile: .github/dev-build-release.md
-          name: Dev Build ${{ steps.get-props.outputs.hash }}
+          name: Dev ${{ steps.get-hash.outputs.sha_short }}
+          body_path: .github/dev-build-release.md
           prerelease: true
           draft: false
-          tag: dev-build
-          artifacts: Releases/*
+          tag_name: dev-build
+          files: |
+            Releases/*  
+#      - name: Create Release
+#        uses: ncipollo/release-action@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          bodyFile: .github/dev-build-release.md
+#          name: Dev Build ${{ steps.get-hash.outputs.hash }}
+#          prerelease: true
+#          draft: false
+#          tag: dev-build
+#          artifacts: Releases/*
