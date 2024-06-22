@@ -67,14 +67,8 @@ jobs:
       - name: Publish
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -r ${{ matrix.runtime }} -o publish -p:Version=${{ steps.get-version.outputs.version }}
 
-      - name: Download Latest Assets File
-        uses: robinraju/release-downloader@v1
-        continue-on-error: true
-        with:
-          tag: dev-build
-          repository: ${{ github.repository }}
-          fileName: "assets.${{ matrix.channel }}.json"
-          out-file-path: "Releases"
+      - name: Download Previous Release
+        run: dotnet vpk download github --pre --repoUrl ${{ github.server_url }}/${{ github.repository }}" -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pack Release
         shell: bash
