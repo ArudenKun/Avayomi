@@ -97,6 +97,14 @@ jobs:
       - name: Publish
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -o publish -p:Version=${{ needs.get-props.outputs.version }}
 
+      - name: Download Latest Assets File
+        uses: robinraju/release-downloader@v1
+        continue-on-error: true
+        with:
+          tag: dev-build
+          fileName: "assets.${{ matrix.channel }}.json"
+          out-file-path: "Releases"
+
       - name: Pack Release
         shell: bash
         run: >
@@ -113,7 +121,6 @@ jobs:
           name: ${{ matrix.channel }}-build
           path: |
             Releases/
-            !Releases/assets.*.json
             !Releases/RELEASES-*
   
   release:
