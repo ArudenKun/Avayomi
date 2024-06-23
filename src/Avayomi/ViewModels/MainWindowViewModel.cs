@@ -1,4 +1,6 @@
-﻿using Avayomi.Core.Attributes;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Avayomi.Core.Attributes;
 using Avayomi.ViewModels.Abstractions;
 
 namespace Avayomi.ViewModels;
@@ -6,10 +8,10 @@ namespace Avayomi.ViewModels;
 [Singleton]
 public sealed class MainWindowViewModel : BaseViewModel
 {
-    public MainWindowViewModel(ShellViewModel shellViewModel)
+    public MainWindowViewModel(IEnumerable<BasePageViewModel> pages)
     {
-        ViewContent = shellViewModel;
+        Pages = new List<BasePageViewModel>(pages).OrderBy(x => x.Index).ToArray();
     }
 
-    public object ViewContent { get; }
+    public IReadOnlyCollection<BasePageViewModel> Pages { get; }
 }

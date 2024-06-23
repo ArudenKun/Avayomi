@@ -34,30 +34,21 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Check Cache
         id: check-cache
         uses: actions/cache@v4
         with:
           path: |
-            ~/.nuget/packages
-            ~/.dotnet/toolResolverCache
-            ~/.dotnet/tools
+            ~/.nuget
+            ~/.dotnet
             ${{ github.workspace }}/.config
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
 
       - name: Install Velopack
-        if: ${{ steps.check-cache.outputs.cache-hit == false }}
-        run: |
-          dotnet new tool-manifest
-          dotnet tool install vpk --prerelease
+        run: dotnet tool install vpk --prerelease --create-manifest-if-needed --allow-downgrade
 
       - name: Restore
-        if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet restore
 
       - name: Get Version
@@ -68,7 +59,13 @@ jobs:
         run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -r ${{ matrix.runtime }} -o publish -p:Version=${{ steps.get-version.outputs.version }}
 
       - name: Download Previous Release
-        run: dotnet vpk download github --pre --repoUrl ${{ github.server_url }}/${{ github.repository }} -c ${{ matrix.channel }} --token ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          dotnet vpk download github 
+          --pre 
+          --repoUrl 
+          ${{ github.server_url }}/${{ github.repository }} 
+          -c ${{ matrix.channel }} 
+          --token ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pack Release
         shell: bash
@@ -125,14 +122,3 @@ jobs:
           tag_name: dev-build
           files: |
             Releases/*  
-#      - name: Create Release
-#        uses: ncipollo/release-action@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          bodyFile: .github/dev-build-release.md
-#          name: Dev Build ${{ steps.get-hash.outputs.hash }}
-#          prerelease: true
-#          draft: false
-#          tag: dev-build
-#          artifacts: Releases/*

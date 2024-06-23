@@ -51,6 +51,8 @@ public sealed partial class FileCache : IFileCache
         _manifestSavingCancellationTokenSource = new CancellationTokenSource();
         _backgroundRemovingExpiredTask = BackgroundRemovingExpired();
         _backgroundManifestSavingTask = BackgroundManifestSaving();
+        
+        RemoveExpired();
     }
 
     public async ValueTask DisposeAsync()
@@ -408,6 +410,7 @@ public sealed partial class FileCache : IFileCache
         if (_cacheManifest is null)
             return;
 
+        LogBeginRemovingExpiredEntries();
         var removed = 0;
         foreach (var (key, manifestEntry) in _cacheManifest)
         {
@@ -428,15 +431,14 @@ public sealed partial class FileCache : IFileCache
             }
         }
 
-        if (removed > 0)
-        {
-            _logger.LogDebug(
-                "Evicted {DeletedCacheEntryCount} expired entries from cache",
-                removed
-            );
+        if (removed <= 0) return;
 
-            LogRemovedExpiredEntries();
-        }
+        _logger.LogDebug(
+            "Evicted {DeletedCacheEntryCount} expired entries from cache",
+            removed
+        );
+
+        LogRemovedExpiredEntries();
     }
 
     public async Task RemoveExpiredAsync()
@@ -446,6 +448,7 @@ public sealed partial class FileCache : IFileCache
         if (_cacheManifest is null)
             return;
 
+        LogBeginRemovingExpiredEntries();
         var removed = 0;
         foreach (var (key, manifestEntry) in _cacheManifest)
         {
@@ -622,4 +625,8 @@ public sealed partial class FileCache : IFileCache
 
     [LoggerMessage(Message = "Removed expired entries", SkipEnabledCheck = true, Level = LogLevel.Information)]
     partial void LogRemovedExpiredEntries();
+
+    [LoggerMessage(Message = "Beginning background cleanup of expired cache item", SkipEnabledCheck = true,
+        Level = LogLevel.Information)]
+    partial void LogBeginRemovingExpiredEntries();
 }

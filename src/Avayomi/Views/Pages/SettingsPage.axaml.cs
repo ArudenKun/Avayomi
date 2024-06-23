@@ -2,11 +2,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Avayomi.Views;
+namespace Avayomi.Views.Pages;
 
-public partial class ShellView : UserControl
+public partial class SettingsPage : UserControl
 {
-    public ShellView()
+    public SettingsPage()
     {
         InitializeComponent();
     }

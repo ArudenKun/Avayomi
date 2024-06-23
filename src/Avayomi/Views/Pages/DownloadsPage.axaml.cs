@@ -1,10 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Controls;
 
 namespace Avayomi.Views.Pages;
 
-public partial class DownloadsPage : Window
+public partial class DownloadsPage : UserControl
 {
     public DownloadsPage()
     {

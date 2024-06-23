@@ -21,6 +21,18 @@
           "Avalonia.X11": "11.1.0-beta2"
         }
       },
+      "Avalonia.Diagnostics": {
+        "type": "Direct",
+        "requested": "[11.1.0-beta2, )",
+        "resolved": "11.1.0-beta2",
+        "contentHash": "B96Oy5DxjSb9WHdjLYoC7ekq2c8jF8UpVgRiFLkCjjx8mXzbiIvqDPn5Y1zgmQUyZFm+3pjnwe5hCgTZ0Aze4g==",
+        "dependencies": {
+          "Avalonia": "11.1.0-beta2",
+          "Avalonia.Controls.ColorPicker": "11.1.0-beta2",
+          "Avalonia.Controls.DataGrid": "11.1.0-beta2",
+          "Avalonia.Themes.Simple": "11.1.0-beta2"
+        }
+      },
       "Avalonia.Fonts.Inter": {
         "type": "Direct",
         "requested": "[11.1.0-beta2, )",
@@ -45,6 +57,12 @@
           "Avalonia.Xaml.Interactions.Responsive": "11.1.0-beta2.1",
           "Avalonia.Xaml.Interactivity": "11.1.0-beta2.1"
         }
+      },
+      "CliWrap": {
+        "type": "Direct",
+        "requested": "[3.6.6, )",
+        "resolved": "3.6.6",
+        "contentHash": "8/WnYKDjXjqMp9ktCygmeC6kDsmSEKF4riEYNy98+nD3wOKbuxqOjmhiFMalOYlM+mUqfs3SOEowF20+loDZHQ=="
       },
       "Cogwheel": {
         "type": "Direct",
@@ -80,13 +98,14 @@
           "Macross.Json.Extensions": "3.0.0"
         }
       },
-      "LucideAvalonia": {
+      "Material.Icons.Avalonia": {
         "type": "Direct",
-        "requested": "[1.2.0, )",
-        "resolved": "1.2.0",
-        "contentHash": "dlissR7h4eUVxnF7jMPs9dr0JghwvqaXdQlOjUipDxpzJ1qHpw1buy9YVUi/c4LFJpdRtMksTNfDeIUK4odDdQ==",
+        "requested": "[2.1.10, )",
+        "resolved": "2.1.10",
+        "contentHash": "dclTtNbnoLonYK/YI2vgYvOmLeqw08xHxL+ExOSGZEMJKt6k3F6SDmJ41tByOxgXAd+nIDh8V9FqC0FQSEp/CQ==",
         "dependencies": {
-          "Avalonia": "11.1.0-beta1"
+          "Avalonia": "11.0.0-rc1.1",
+          "Material.Icons": "2.1.10"
         }
       },
       "Microsoft.Extensions.Hosting": {
@@ -262,6 +281,15 @@
         "type": "Transitive",
         "resolved": "0.0.29",
         "contentHash": "U4eJLQdoDNHXtEba7MZUCwrBErBTxFp6sUewXBOdAhU0Kwzwaa/EKFcYm8kpcysjzKtfB4S0S9n0uxKZFz/ikw=="
+      },
+      "Avalonia.Controls.ColorPicker": {
+        "type": "Transitive",
+        "resolved": "11.1.0-beta2",
+        "contentHash": "yZVF+Qubz2uCptX9hgoHBZWvHpchE8wLHHQDlWjkHMksDQX81X2bby6v8BEd9hZMklf4Npo0u6OmNWdtGg8Vdg==",
+        "dependencies": {
+          "Avalonia": "11.1.0-beta2",
+          "Avalonia.Remote.Protocol": "11.1.0-beta2"
+        }
       },
       "Avalonia.Controls.DataGrid": {
         "type": "Transitive",
@@ -456,6 +484,11 @@
         "type": "Transitive",
         "resolved": "3.0.0",
         "contentHash": "AkNshs6dopj8FXsmkkJxvLivN2SyDJQDbjcds5lo9+Y6L4zpcoXdmzXQ3VVN+AIWQr0CTD5A7vkuHGAr2aypZg=="
+      },
+      "Material.Icons": {
+        "type": "Transitive",
+        "resolved": "2.1.10",
+        "contentHash": "nQnLAoVb9lgxWd4OtDADPVzBxERB9UYQd0UWcrqjg0NKFf8oPMuDM2kkxpBKe/Wm6Ayx3C/t3j2+8R1Nscg0Kw=="
       },
       "MicroCom.Runtime": {
         "type": "Transitive",

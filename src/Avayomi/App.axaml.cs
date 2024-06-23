@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avayomi.ViewModels;
+using Avayomi.Views;
 
 namespace Avayomi;
 
@@ -12,10 +13,7 @@ public class App : Application
 {
     private readonly MainWindowViewModel _mainWindowViewModel;
 
-    public App(MainWindowViewModel mainWindowViewModel)
-    {
-        _mainWindowViewModel = mainWindowViewModel;
-    }
+    public App(MainWindowViewModel mainWindowViewModel) => _mainWindowViewModel = mainWindowViewModel;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -29,7 +27,11 @@ public class App : Application
             // Line below is needed to remove Avalonia data validation.
             // Without this line you will get duplicate validations from both Avalonia and CT
             BindingPlugins.DataValidators.RemoveAt(0);
-            desktop.MainWindow = DataTemplates[0].Build(_mainWindowViewModel) as Window;
+            // desktop.MainWindow = DataTemplates[0].Build(_mainWindowViewModel) as Window;
+            desktop.MainWindow = new MainWindow
+            {
+                DataContext = _mainWindowViewModel
+            };
         }
 
         base.OnFrameworkInitializationCompleted();

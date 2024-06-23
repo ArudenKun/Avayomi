@@ -165,8 +165,5 @@ internal sealed class SourceStringBuilder
         BlockBrace(writeInner);
     }
 
-    public override string ToString()
-    {
-        return _sourceBuilder.Append(BottomMessage).ToString();
-    }
+    public override string ToString() => _sourceBuilder.Append(BottomMessage).ToString();
 }
