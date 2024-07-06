@@ -9,9 +9,9 @@
         <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
         <ApplicationIcon>Assets\faviconlogo.ico</ApplicationIcon>
         <NoWarn>${NoWarn};AVLN3001;</NoWarn>
-        <AssemblyName>Avayomi</AssemblyName>
         <PublishAot>true</PublishAot>
         <OptimizationPreference>Size</OptimizationPreference>
+        <AssemblyName>Avayomi</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

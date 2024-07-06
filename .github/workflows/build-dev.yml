@@ -50,6 +50,7 @@ jobs:
         run: dotnet tool install vpk --create-manifest-if-needed
 
       - name: Restore
+        if: ${{ steps.check-cache.outputs.cache-hit == false }}
         run: dotnet restore
 
       - name: Get Version
@@ -77,7 +78,7 @@ jobs:
           -v ${{ steps.get-version.outputs.version }}  
           -p publish 
           -c ${{ matrix.channel }}  
-          -e Desktop${{ matrix.runtime == 'windows' && '.exe' || '' }}
+#          -e Desktop${{ matrix.runtime == 'windows' && '.exe' || '' }}
           -i src/Desktop/Assets/faviconlogo.${{ matrix.runtime == 'windows' && 'ico' || 'png' }}
 
       - name: Upload Artifacts
