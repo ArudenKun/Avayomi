@@ -1,10 +1,10 @@
 <Project>
     <PropertyGroup>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <Version>0.1.0</Version>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)' == 'Release' ">
-        <DebuggerSupport>false</DebuggerSupport>
-        <DebugSymbols>false</DebugSymbols>
-        <DebugType>None</DebugType>
+    <PropertyGroup>
+        <DefineConstants>$(DefineConstants);GRAPHQL_GENERATOR_DISABLE_NEWTONSOFT_JSON;HAS_AVALONIA</DefineConstants>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     </PropertyGroup>
 </Project>

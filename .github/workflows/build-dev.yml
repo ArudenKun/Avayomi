@@ -46,17 +46,17 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
 
       - name: Install Velopack
-        run: dotnet tool install vpk --prerelease --create-manifest-if-needed --allow-downgrade
+        run: dotnet tool install vpk --prerelease --create-manifest-if-needed
 
       - name: Restore
         run: dotnet restore
 
       - name: Get Version
         id: get-version
-        run: echo "version=$(grep -oE '<Version>[^<]+' src/Avayomi/Avayomi.csproj | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
+        run: echo "version=$(grep -oE '<Version>[^<]+' Directory.Build.props | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Publish
-        run: dotnet publish src/Avayomi/Avayomi.csproj -c Release -r ${{ matrix.runtime }} -o publish -p:Version=${{ steps.get-version.outputs.version }}
+        run: dotnet publish src/Desktop/Desktop.csproj -c Release -r ${{ matrix.runtime }} -o publish -p:Version=${{ steps.get-version.outputs.version }}
 
       - name: Download Previous Release
         run: >
@@ -75,7 +75,8 @@ jobs:
           -v ${{ steps.get-version.outputs.version }}  
           -p publish 
           -c ${{ matrix.channel }}  
-          -i src/Avayomi/Assets/faviconlogo.${{ matrix.os == 'linux' && 'png' || 'ico' }}
+          -e Desktop${{ matrix.os == 'win' && '.exe' || '' }}
+          -i src/Desktop/Assets/faviconlogo.${{ matrix.os == 'linux' && 'png' || 'ico' }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
