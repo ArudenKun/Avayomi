@@ -48,7 +48,8 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
 
       - name: Install Velopack
-        run: dotnet tool install vpk --prerelease --create-manifest-if-needed
+        if: ${{ steps.check-cache.outputs.cache-hit == false }}
+        run: dotnet tool install vpk --create-manifest-if-needed
 
       - name: Restore
         run: dotnet restore
@@ -58,7 +59,7 @@ jobs:
         run: echo "version=$(grep -oE '<Version>[^<]+' Directory.Build.props | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Publish
-        run: dotnet publish src/Desktop/Desktop.csproj -c Release -o publish -p:Version=${{ steps.get-version.outputs.version }}
+        run: dotnet publish src/Desktop/Desktop.csproj -c Release -o publish
 
       - name: Download Previous Release
         run: >
