@@ -78,7 +78,6 @@ jobs:
           -v ${{ steps.get-version.outputs.version }}  
           -p publish 
           -c ${{ matrix.channel }}  
-#          -e Desktop${{ matrix.runtime == 'windows' && '.exe' || '' }}
           -i src/Desktop/Assets/faviconlogo.${{ matrix.runtime == 'windows' && 'ico' || 'png' }}
 
       - name: Upload Artifacts
