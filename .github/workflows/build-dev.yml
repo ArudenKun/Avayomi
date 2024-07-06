@@ -15,16 +15,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target-platform:
-          - windows
-          - linux
+        runtime: [ windows, linux ]
         target-arch:
           - x64
         include:
-          - target-platform: windows
+          - runtime: windows
             os: windows-latest
             channel: win-x64-dev
-          - target-platform: linux
+          - runtime: linux
             os: ubuntu-latest
             channel: linux-x64-dev
     env:
@@ -56,6 +54,7 @@ jobs:
 
       - name: Get Version
         id: get-version
+        shell: bash
         run: echo "version=$(grep -oE '<Version>[^<]+' Directory.Build.props | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Publish
@@ -78,8 +77,8 @@ jobs:
           -v ${{ steps.get-version.outputs.version }}  
           -p publish 
           -c ${{ matrix.channel }}  
-          -e Desktop${{ matrix.target-platform == 'windows-latest' && '.exe' || '' }}
-          -i src/Desktop/Assets/faviconlogo.${{ matrix.os == 'windows-latest' && 'ico' || 'png' }}
+          -e Desktop${{ matrix.runtime == 'windows' && '.exe' || '' }}
+          -i src/Desktop/Assets/faviconlogo.${{ matrix.runtime == 'windows' && 'ico' || 'png' }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
