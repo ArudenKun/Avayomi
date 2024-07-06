@@ -15,22 +15,24 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        runtime: [ linux-x64, win-x64 ]
+        target-platform:
+          - windows
+          - linux
         target-arch:
           - x64
         include:
-          - runtime: linux-x64
-            channel: linux-x64-dev
-            os: linux
-          - runtime: win-x64
+          - target-platform: windows
+            os: windows-latest
             channel: win-x64-dev
-            os: win
+          - target-platform: linux
+            os: ubuntu-latest
+            channel: linux-x64-dev
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       DOTNET_NOLOGO: true
       NUGET_CERT_REVOCATION_MODE: offline
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -56,7 +58,7 @@ jobs:
         run: echo "version=$(grep -oE '<Version>[^<]+' Directory.Build.props | sed 's/<Version>//')-dev.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Publish
-        run: dotnet publish src/Desktop/Desktop.csproj -c Release -r ${{ matrix.runtime }} -o publish -p:Version=${{ steps.get-version.outputs.version }}
+        run: dotnet publish src/Desktop/Desktop.csproj -c Release -o publish -p:Version=${{ steps.get-version.outputs.version }}
 
       - name: Download Previous Release
         run: >
@@ -70,13 +72,13 @@ jobs:
       - name: Pack Release
         shell: bash
         run: >
-          dotnet vpk [${{ matrix.os }}] pack  
+          dotnet vpk pack  
           -u Avayomi  
           -v ${{ steps.get-version.outputs.version }}  
           -p publish 
           -c ${{ matrix.channel }}  
-          -e Desktop${{ matrix.os == 'win' && '.exe' || '' }}
-          -i src/Desktop/Assets/faviconlogo.${{ matrix.os == 'linux' && 'png' || 'ico' }}
+          -e Desktop${{ matrix.target-platform == 'windows-latest' && '.exe' || '' }}
+          -i src/Desktop/Assets/faviconlogo.${{ matrix.os == 'windows-latest' && 'ico' || 'png' }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
