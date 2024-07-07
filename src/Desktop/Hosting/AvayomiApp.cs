@@ -13,7 +13,6 @@ public sealed class AvayomiApp : IDisposable
     private readonly IHostedServiceManager _hostedServiceManager;
     private readonly AvayomiAppOptions _avayomiAppOptions;
 
-
     public AvayomiApp(IServiceProvider services)
     {
         Services = services;
@@ -24,17 +23,14 @@ public sealed class AvayomiApp : IDisposable
 
     public IServiceProvider Services { get; }
 
-    public static AvayomiAppBuilder CreateBuilder(string[] args)
-        => new(args);
+    public static AvayomiAppBuilder CreateBuilder(string[] args) => new(args);
 
-    public void Run()
-    {
-        RunAsync().GetAwaiter().GetResult();
-    }
+    public void Run() => RunAsync().GetAwaiter().GetResult();
 
     public async Task RunAsync()
     {
-        var appBuilder = AppBuilder.Configure(() => Services.GetRequiredService<Application>())
+        var appBuilder = AppBuilder
+            .Configure(() => Services.GetRequiredService<Application>())
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();

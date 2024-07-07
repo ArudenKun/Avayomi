@@ -48,6 +48,7 @@ internal sealed class DependencyInjectionGenerator
 
         var viewModels = GetAll<INamedTypeSymbol>(nodes)
             .Where(x => !x.IsAbstract)
+            .Where(x => !x.HasAttribute<IgnoreAttribute>())
             .Where(x => x.Name.EndsWith("ViewModel"))
             .Where(x => x.IsOfBaseType(targetSymbol!))
             .OrderBy(x => x.ToDisplayString())

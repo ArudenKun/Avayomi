@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <LangVersion>12</LangVersion>
@@ -9,28 +8,28 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Ardalis.GuardClauses" />
-      <PackageReference Include="AutoInterface">
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Cogwheel" />
-      <PackageReference Include="CSharpier.MsBuild">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Flurl.Http" />
-      <PackageReference Include="Nito.AsyncEx" />
-      <PackageReference Include="Serilog.Enrichers.ClassName" />
-      <PackageReference Include="Serilog.Extensions.Logging" />
-      <PackageReference Include="Serilog.Sinks.Async" />
-      <PackageReference Include="Serilog.Sinks.Console" />
-      <PackageReference Include="Serilog.Sinks.FileEx" />
-      <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" />
+        <PackageReference Include="Ardalis.GuardClauses"/>
+        <PackageReference Include="AutoInterface">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Cogwheel"/>
+        <PackageReference Include="CSharpier.MsBuild">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Flurl.Http"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+        <PackageReference Include="Nito.AsyncEx"/>
+        <PackageReference Include="Serilog.Enrichers.ClassName"/>
+        <PackageReference Include="Serilog.Extensions.Logging"/>
+        <PackageReference Include="Serilog.Sinks.Async"/>
+        <PackageReference Include="Serilog.Sinks.Console"/>
+        <PackageReference Include="Serilog.Sinks.FileEx"/>
+        <PackageReference Include="Supernova.Enum.Generators"/>
+        <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson"/>
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Factories\" />
-      <Folder Include="Models\" />
     </ItemGroup>
-
 </Project>

@@ -1,5 +1,8 @@
-﻿namespace Core.Models;
+﻿using EnumFastToStringGenerated;
 
+namespace Core.Models;
+
+[EnumGenerator]
 public enum Theme
 {
     Light,

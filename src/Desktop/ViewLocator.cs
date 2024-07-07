@@ -25,15 +25,15 @@ public sealed partial class ViewLocator
         if (!ViewMap.TryGetValue(type, out var factory))
             return new TextBlock { Text = "Not Found: " + name };
 
-        var control = factory();
-        control.DataContext = viewModel;
+        var control = factory(viewModel);
+        control.DataContext = control;
         RegisterActivatable(viewModel, control);
         return control;
     }
 
     public bool Match(object? data) => data is INotifyPropertyChanged;
 
-    [RequiresUnreferencedCode("Calls Loaded(Object, RoutedEventArgs)")]
+    [RequiresUnreferencedCode("Calls Loaded and Unloaded Methods")]
     private static void RegisterActivatable(object viewModel, Control control)
     {
         // ReSharper disable once SuspiciousTypeConversion.Global

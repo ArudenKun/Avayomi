@@ -15,8 +15,8 @@ internal static class SymbolExtensions
     public static bool HasAttribute(this ISymbol symbol, string attributeName) =>
         symbol.GetAttributes().Any(x => x.AttributeClass?.Name == attributeName);
 
-    public static bool HasAttribute<TAttribute>(this ISymbol symbol) where TAttribute : Attribute =>
-        HasAttribute(symbol, typeof(TAttribute).Name);
+    public static bool HasAttribute<TAttribute>(this ISymbol symbol)
+        where TAttribute : Attribute => HasAttribute(symbol, typeof(TAttribute).Name);
 
     public static string ToFullDisplayString(this ISymbol s) =>
         s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
@@ -61,14 +61,14 @@ internal static class SymbolExtensions
     {
         if (targetSymbol is null)
         {
-            foreach (var x1 in Enumerable.Empty<INamedTypeSymbol>()) yield return x1;
+            foreach (var x1 in Enumerable.Empty<INamedTypeSymbol>())
+                yield return x1;
             yield break;
         }
 
         foreach (
             var namedTypeSymbol in namespaceSymbol
                 .GetTypeMembers()
-                .Where(x => !x.IsAbstract)
                 .Where(x => IsDerivedFrom(x, targetSymbol))
         )
         {

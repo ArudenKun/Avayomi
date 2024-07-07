@@ -10,7 +10,7 @@
         <ApplicationIcon>Assets\faviconlogo.ico</ApplicationIcon>
         <NoWarn>${NoWarn};AVLN3001;</NoWarn>
         <PublishAot>true</PublishAot>
-        <OptimizationPreference>Size</OptimizationPreference>
+        <OptimizationPreference>Speed</OptimizationPreference>
         <AssemblyName>Avayomi</AssemblyName>
     </PropertyGroup>
 
@@ -28,8 +28,9 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="H.Ipc" />
+        <PackageReference Include="H.Pipes" />
         <PackageReference Include="Material.Icons.Avalonia"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
         <PackageReference Include="SukiUI"/>
         <PackageReference Include="UVtools.AvaloniaControls"/>
         <PackageReference Include="Velopack"/>

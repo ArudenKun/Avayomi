@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using Generator.Extensions;
 using Generator.Utilities;
@@ -17,8 +16,7 @@ internal abstract class SourceGeneratorForDeclaredMember<TDeclarationSyntax> : I
 {
     private Compilation _compilation = null!;
 
-    protected virtual IEnumerable<(string Name, string Source)> StaticSources =>
-        [];
+    protected virtual IEnumerable<(string Name, string Source)> StaticSources => [];
 
     public void Initialize(GeneratorContext context)
     {

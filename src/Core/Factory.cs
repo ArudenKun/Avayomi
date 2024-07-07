@@ -1,6 +1,6 @@
 ﻿using AutoInterfaceAttributes;
 
-namespace Core.Factories;
+namespace Core;
 
 [AutoInterface]
 public class Factory<T>(Func<T> initFunc) : IFactory<T>

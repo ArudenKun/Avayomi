@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Generator.Attributes;
 using Generator.Extensions;
@@ -25,6 +24,8 @@ internal sealed class StaticViewLocatorGenerator
 
         var viewModelSymbols = compilation
             .GlobalNamespace.CollectTypeSymbols(targetSymbol)
+            .Where(x => !x.IsAbstract)
+            .Where(x => !x.HasAttribute<IgnoreAttribute>())
             .OrderBy(x => x.ToDisplayString());
 
         var source = new SourceStringBuilder(symbol);
@@ -41,7 +42,7 @@ internal sealed class StaticViewLocatorGenerator
             () =>
             {
                 source.Line(
-                    "public static Dictionary<Type, Func<Control>> ViewMap { get; } = new()"
+                    "public static Dictionary<Type, Func<object, Control>> ViewMap { get; } = new()"
                 );
                 source.BlockDecl(() =>
                 {
@@ -55,7 +56,7 @@ internal sealed class StaticViewLocatorGenerator
                         }
 
                         source.Line(
-                            $"[typeof({viewModelSymbol.ToFullDisplayString()})] = () => new {view.ToFullDisplayString()}(),"
+                            $"[typeof({viewModelSymbol.ToFullDisplayString()})] = (vm) => new {view.ToFullDisplayString()}() {{ ViewModel = ({viewModelSymbol.ToDisplayString()})vm }},"
                         );
                     }
                 });

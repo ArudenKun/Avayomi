@@ -1,8 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using DependencyPropertyGenerator;
 
 namespace Desktop.Controls;
 
+[DependencyProperty<bool>("Condition")]
+[DependencyProperty<Control>("True")]
+[DependencyProperty<Control>("False")]
 public partial class If : UserControl
 {
     public If()
@@ -10,51 +14,25 @@ public partial class If : UserControl
         InitializeComponent();
     }
 
-    public static readonly StyledProperty<bool> ConditionProperty = AvaloniaProperty.Register<
-        If,
-        bool
-    >(nameof(Condition));
-
-    public static readonly StyledProperty<Control> TrueProperty = AvaloniaProperty.Register<
-        If,
-        Control
-    >(nameof(True));
-
-    public static readonly StyledProperty<Control> FalseProperty = AvaloniaProperty.Register<
-        If,
-        Control
-    >(nameof(False));
-
-    public bool Condition
+    partial void OnConditionChanged()
     {
-        get => GetValue(ConditionProperty);
-        set => SetValue(ConditionProperty, value);
+        UpdateContent();
     }
 
-    public Control True
+    partial void OnTrueChanged()
     {
-        get => GetValue(TrueProperty);
-        set => SetValue(TrueProperty, value);
+        UpdateContent();
     }
 
-    public Control False
+    partial void OnFalseChanged()
     {
-        get => GetValue(FalseProperty);
-        set => SetValue(FalseProperty, value);
-    }
-
-    static If()
-    {
-        ConditionProperty.Changed.AddClassHandler<If>(ConditionPropertyChanged);
-        TrueProperty.Changed.AddClassHandler<If>(ConditionPropertyChanged);
-        FalseProperty.Changed.AddClassHandler<If>(ConditionPropertyChanged);
+        UpdateContent();
     }
 
     private static void ConditionPropertyChanged(
         If control,
         AvaloniaPropertyChangedEventArgs args
-    ) =>
-        control.UpdateContent();
+    ) => control.UpdateContent();
 
     private void UpdateContent() => Content = Condition ? True : False;
 }
