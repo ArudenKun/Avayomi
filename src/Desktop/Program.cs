@@ -5,6 +5,7 @@ using Desktop.Extensions;
 using Desktop.Hosting;
 using Desktop.Hosting.Ui;
 using Generator.Core.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,14 +26,39 @@ public static class Program
     public static void Main(string[] args)
     {
         ConfigureLogging();
-        // var builder = AvayomiApp.CreateBuilder(args);
         var builder = Host.CreateApplicationBuilder(args);
-        // builder.ConfigureAvayomiApp<App>();
+#if DEBUG
+        builder.Environment.EnvironmentName = Environments.Development;
+#endif
         builder.ConfigureAvalonia<App>();
-
-        builder.Services.AddCore();
-
-        builder.Logging.ClearProviders().AddSerilog();
+        builder.Configuration.AddJsonFile("appsettings.json", true, true);
+        builder
+            .Services.AddCore()
+            .AddSerilog(loggerConfig =>
+            {
+                const string logTemplate =
+                    "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3} {ClassName}] {Message:lj} {NewLine}{Exception}";
+                loggerConfig
+                    .MinimumLevel.Is(IsDebug() ? LogEventLevel.Debug : LogEventLevel.Information)
+                    .WriteTo.Console(outputTemplate: logTemplate)
+                    .WriteTo.Async(x =>
+                        x.FileEx(
+                            EnvironmentHelper.ApplicationDataPath.JoinPath(
+                                "logs",
+                                $"logs{(IsDebug() ? ".debug" : "")}.txt"
+                            ),
+                            ".dd-MM-yyyy",
+                            outputTemplate: logTemplate,
+                            rollingInterval: RollingInterval.Day,
+                            rollOnEachProcessRun: false,
+                            rollOnFileSizeLimit: true,
+                            preserveLogFileName: true,
+                            shared: true
+                        )
+                    )
+                    .Enrich.FromLogContext()
+                    .Enrich.WithClassName();
+            });
 
         using var app = builder.Build();
 
@@ -44,10 +70,6 @@ public static class Program
         catch (Exception e)
         {
             app.Services.GetRequiredService<ILogger<AvayomiApp>>().LogException(e);
-        }
-        finally
-        {
-            Log.CloseAndFlush();
         }
     }
 

@@ -19,5 +19,11 @@
                 Foreground="Red"
                 Kind="Youtube" />
         </StackPanel>
+        <Grid
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Effect="blur(10)">
+            <TextBlock FontSize="50" Text="Testing" />
+        </Grid>
     </Grid>
 </UserControl>

@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using DependencyPropertyGenerator;
 
 namespace Desktop.Controls;
@@ -14,25 +13,11 @@ public partial class If : UserControl
         InitializeComponent();
     }
 
-    partial void OnConditionChanged()
-    {
-        UpdateContent();
-    }
+    partial void OnConditionChanged() => UpdateContent();
 
-    partial void OnTrueChanged()
-    {
-        UpdateContent();
-    }
+    partial void OnTrueChanged() => UpdateContent();
 
-    partial void OnFalseChanged()
-    {
-        UpdateContent();
-    }
-
-    private static void ConditionPropertyChanged(
-        If control,
-        AvaloniaPropertyChangedEventArgs args
-    ) => control.UpdateContent();
+    partial void OnFalseChanged() => UpdateContent();
 
     private void UpdateContent() => Content = Condition ? True : False;
 }

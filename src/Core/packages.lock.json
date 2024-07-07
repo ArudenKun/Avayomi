@@ -8,6 +8,12 @@
         "resolved": "4.5.0",
         "contentHash": "9ajMCMD3gIWUsVb//ftJFsFm+TDvP3y05dVC1S9ANLP4Bo7V2xbCeQbTVomXR0mTYkX4mX6Lp3SPtdcKag4rZg=="
       },
+      "AsyncAwaitBestPractices": {
+        "type": "Direct",
+        "requested": "[7.0.0, )",
+        "resolved": "7.0.0",
+        "contentHash": "RhUokh7YKNpr+W0xzQWTGPyJtv/jVEalyKyBYAhFNyhUa0Ncsrz5S6PYxNDZ4ye/TK//qrpRInn5hzLBTQpehw=="
+      },
       "AutoInterface": {
         "type": "Direct",
         "requested": "[2.3.0, )",

@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Ardalis.GuardClauses"/>
+        <PackageReference Include="AsyncAwaitBestPractices" />
         <PackageReference Include="AutoInterface">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

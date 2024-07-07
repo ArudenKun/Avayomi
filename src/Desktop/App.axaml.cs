@@ -17,14 +17,19 @@ public class App : Application
         _mainWindowViewModel = mainWindowViewModel;
     }
 
+    public IClassicDesktopStyleApplicationLifetime DesktopLifetime =>
+        (IClassicDesktopStyleApplicationLifetime)ApplicationLifetime!;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
-    [UnconditionalSuppressMessage("Trimming",
+    [UnconditionalSuppressMessage(
+        "Trimming",
         "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = "<Pending>")]
+        Justification = "<Pending>"
+    )]
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

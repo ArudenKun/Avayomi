@@ -17,7 +17,7 @@ public static class HostBuilderApplicationExtensions
     /// The key used to access the <see cref="UiContext" /> instance in
     /// <see cref="IHostApplicationBuilder.Properties" />.
     /// </summary>
-    public const string HostingContextKey = "UserInterfaceHostingContext";
+    public const string HostingContextKey = "UiHostingContext";
 
     /// <summary>
     /// Configures the host builder for a Windows UI (WinUI) application.

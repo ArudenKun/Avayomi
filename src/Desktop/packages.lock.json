@@ -36,6 +36,12 @@
           "Avalonia": "11.1.0-beta2"
         }
       },
+      "CliWrap": {
+        "type": "Direct",
+        "requested": "[3.6.6, )",
+        "resolved": "3.6.6",
+        "contentHash": "8/WnYKDjXjqMp9ktCygmeC6kDsmSEKF4riEYNy98+nD3wOKbuxqOjmhiFMalOYlM+mUqfs3SOEowF20+loDZHQ=="
+      },
       "CommunityToolkit.Mvvm": {
         "type": "Direct",
         "requested": "[8.2.2, )",
@@ -120,6 +126,19 @@
         "resolved": "8.0.6",
         "contentHash": "E+lDylsTeP4ZiDmnEkiJ5wobnGaIJzFhOgZppznJCb69UZgbh6G3cfv1pnLDLLBx6JAgl0kAlnINDeT3uCuczQ=="
       },
+      "Serilog.Extensions.Hosting": {
+        "type": "Direct",
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "db0OcbWeSCvYQkHWu6n0v40N4kKaTAXNjlM3BKvcbwvNzYphQFcBR+36eQ/7hMMwOkJvAyLC2a9/jNdUL5NjtQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0",
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
+          "Serilog": "3.1.1",
+          "Serilog.Extensions.Logging": "8.0.0"
+        }
+      },
       "SukiUI": {
         "type": "Direct",
         "requested": "[6.0.0-beta7, )",
@@ -152,6 +171,11 @@
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
           "NuGet.Versioning": "6.10.0"
         }
+      },
+      "AsyncAwaitBestPractices": {
+        "type": "Transitive",
+        "resolved": "7.0.0",
+        "contentHash": "RhUokh7YKNpr+W0xzQWTGPyJtv/jVEalyKyBYAhFNyhUa0Ncsrz5S6PYxNDZ4ye/TK//qrpRInn5hzLBTQpehw=="
       },
       "Avalonia": {
         "type": "Transitive",
@@ -793,6 +817,7 @@
         "type": "Project",
         "dependencies": {
           "Ardalis.GuardClauses": "[4.5.0, )",
+          "AsyncAwaitBestPractices": "[7.0.0, )",
           "AutoInterface": "[2.3.0, )",
           "Cogwheel": "[2.1.0, )",
           "Flurl.Http": "[4.0.2, )",
