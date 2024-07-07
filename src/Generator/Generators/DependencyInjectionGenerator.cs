@@ -17,7 +17,7 @@ internal sealed class DependencyInjectionGenerator
     protected override IEnumerable<(string Name, string Source)> StaticSources { get; } =
         [
             (
-                $"{MetadataNames.DependencyInjectionNamespace}.statics.g.cs",
+                $"{MetadataNames.DependencyInjectionNamespace}.Partials",
                 $$"""
                 using Microsoft.Extensions.DependencyInjection;
 

@@ -3,8 +3,10 @@ using Avalonia;
 using Core.Helpers;
 using Desktop.Extensions;
 using Desktop.Hosting;
+using Desktop.Hosting.Ui;
 using Generator.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Enrichers.ClassName;
@@ -23,8 +25,10 @@ public static class Program
     public static void Main(string[] args)
     {
         ConfigureLogging();
-        var builder = AvayomiApp.CreateBuilder(args);
-        builder.ConfigureAvayomiApp<App>();
+        // var builder = AvayomiApp.CreateBuilder(args);
+        var builder = Host.CreateApplicationBuilder(args);
+        // builder.ConfigureAvayomiApp<App>();
+        builder.ConfigureAvalonia<App>();
 
         builder.Services.AddCore();
 

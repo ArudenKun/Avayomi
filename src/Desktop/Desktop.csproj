@@ -31,6 +31,7 @@
         <PackageReference Include="H.Ipc" />
         <PackageReference Include="H.Pipes" />
         <PackageReference Include="Material.Icons.Avalonia"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
         <PackageReference Include="SukiUI"/>
         <PackageReference Include="UVtools.AvaloniaControls"/>
         <PackageReference Include="Velopack"/>
