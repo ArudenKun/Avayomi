@@ -27,9 +27,6 @@ public partial class BrowsePageViewModel : BasePageViewModel
     private async Task ChangeLoadingState()
     {
         LoadingState = !LoadingState;
-        await _fusionCache.GetOrSetAsync(
-            $"key:{Random.Shared.Next(1, 2)}",
-            Random.Shared.Next(1, 100_000)
-        );
+        await _fusionCache.GetOrSetAsync("key:1", Random.Shared.Next(1, 100_000));
     }
 }

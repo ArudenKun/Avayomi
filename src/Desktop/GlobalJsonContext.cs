@@ -1,13 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Core.Caching;
 using Desktop.Models;
+using Desktop.Services.Caching;
 using ZiggyCreatures.Caching.Fusion.Internals.Distributed;
 
 namespace Desktop;
 
-[JsonSerializable(typeof(Settings))]
+[JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(ConcurrentDictionary<string, ManifestEntry>))]
 [JsonSerializable(typeof(FusionCacheDistributedEntry<byte[]>))]
 [JsonSerializable(typeof(FusionCacheDistributedEntry<bool>))]

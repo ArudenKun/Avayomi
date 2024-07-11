@@ -46,6 +46,7 @@ public sealed class UiThreadHostedService : IHostedService
         if (cancellationToken.IsCancellationRequested)
             return Task.CompletedTask;
 
+        _logger.LogDebug("Starting UiThread");
         // Make the UI thread go
         _uiThread.StartUiThread();
         return Task.CompletedTask;

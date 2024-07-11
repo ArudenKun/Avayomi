@@ -21,17 +21,19 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageVersion Include="PolySharp" Version="1.14.1" />
     <PackageVersion Include="Serilog.Enrichers.ClassName" Version="0.2.0" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageVersion Include="Serilog.Sinks.Async" Version="2.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageVersion Include="Serilog.Sinks.FileEx" Version="5.1.8" />
     <PackageVersion Include="SukiUI" Version="6.0.0-beta7" />
     <PackageVersion Include="Supernova.Enum.Generators" Version="1.0.17" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Analyzers" Version="2022.0.0" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="2.2.5" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.0.22" />
+    <PackageVersion Include="ThisAssembly.AssemblyInfo" Version="1.4.3" />
     <PackageVersion Include="UVtools.AvaloniaControls" Version="3.0.3" />
     <PackageVersion Include="Velopack" Version="0.0.556" />
     <PackageVersion Include="ZiggyCreatures.FusionCache" Version="1.2.0" />

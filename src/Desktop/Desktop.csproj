@@ -8,6 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
         <ApplicationIcon>Assets\faviconlogo.ico</ApplicationIcon>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>${NoWarn};AVLN3001;</NoWarn>
         <PublishAot>true</PublishAot>
         <OptimizationPreference>Speed</OptimizationPreference>
@@ -19,24 +20,51 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Ardalis.GuardClauses" />
+        <PackageReference Include="AsyncAwaitBestPractices" />
+        <PackageReference Include="AutoInterface">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Avalonia.Desktop"/>
         <PackageReference Include="Avalonia.Fonts.Inter"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"/>
         <PackageReference Include="CliWrap"/>
         <PackageReference Include="CommunityToolkit.Mvvm"/>
+        <PackageReference Include="CSharpier.MsBuild">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Flurl.Http" />
         <PackageReference Include="H.Ipc"/>
         <PackageReference Include="H.Pipes"/>
         <PackageReference Include="Material.Icons.Avalonia"/>
         <PackageReference Include="Microsoft.Extensions.Hosting"/>
+        <PackageReference Include="Nito.AsyncEx" />
+        <PackageReference Include="Serilog.Enrichers.ClassName" />
         <PackageReference Include="Serilog.Extensions.Hosting"/>
+        <PackageReference Include="Serilog.Sinks.Async" />
+        <PackageReference Include="Serilog.Sinks.Console" />
+        <PackageReference Include="Serilog.Sinks.FileEx" />
         <PackageReference Include="SukiUI"/>
+        <PackageReference Include="Supernova.Enum.Generators" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Analyzers">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
+        <PackageReference Include="ThisAssembly.AssemblyInfo">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="UVtools.AvaloniaControls"/>
         <PackageReference Include="Velopack"/>
+        <PackageReference Include="ZiggyCreatures.FusionCache" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Core\Core.csproj"/>
         <ProjectReference Include="..\Generator\Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 </Project>

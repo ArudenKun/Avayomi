@@ -1,17 +1,19 @@
 ﻿using System;
+using System.IO.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Avalonia;
-using Core.Caching;
-using Core.Helpers;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using Desktop.Extensions;
+using Desktop.Helpers;
 using Desktop.Hosting;
-using Desktop.Hosting.Ui;
+using Desktop.Models;
+using Desktop.Services;
+using Desktop.Services.Caching;
+using Desktop.Services.Settings;
 using Generator.DependencyInjection;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Enrichers.ClassName;
@@ -32,12 +34,8 @@ public static class Program
     public static void Main(string[] args)
     {
         ConfigureLogging();
-        var builder = Host.CreateApplicationBuilder(args);
-#if DEBUG
-        builder.Environment.EnvironmentName = Environments.Development;
-#endif
+        var builder = AvayomiApp.CreateBuilder(args);
         builder.ConfigureAvalonia<App>();
-        builder.Configuration.AddJsonFile("appsettings.json", true, true);
         builder
             .Services.AddSingleton<IJsonTypeInfoResolver>(GlobalJsonContext.Default)
             .AddSingleton(
@@ -50,34 +48,41 @@ public static class Program
             .AddSingleton(
                 new FileCacheOptions(EnvironmentHelper.ApplicationDataPath.JoinPath("cache"))
             )
+            .AddSingleton<ISettingsProvider<AppSettings>, AppSettingsProvider>()
             .AddSingleton<IDistributedCache, FileCache>()
             .AddSingleton<IFusionCacheSerializer, FileCacheSerializer>()
+            .AddSingleton<IFileSystem, FileSystem>()
+            .AddSingleton<IFileSystemService, FileSystemService>()
             .AddCore()
-            .AddSerilog(loggerConfig =>
-            {
-                const string logTemplate =
-                    "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3} {ClassName}] {Message:lj} {NewLine}{Exception}";
-                loggerConfig
-                    .MinimumLevel.Is(IsDebug() ? LogEventLevel.Debug : LogEventLevel.Information)
-                    .WriteTo.Console(outputTemplate: logTemplate)
-                    .WriteTo.Async(x =>
-                        x.FileEx(
-                            EnvironmentHelper.ApplicationDataPath.JoinPath(
-                                "logs",
-                                $"logs{(IsDebug() ? ".debug" : "")}.txt"
-                            ),
-                            ".dd-MM-yyyy",
-                            outputTemplate: logTemplate,
-                            rollingInterval: RollingInterval.Day,
-                            rollOnEachProcessRun: false,
-                            rollOnFileSizeLimit: true,
-                            preserveLogFileName: true,
-                            shared: true
+            .AddSerilog(
+                (sp, loggerConfig) =>
+                {
+                    const string logTemplate =
+                        "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3} {ClassName}] {Message:lj} {NewLine}{Exception}";
+                    loggerConfig
+                        .MinimumLevel.Is(
+                            IsDebug() ? LogEventLevel.Debug : LogEventLevel.Information
                         )
-                    )
-                    .Enrich.FromLogContext()
-                    .Enrich.WithClassName();
-            })
+                        .WriteTo.Console(outputTemplate: logTemplate)
+                        .WriteTo.Async(x =>
+                            x.FileEx(
+                                EnvironmentHelper.ApplicationDataPath.JoinPath(
+                                    "logs",
+                                    $"logs{(IsDebug() ? ".debug" : "")}.txt"
+                                ),
+                                ".dd-MM-yyyy",
+                                outputTemplate: logTemplate,
+                                rollingInterval: RollingInterval.Day,
+                                rollOnEachProcessRun: false,
+                                rollOnFileSizeLimit: true,
+                                preserveLogFileName: true,
+                                shared: true
+                            )
+                        )
+                        .Enrich.FromLogContext()
+                        .Enrich.WithClassName();
+                }
+            )
             .AddFusionCache()
             .WithDefaultEntryOptions(opt =>
                 opt.SetDuration(TimeSpan.FromMinutes(5))
@@ -87,6 +92,8 @@ public static class Program
             .TryWithAutoSetup();
 
         using var app = builder.Build();
+
+        // Ioc.Default.ConfigureServices(app.Services);
 
         try
         {

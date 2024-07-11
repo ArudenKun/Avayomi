@@ -2,7 +2,9 @@
 
 namespace Desktop.Controls.SpaceGrid;
 
-public class SpacingColumnDefinition(double width) : ColumnDefinition(width, GridUnitType.Pixel), ISpacingDefinition
+public class SpacingColumnDefinition(double width)
+    : ColumnDefinition(width, GridUnitType.Pixel),
+        ISpacingDefinition
 {
     public double Spacing
     {

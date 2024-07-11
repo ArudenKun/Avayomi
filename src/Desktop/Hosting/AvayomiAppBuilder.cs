@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Core.Helpers;
+using Desktop.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -25,7 +25,7 @@ public class AvayomiAppBuilder
 
     public ILoggingBuilder Logging { get; }
 
-    public AvayomiAppBuilder ConfigureAvayomiApp<
+    public AvayomiAppBuilder ConfigureAvalonia<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication
     >(Action<AppBuilder>? configureAppBuilder = null)
         where TApplication : Application

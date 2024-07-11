@@ -47,14 +47,14 @@ public sealed class AvayomiApp : IDisposable
             .LogToTrace();
         _avayomiAppOptions.ConfigureAppBuilderDelegate?.Invoke(appBuilder);
 
-        _logger.LogInformation("Staring Application");
+        _logger.LogInformation("Starting Application");
         var startTask = _hostedServiceManager.StartAllAsync();
-        _logger.LogInformation("Application Started");
+        _logger.LogInformation("Started Application");
         appBuilder.StartWithClassicDesktopLifetime(_avayomiAppOptions.Args);
         _logger.LogInformation("Stopping Application");
         var stopTask = _hostedServiceManager.StopAllAsync();
         await startTask;
         await stopTask;
-        _logger.LogInformation("Application Stopped");
+        _logger.LogInformation("Stopped Application");
     }
 }

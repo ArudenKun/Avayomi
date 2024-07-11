@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
+using Desktop.Models;
+using Desktop.Services.Settings;
 using Generator.Interfaces;
 
 namespace Desktop.ViewModels.Common;
@@ -8,6 +11,11 @@ namespace Desktop.ViewModels.Common;
 [ObservableRecipient]
 public abstract partial class BaseViewModel : ObservableValidator, IActivatable
 {
+    public ISettingsProvider<AppSettings> SettingsProvider { get; } =
+        Ioc.Default.GetRequiredService<ISettingsProvider<AppSettings>>();
+
+    public AppSettings AppSettings => SettingsProvider.Value;
+
     [RequiresUnreferencedCode("Activate()")]
 #pragma warning disable IL2046
     public void Activate()
