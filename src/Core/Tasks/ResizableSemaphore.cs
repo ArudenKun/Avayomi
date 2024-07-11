@@ -2,13 +2,13 @@
 
 public sealed class ResizableSemaphore
 {
-    private readonly object _lock = new();
     private readonly CancellationTokenSource _cts = new();
+    private readonly object _lock = new();
     private readonly Queue<TaskCompletionSource> _waiters = new();
+    private int _count;
 
     private bool _isDisposed;
     private int _maxCount = int.MaxValue;
-    private int _count;
 
     public bool IsBusy => MaxCount > 0;
 
@@ -31,7 +31,10 @@ public sealed class ResizableSemaphore
         }
     }
 
-    public IDisposable Acquire() => AcquireAsync().GetAwaiter().GetResult();
+    public IDisposable Acquire()
+    {
+        return AcquireAsync().GetAwaiter().GetResult();
+    }
 
     public async ValueTask<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
     {
@@ -69,11 +72,9 @@ public sealed class ResizableSemaphore
         lock (_lock)
         {
             while (_count < MaxCount && _waiters.TryDequeue(out var waiter))
-            {
                 // Don't increment if the waiter has ben canceled
                 if (waiter.TrySetResult())
                     _count++;
-            }
         }
     }
 
@@ -86,6 +87,9 @@ public sealed class ResizableSemaphore
 
     private class AcquiredAccess(ResizableSemaphore semaphore) : IDisposable
     {
-        public void Dispose() => semaphore.Release();
+        public void Dispose()
+        {
+            semaphore.Release();
+        }
     }
 }

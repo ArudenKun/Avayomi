@@ -9,7 +9,7 @@ public static class OsHelper
     public static bool IsLinux => GetOSVersion() == OSVersion.Linux;
 
     /// <summary>
-    /// Gets the <see cref="OSVersion"/> depending on what platform you are on
+    ///     Gets the <see cref="OSVersion" /> depending on what platform you are on
     /// </summary>
     /// <returns>Returns the OS Version</returns>
     /// <exception cref="Exception"></exception>
@@ -17,14 +17,10 @@ public static class OsHelper
     public static OSVersion GetOSVersion()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
             return OSVersion.Windows;
-        }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
             return OSVersion.Linux;
-        }
 
         throw new Exception("Your OS isn't supported");
     }

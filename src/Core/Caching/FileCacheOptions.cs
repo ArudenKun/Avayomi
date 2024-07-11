@@ -1,7 +1,7 @@
 ﻿namespace Core.Caching;
 
 /// <summary>
-/// Options for controlling a <see cref="FileCache"/>.
+///     Options for controlling a <see cref="FileCache" />.
 /// </summary>
 /// <param name="DirectoryPath">The directory to store the cache in.</param>
 /// <param name="RemoveExpiredInterval">The time interval controlling how often the cache is removed of expired entries.</param>
@@ -13,12 +13,12 @@ public record FileCacheOptions(
 )
 {
     /// <summary>
-    /// The default remove expired interval of 30 minutes.
+    ///     The default remove expired interval of 30 minutes.
     /// </summary>
     public TimeSpan DefaultRemovedExpiredInterval { get; } = TimeSpan.FromMinutes(30);
 
     /// <summary>
-    /// The default manifest save interval of 30 seconds.
+    ///     The default manifest save interval of 30 seconds.
     /// </summary>
     public TimeSpan DefaultManifestSaveInterval { get; } = TimeSpan.FromSeconds(30);
 }

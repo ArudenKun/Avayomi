@@ -12,22 +12,22 @@ namespace Core.Caching;
 [AutoInterface(Inheritance = [typeof(IDistributedCache), typeof(IDisposable)])]
 public sealed class FileCache : IFileCache
 {
-    private bool _disposed;
-    private readonly FileCacheOptions _options;
-    private readonly ILogger<FileCache> _logger;
-    private readonly string _manifestPath;
-
-    private readonly CancellationTokenSource _removingExpiredCancellationTokenSource;
-    private readonly CancellationTokenSource _manifestSavingCancellationTokenSource;
-    private readonly Task _backgroundRemovingExpiredTask;
     private readonly Task _backgroundManifestSavingTask;
-
-    private readonly SemaphoreSlim _manifestLock = new(1, 1);
-
-    private ConcurrentDictionary<string, ManifestEntry>? _cacheManifest;
+    private readonly Task _backgroundRemovingExpiredTask;
     private readonly ConcurrentDictionary<string, AsyncReaderWriterLock> _fileLock;
 
     private readonly JsonSerializerOptions _jsonSerializerOptions;
+    private readonly ILogger<FileCache> _logger;
+
+    private readonly SemaphoreSlim _manifestLock = new(1, 1);
+    private readonly string _manifestPath;
+    private readonly CancellationTokenSource _manifestSavingCancellationTokenSource;
+    private readonly FileCacheOptions _options;
+
+    private readonly CancellationTokenSource _removingExpiredCancellationTokenSource;
+
+    private ConcurrentDictionary<string, ManifestEntry>? _cacheManifest;
+    private bool _disposed;
 
     public FileCache(
         FileCacheOptions options,
@@ -55,15 +55,11 @@ public sealed class FileCache : IFileCache
 
         _removingExpiredCancellationTokenSource.Cancel();
         if (!_backgroundRemovingExpiredTask.IsFaulted)
-        {
             _backgroundRemovingExpiredTask.Wait();
-        }
 
         _manifestSavingCancellationTokenSource.Cancel();
         if (!_backgroundManifestSavingTask.IsFaulted)
-        {
             _backgroundManifestSavingTask.Wait();
-        }
 
         SaveManifest();
         _manifestLock.Dispose();
@@ -116,8 +112,10 @@ public sealed class FileCache : IFileCache
         return default;
     }
 
-    public Task<byte[]?> GetAsync(string key, CancellationToken token = new()) =>
-        Task.Run(() => Get(key), token);
+    public Task<byte[]?> GetAsync(string key, CancellationToken token = new())
+    {
+        return Task.Run(() => Get(key), token);
+    }
 
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
     {
@@ -130,13 +128,9 @@ public sealed class FileCache : IFileCache
         TimeSpan? renewal = null;
 
         if (options.AbsoluteExpiration.HasValue)
-        {
             expiry = options.AbsoluteExpiration.Value.ToUniversalTime();
-        }
         else if (options.AbsoluteExpirationRelativeToNow.HasValue)
-        {
             expiry = DateTimeOffset.UtcNow.Add(options.AbsoluteExpirationRelativeToNow.Value);
-        }
 
         if (options.SlidingExpiration.HasValue)
         {
@@ -146,13 +140,9 @@ public sealed class FileCache : IFileCache
 
         //Update the manifest entry with the new expiry
         if (_cacheManifest.TryGetValue(key, out var manifestEntry))
-        {
             manifestEntry = manifestEntry with { Expiry = expiry, Renewal = renewal };
-        }
         else
-        {
             manifestEntry = new ManifestEntry(MD5HashHelper.ComputeHash(key), expiry, renewal);
-        }
 
         _cacheManifest[key] = manifestEntry;
 
@@ -181,7 +171,10 @@ public sealed class FileCache : IFileCache
         byte[] value,
         DistributedCacheEntryOptions options,
         CancellationToken token = new()
-    ) => Task.Run(() => Set(key, value, options), token);
+    )
+    {
+        return Task.Run(() => Set(key, value, options), token);
+    }
 
     public void Refresh(string key)
     {
@@ -204,8 +197,10 @@ public sealed class FileCache : IFileCache
         _cacheManifest[key] = manifestEntry;
     }
 
-    public Task RefreshAsync(string key, CancellationToken token = new()) =>
-        Task.Run(() => Refresh(key), token);
+    public Task RefreshAsync(string key, CancellationToken token = new())
+    {
+        return Task.Run(() => Refresh(key), token);
+    }
 
     public void Remove(string key)
     {
@@ -224,17 +219,17 @@ public sealed class FileCache : IFileCache
         {
             var path = Path.Combine(_options.DirectoryPath, manifestEntry.FileName);
             if (File.Exists(path))
-            {
                 File.Delete(path);
-            }
         }
     }
 
-    public Task RemoveAsync(string key, CancellationToken token = new()) =>
-        Task.Run(() => Remove(key), token);
+    public Task RemoveAsync(string key, CancellationToken token = new())
+    {
+        return Task.Run(() => Remove(key), token);
+    }
 
     /// <summary>
-    /// Saves the cache manifest to the file system.
+    ///     Saves the cache manifest to the file system.
     /// </summary>
     /// <returns></returns>
     public void SaveManifest()
@@ -243,9 +238,7 @@ public sealed class FileCache : IFileCache
         try
         {
             if (!Directory.Exists(_options.DirectoryPath))
-            {
                 Directory.CreateDirectory(_options.DirectoryPath);
-            }
 
             SerializeFile(_manifestPath, _cacheManifest);
         }
@@ -256,7 +249,7 @@ public sealed class FileCache : IFileCache
     }
 
     /// <summary>
-    /// Saves the cache manifest to the file system.
+    ///     Saves the cache manifest to the file system.
     /// </summary>
     /// <returns></returns>
     public async Task SaveManifestAsync()
@@ -265,9 +258,7 @@ public sealed class FileCache : IFileCache
         try
         {
             if (!Directory.Exists(_options.DirectoryPath))
-            {
                 Directory.CreateDirectory(_options.DirectoryPath);
-            }
 
             await SerializeFileAsync(_manifestPath, _cacheManifest);
         }
@@ -305,15 +296,16 @@ public sealed class FileCache : IFileCache
         }
 
         if (removed > 0)
-        {
             _logger.LogDebug(
                 "Evicted {DeletedCacheEntryCount} expired entries from cache",
                 removed
             );
-        }
     }
 
-    public Task RemoveExpiredAsync() => Task.Run(RemoveExpired);
+    public Task RemoveExpiredAsync()
+    {
+        return Task.Run(RemoveExpired);
+    }
 
     private void SerializeFile<T>(string path, T value)
     {
@@ -330,8 +322,10 @@ public sealed class FileCache : IFileCache
         memStream.CopyTo(stream);
     }
 
-    private Task SerializeFileAsync<T>(string path, T value) =>
-        Task.Run(() => SerializeFile(path, value));
+    private Task SerializeFileAsync<T>(string path, T value)
+    {
+        return Task.Run(() => SerializeFile(path, value));
+    }
 
     private T? DeserializeFile<T>(string path)
     {
@@ -371,9 +365,7 @@ public sealed class FileCache : IFileCache
             else
             {
                 if (!Directory.Exists(_options.DirectoryPath))
-                {
                     Directory.CreateDirectory(_options.DirectoryPath);
-                }
 
                 _cacheManifest = new ConcurrentDictionary<string, ManifestEntry>();
                 SerializeFile(_manifestPath, _cacheManifest);

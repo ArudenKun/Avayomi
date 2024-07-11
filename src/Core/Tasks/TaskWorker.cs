@@ -1,9 +1,9 @@
 ﻿namespace Core.Tasks;
 
 /// <summary>
-/// A class designed to run code using <see cref="Task"/> with <see cref="TaskCreationOptions.LongRunning"/> <br/>
-/// and supporting automatic cancellation after <see cref="DisposeAsync"/> <br/>
-/// <![CDATA[Version: 1.0.0.6]]> <br/>
+///     A class designed to run code using <see cref="Task" /> with <see cref="TaskCreationOptions.LongRunning" /> <br />
+///     and supporting automatic cancellation after <see cref="DisposeAsync" /> <br />
+///     <![CDATA[Version: 1.0.0.6]]> <br />
 /// </summary>
 public sealed class TaskWorker : IAsyncDisposable
 {
@@ -13,24 +13,10 @@ public sealed class TaskWorker : IAsyncDisposable
 
     #endregion
 
-    #region Properties
-
-    /// <summary>
-    /// Internal task
-    /// </summary>
-    public Task Task { get; set; }
-
-    /// <summary>
-    /// Internal task CancellationTokenSource
-    /// </summary>
-    public CancellationTokenSource CancellationTokenSource { get; } = new();
-
-    #endregion
-
     #region Constructors
 
     /// <summary>
-    /// Creates and starts <see cref="TaskWorker"/>
+    ///     Creates and starts <see cref="TaskWorker" />
     /// </summary>
     /// <param name="action"></param>
     /// <param name="exceptionAction"></param>
@@ -60,17 +46,27 @@ public sealed class TaskWorker : IAsyncDisposable
 
     #endregion
 
+    #region IDisposable
+
+    /// <summary>
+    ///     Cancel task(if it's not completed) and dispose internal resources <br />
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        await StopAsync().ConfigureAwait(false);
+    }
+
+    #endregion
+
     #region Methods
 
     /// <summary>
-    /// Cancel task(if it's not completed) and dispose internal resources <br/>
+    ///     Cancel task(if it's not completed) and dispose internal resources <br />
     /// </summary>
     public async Task StopAsync()
     {
         if (_isDisposed)
-        {
             return;
-        }
 
         _isDisposed = true;
 
@@ -95,15 +91,17 @@ public sealed class TaskWorker : IAsyncDisposable
 
     #endregion
 
-    #region IDisposable
+    #region Properties
 
     /// <summary>
-    /// Cancel task(if it's not completed) and dispose internal resources <br/>
+    ///     Internal task
     /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        await StopAsync().ConfigureAwait(false);
-    }
+    public Task Task { get; set; }
+
+    /// <summary>
+    ///     Internal task CancellationTokenSource
+    /// </summary>
+    public CancellationTokenSource CancellationTokenSource { get; } = new();
 
     #endregion
 }

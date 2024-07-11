@@ -27,8 +27,10 @@ public static class CommonExtensions
         return result;
     }
 
-    public static string ToMemoryMensurableUnit(this long bytes) =>
-        ((double)bytes).ToMemoryMensurableUnit();
+    public static string ToMemoryMensurableUnit(this long bytes)
+    {
+        return ((double)bytes).ToMemoryMensurableUnit();
+    }
 
     public static async Task CopyToAsync(
         this Stream source,

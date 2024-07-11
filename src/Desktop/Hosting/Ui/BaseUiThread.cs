@@ -9,12 +9,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace Desktop.Hosting.Ui;
 
 /// <summary>
-/// Represents a base class for a user interface thread in a hosted
-/// application.
+///     Represents a base class for a user interface thread in a hosted
+///     application.
 /// </summary>
 /// <typeparam name="T">
-/// The concrete type of the class extending <see cref="BaseUiContext" />
-/// which will provide the necessary options to setup the User Interface.
+///     The concrete type of the class extending <see cref="BaseUiContext" />
+///     which will provide the necessary options to setup the User Interface.
 /// </typeparam>
 public abstract class BaseUiThread<T> : IDisposable, IUiThread
     where T : BaseUiContext
@@ -42,14 +42,12 @@ public abstract class BaseUiThread<T> : IDisposable, IUiThread
             UiThreadExit();
         })
         {
-            IsBackground = true,
+            IsBackground = true
         };
 
         if (OperatingSystem.IsWindows())
-        {
             // Set the apartment state
             newUiThread.SetApartmentState(ApartmentState.STA);
-        }
 
         // Transition the new UI thread to the RUNNING state. Note that the
         // thread will actually start after the `serviceManualResetEvent` is
@@ -58,12 +56,12 @@ public abstract class BaseUiThread<T> : IDisposable, IUiThread
     }
 
     /// <summary>
-    /// Gets the hosting context for the user interface service.
+    ///     Gets the hosting context for the user interface service.
     /// </summary>
     /// <value>
-    /// Although never <c>null</c>, the different fields of the hosting context
-    /// may or may not contain valid values depending on the current state of
-    /// the User Interface thread. Refer to the concrete class documentation.
+    ///     Although never <c>null</c>, the different fields of the hosting context
+    ///     may or may not contain valid values depending on the current state of
+    ///     the User Interface thread. Refer to the concrete class documentation.
     /// </value>
     protected T UiContext { get; }
 
@@ -76,15 +74,18 @@ public abstract class BaseUiThread<T> : IDisposable, IUiThread
         _serviceManualResetEvent.Dispose();
     }
 
-    /// <summary>
-    /// Do the work needed to actually start the User Interface thread.
-    /// </summary>
-    protected abstract void UiThreadStart();
-
-    public void StartUiThread() => _serviceManualResetEvent.Set();
+    public void StartUiThread()
+    {
+        _serviceManualResetEvent.Set();
+    }
 
     /// <inheritdoc />
     public abstract Task StopUiThreadAsync();
+
+    /// <summary>
+    ///     Do the work needed to actually start the User Interface thread.
+    /// </summary>
+    protected abstract void UiThreadStart();
 
     private void UiThreadExit()
     {
@@ -101,8 +102,6 @@ public abstract class BaseUiThread<T> : IDisposable, IUiThread
             !_hostApplicationLifetime.ApplicationStopped.IsCancellationRequested
             && !_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested
         )
-        {
             _hostApplicationLifetime.StopApplication();
-        }
     }
 }

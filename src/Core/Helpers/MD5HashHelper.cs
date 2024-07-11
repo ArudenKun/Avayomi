@@ -40,9 +40,7 @@ public static class MD5HashHelper
     private static char GetHexValue(int i)
     {
         if (i < 10)
-        {
             return (char)(i + '0');
-        }
 
         return (char)(i - 10 + 'A');
     }

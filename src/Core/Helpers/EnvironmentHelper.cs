@@ -10,38 +10,39 @@ public static class EnvironmentHelper
     private const string PortableFolder = "portable";
 
     /// <summary>
-    /// Returns the version of executing assembly.
+    ///     Returns the version of executing assembly.
     /// </summary>
     public static Version AppVersion =>
         Assembly.GetEntryAssembly()?.GetName().Version ?? new Version();
 
     /// <summary>
-    /// Returns the friendly name of this application.
+    ///     Returns the friendly name of this application.
     /// </summary>
     public static string AppFriendlyName => AppDomain.CurrentDomain.FriendlyName;
 
     /// <summary>
-    /// Returns the path of the ApplicationData.
+    ///     Returns the path of the ApplicationData.
     /// </summary>
     public static string ApplicationDataPath => GetApplicationDataPath();
 
     /// <summary>
-    /// Returns the directory from which the application is run.
+    ///     Returns the directory from which the application is run.
     /// </summary>
     public static string AppDirectory => AppDomain.CurrentDomain.BaseDirectory;
 
     /// <summary>
-    /// Indicates whether the current application should save its data in the AppDirectory
+    ///     Indicates whether the current application should save its data in the AppDirectory
     /// </summary>
     public static bool IsPortable => Directory.Exists(GetPortablePath());
 
     /// <summary>
-    /// Gets or sets the <see cref="T:System.Globalization.CultureInfo" /> object that represents the culture used by the current thread and task-based asynchronous operations.
+    ///     Gets or sets the <see cref="T:System.Globalization.CultureInfo" /> object that represents the culture used by the
+    ///     current thread and task-based asynchronous operations.
     /// </summary>
     public static IFormatProvider CurrentCulture => CultureInfo.CurrentCulture;
 
     /// <summary>
-    /// Gets the application data folder path for the user.
+    ///     Gets the application data folder path for the user.
     /// </summary>
     /// <param name="parts">Additional path parts to append to the path.</param>
     /// <returns>The application data folder path.</returns>
@@ -59,13 +60,17 @@ public static class EnvironmentHelper
         return defaultPath.JoinPath(parts);
     }
 
-    public static string GetPortablePath() =>
-        PathHelper.GetParent(1, AppDirectory).JoinPath(PortableFolder);
+    public static string GetPortablePath()
+    {
+        return PathHelper.GetParent(1, AppDirectory).JoinPath(PortableFolder);
+    }
 
-    public static string GetDefaultPath() =>
-        Environment
+    public static string GetDefaultPath()
+    {
+        return Environment
             .GetFolderPath(Environment.SpecialFolder.ApplicationData)
             .JoinPath(AppFriendlyName);
+    }
 
     public static void OpenUrl(Url url)
     {

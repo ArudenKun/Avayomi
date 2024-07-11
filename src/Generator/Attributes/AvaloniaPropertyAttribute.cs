@@ -11,7 +11,6 @@ namespace Generator.Attributes;
 public partial class AvaloniaPropertyAttribute : Attribute
 {
     /// <summary>
-    ///
     /// </summary>
     /// <param name="name"></param>
     /// <param name="type"></param>
@@ -32,12 +31,12 @@ public partial class AvaloniaPropertyAttribute : Attribute
 #endif
 
     /// <summary>
-    /// Name of this avalonia property.
+    ///     Name of this avalonia property.
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    /// Type of this avalonia property.
+    ///     Type of this avalonia property.
     /// </summary>
     public Type Type { get; }
 

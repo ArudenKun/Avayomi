@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Generator.Metadata.AttributeFactory;
+﻿namespace Generator.Metadata.AttributeFactory;
 
 internal partial class AttributeFactoryGenerator
 {

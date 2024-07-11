@@ -11,20 +11,22 @@ namespace Generator.Metadata.AttributeFactory;
 
 internal partial class AttributeFactoryGenerator
 {
-    readonly struct AttributeSourceModel(
-        String source,
+    private readonly struct AttributeSourceModel(
+        string source,
         TypeDeclarationSyntax declaration,
         SemanticModel semanticModel,
         INamedTypeSymbol symbol
     ) : IEquatable<AttributeSourceModel>
     {
-        public readonly String Source = source;
+        public readonly string Source = source;
         public readonly TypeDeclarationSyntax Declaration = declaration;
         public readonly SemanticModel SemanticModel = semanticModel;
         public readonly INamedTypeSymbol Symbol = symbol;
 
-        public AttributeSourceModel WithSource(String source) =>
-            new(source, Declaration, SemanticModel, Symbol);
+        public AttributeSourceModel WithSource(string source)
+        {
+            return new AttributeSourceModel(source, Declaration, SemanticModel, Symbol);
+        }
 
         public static AttributeSourceModel Create(
             GeneratorAttributeSyntaxContext context,
@@ -35,7 +37,7 @@ internal partial class AttributeFactoryGenerator
             var semanticModel = context.SemanticModel;
 
             var symbol =
-                semanticModel.GetDeclaredSymbol(declaration, cancellationToken: token)
+                semanticModel.GetDeclaredSymbol(declaration, token)
                 ?? throw new ArgumentException(
                     "The symbol of the declaration passed could not be determined using the semantic model provided.",
                     nameof(declaration)
@@ -57,7 +59,7 @@ internal partial class AttributeFactoryGenerator
                 { IsRecord: true, IsValueType: true } => "record struct",
                 { IsReferenceType: true } => "class",
                 { IsValueType: true } => "struct",
-                _ => String.Empty
+                _ => string.Empty
             };
 
             var source = _sourceTemplate
@@ -69,14 +71,11 @@ internal partial class AttributeFactoryGenerator
                 context.Attributes.Length > 0
                 && context.Attributes[0].NamedArguments.Length > 0
                 && context.Attributes[0].NamedArguments[0].Key == "OmitTypeCheck"
-                && context.Attributes[0].NamedArguments[0].Value.Value is Boolean omitTypeCheck
+                && context.Attributes[0].NamedArguments[0].Value.Value is bool omitTypeCheck
                 && omitTypeCheck
             )
-            {
                 source = source.Replace(_typeCheckPlaceholder, "");
-            }
             else
-            {
                 source = source.Replace(
                     _typeCheckPlaceholder,
                     """
@@ -88,7 +87,6 @@ internal partial class AttributeFactoryGenerator
                                 }
                     """
                 );
-            }
 #pragma warning restore IDE0045 // Convert to conditional expression
 
             var result = new AttributeSourceModel(
@@ -103,7 +101,7 @@ internal partial class AttributeFactoryGenerator
 
         private static readonly Regex _rawStringValuePattern = new("\"*", RegexOptions.Compiled);
 
-        private static String GetRawSourceTextValue(String sourceText)
+        private static string GetRawSourceTextValue(string sourceText)
         {
             var longestMatch = _rawStringValuePattern
                 .Matches(sourceText)
@@ -112,24 +110,35 @@ internal partial class AttributeFactoryGenerator
                 .Max();
 
             var quoteCount = longestMatch > 2 ? longestMatch + 1 : 3;
-            var quotes = String.Concat(Enumerable.Repeat('"', quoteCount));
+            var quotes = string.Concat(Enumerable.Repeat('"', quoteCount));
             var result = $"{quotes}\n{sourceText}\n{quotes}";
 
             return result;
         }
 
-        public override Boolean Equals(Object obj) =>
-            obj is AttributeSourceModel model && Equals(model);
+        public override bool Equals(object obj)
+        {
+            return obj is AttributeSourceModel model && Equals(model);
+        }
 
-        public Boolean Equals(AttributeSourceModel other) => Source == other.Source;
+        public bool Equals(AttributeSourceModel other)
+        {
+            return Source == other.Source;
+        }
 
-        public override Int32 GetHashCode() =>
-            924162744 + EqualityComparer<String>.Default.GetHashCode(Source);
+        public override int GetHashCode()
+        {
+            return 924162744 + EqualityComparer<string>.Default.GetHashCode(Source);
+        }
 
-        public static Boolean operator ==(AttributeSourceModel left, AttributeSourceModel right) =>
-            left.Equals(right);
+        public static bool operator ==(AttributeSourceModel left, AttributeSourceModel right)
+        {
+            return left.Equals(right);
+        }
 
-        public static Boolean operator !=(AttributeSourceModel left, AttributeSourceModel right) =>
-            !(left == right);
+        public static bool operator !=(AttributeSourceModel left, AttributeSourceModel right)
+        {
+            return !(left == right);
+        }
     }
 }

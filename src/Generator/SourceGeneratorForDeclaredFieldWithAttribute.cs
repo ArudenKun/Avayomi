@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -24,8 +23,13 @@ internal abstract class SourceGeneratorForDeclaredFieldWithAttribute<TAttribute>
         ISymbol symbol,
         AttributeData attribute,
         AnalyzerConfigOptions options
-    ) => GenerateCode(compilation, node, (IFieldSymbol)symbol, attribute, options);
+    )
+    {
+        return GenerateCode(compilation, node, (IFieldSymbol)symbol, attribute, options);
+    }
 
-    protected override SyntaxNode Node(FieldDeclarationSyntax node) =>
-        node.Declaration.Variables.Single();
+    protected override SyntaxNode Node(FieldDeclarationSyntax node)
+    {
+        return node.Declaration.Variables.Single();
+    }
 }

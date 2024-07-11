@@ -73,9 +73,7 @@ public class UiThread : BaseUiThread<UiContext>
                 UiContext.Application.ApplicationLifetime
                 is IClassicDesktopStyleApplicationLifetime desktop
             )
-            {
                 desktop.Shutdown();
-            }
 
             completion.SetResult();
         });

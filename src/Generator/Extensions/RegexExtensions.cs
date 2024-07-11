@@ -7,8 +7,10 @@ namespace Generator.Extensions;
 
 internal static class RegexExtensions
 {
-    public static Dictionary<string, string> ToDictionary(this Group keys, Group values) =>
-        keys.Captures.ToDictionary(values.Captures);
+    public static Dictionary<string, string> ToDictionary(this Group keys, Group values)
+    {
+        return keys.Captures.ToDictionary(values.Captures);
+    }
 
     public static Dictionary<string, string> ToDictionary(
         this CaptureCollection keys,

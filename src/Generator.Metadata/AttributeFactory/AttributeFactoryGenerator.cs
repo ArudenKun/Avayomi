@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,55 +14,6 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
     //source: https://stackoverflow.com/a/58853591
     private static readonly Regex _camelCasePattern =
         new(@"([A-Z])([A-Z]+|[a-z0-9_]+)($|[A-Z]\w*)", RegexOptions.Compiled);
-
-    private static string ToCamelCase(string name)
-    {
-        if (name.Length == 0)
-        {
-            return name;
-        }
-
-        if (name.Length == 1 && char.IsLower(name[0]))
-        {
-            return name;
-        }
-
-        //source: https://stackoverflow.com/a/58853591
-        var result = _camelCasePattern.Replace(
-            name,
-            m => m.Groups[1].Value.ToLower() + m.Groups[2].Value.ToLower() + m.Groups[3].Value
-        );
-
-        return result;
-    }
-
-    //source: https://stackoverflow.com/a/27106959
-    private static string GetFullMetadataName(ISymbol s)
-    {
-        if (s == null || isRootNamespace(s))
-        {
-            return string.Empty;
-        }
-
-        var sb = new StringBuilder(s.MetadataName);
-        var last = s;
-
-        s = s.ContainingSymbol;
-
-        while (!isRootNamespace(s))
-        {
-            _ = s is ITypeSymbol && last is ITypeSymbol ? sb.Insert(0, '+') : sb.Insert(0, '.');
-
-            //_ = sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-            _ = sb.Insert(0, s.MetadataName);
-            s = s.ContainingSymbol;
-        }
-
-        return sb.ToString();
-
-        static bool isRootNamespace(ISymbol symbol) =>
-            symbol is INamespaceSymbol s && s.IsGlobalNamespace;
-    }
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -129,15 +79,13 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                                 t.IsType,
                                 t.Type,
                                 Expression: t.IsArray
-                                    ? (
-                                        t.IsObjectArray
-                                            ?
-                                            //object array
-                                            $"getValues(propArg.Value)"
-                                            :
-                                            //regular array
-                                            $"propArg.Value.Values.Select(c => ({t.Type[..^2]})c.Value).ToArray()"
-                                    )
+                                    ? t.IsObjectArray
+                                        ?
+                                        //object array
+                                        "getValues(propArg.Value)"
+                                        :
+                                        //regular array
+                                        $"propArg.Value.Values.Select(c => ({t.Type[..^2]})c.Value).ToArray()"
                                     :
                                     //scalar
                                     $"{(t.IsType || t.Type == "object" ? string.Empty : $"({t.Type})")}propArg.Value.Value"
@@ -215,15 +163,13 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                                             static (p, i) =>
                                             {
                                                 var argDeclaration = p.IsArray
-                                                    ? (
-                                                        p.IsObjectArray
-                                                            ?
-                                                            //object array
-                                                            $"var arg{i} = getValues(ctorArgs[{i}]);"
-                                                            :
-                                                            //regular array
-                                                            $"var arg{i} = ctorArgs[{i}].Values.Select(c => ({p.NullableType[..^2]})c.Value).ToArray();"
-                                                    )
+                                                    ? p.IsObjectArray
+                                                        ?
+                                                        //object array
+                                                        $"var arg{i} = getValues(ctorArgs[{i}]);"
+                                                        :
+                                                        //regular array
+                                                        $"var arg{i} = ctorArgs[{i}].Values.Select(c => ({p.NullableType[..^2]})c.Value).ToArray();"
                                                     :
                                                     //scalar
                                                     $"var arg{i} = ctorArgs[{i}].IsNull ? default : {(p.HasDefault ? $"ctorArgs[{i}].Value != null ? " : "")}{(p.IsType || p.NullableType == "object" ? string.Empty : $"({p.NonNullableType})")}ctorArgs[{i}].Value{(p.HasDefault ? $" : {p.Default}" : "")};";
@@ -247,13 +193,9 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                                 })
                                 .ToList();
                             if (g.Key != 0)
-                            {
                                 groupBranches.Add("{return false;}break;");
-                            }
                             else
-                            {
                                 groupBranches[0] = groupBranches[0] + "break;";
-                            }
 
                             var groupBranchesSource =
                                 $"case {g.Key}:{string.Join("else ", groupBranches)}";
@@ -313,19 +255,19 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                                 .FullyQualifiedFormat.WithMiscellaneousOptions(
                                     /*
                                         get rid of special types
-                
+
                                                 10110
                                         NAND 00100
                                             => 10010
-                
+
                                                 10110
                                             &! 00100
                                             => 10010
-                
+
                                                 00100
                                             ^ 11111
                                             => 11011
-                
+
                                                 10110
                                             & 11011
                                             => 10010
@@ -368,6 +310,51 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(provider, static (c, s) => c.AddSource(s.Hint, s.Source));
     }
 
+    private static string ToCamelCase(string name)
+    {
+        if (name.Length == 0)
+            return name;
+
+        if (name.Length == 1 && char.IsLower(name[0]))
+            return name;
+
+        //source: https://stackoverflow.com/a/58853591
+        var result = _camelCasePattern.Replace(
+            name,
+            m => m.Groups[1].Value.ToLower() + m.Groups[2].Value.ToLower() + m.Groups[3].Value
+        );
+
+        return result;
+    }
+
+    //source: https://stackoverflow.com/a/27106959
+    private static string GetFullMetadataName(ISymbol s)
+    {
+        if (s == null || isRootNamespace(s))
+            return string.Empty;
+
+        var sb = new StringBuilder(s.MetadataName);
+        var last = s;
+
+        s = s.ContainingSymbol;
+
+        while (!isRootNamespace(s))
+        {
+            _ = s is ITypeSymbol && last is ITypeSymbol ? sb.Insert(0, '+') : sb.Insert(0, '.');
+
+            //_ = sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+            _ = sb.Insert(0, s.MetadataName);
+            s = s.ContainingSymbol;
+        }
+
+        return sb.ToString();
+
+        static bool isRootNamespace(ISymbol symbol)
+        {
+            return symbol is INamespaceSymbol s && s.IsGlobalNamespace;
+        }
+    }
+
     private static string GetNonNullableTypeName(ITypeSymbol type)
     {
         var result = GetNullableTypeName(type).Replace("?", "");
@@ -390,8 +377,9 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
         string nullable,
         string nonNullable,
         IParameterSymbol parameter
-    ) =>
-        parameter.HasExplicitDefaultValue
+    )
+    {
+        return parameter.HasExplicitDefaultValue
             ? parameter.ExplicitDefaultValue switch
             {
                 char => $"'{parameter.ExplicitDefaultValue}'",
@@ -404,4 +392,5 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                         : $"({nonNullable}){parameter.ExplicitDefaultValue}"
             }
             : string.Empty;
+    }
 }

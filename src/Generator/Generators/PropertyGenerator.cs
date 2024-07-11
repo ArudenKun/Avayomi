@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -58,9 +57,7 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
         {
             var viewSymbol = GetView(viewModelSymbol, compilation);
             if (viewSymbol is null)
-            {
                 continue;
-            }
 
             var source = new SourceStringBuilder(viewSymbol);
 
@@ -78,13 +75,18 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
         }
     }
 
-    private static bool IsSyntaxTarget(SyntaxNode node, CancellationToken _) =>
-        node is ClassDeclarationSyntax;
+    private static bool IsSyntaxTarget(SyntaxNode node, CancellationToken _)
+    {
+        return node is ClassDeclarationSyntax;
+    }
 
     private static ClassDeclarationSyntax GetSyntaxTarget(
         GeneratorSyntaxContext context,
         CancellationToken _
-    ) => (ClassDeclarationSyntax)context.Node;
+    )
+    {
+        return (ClassDeclarationSyntax)context.Node;
+    }
 
     private static INamedTypeSymbol? GetView(ISymbol symbol, Compilation compilation)
     {
@@ -92,9 +94,7 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
         var viewSymbol = compilation.GetTypeByMetadataName(viewName);
 
         if (viewSymbol is not null)
-        {
             return viewSymbol;
-        }
 
         viewName = symbol.ToDisplayString().Replace(".ViewModels.", ".Views.");
         viewName = viewName.Remove(viewName.IndexOf("ViewModel", StringComparison.Ordinal));
@@ -108,7 +108,6 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
         where TSymbol : ISymbol
     {
         foreach (var syntaxNode in syntaxNodes)
-        {
             if (syntaxNode is FieldDeclarationSyntax fieldDeclaration)
             {
                 var semanticModel = compilation.GetSemanticModel(fieldDeclaration.SyntaxTree);
@@ -116,9 +115,7 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
                 foreach (var variable in fieldDeclaration.Declaration.Variables)
                 {
                     if (semanticModel.GetDeclaredSymbol(variable) is not TSymbol symbol)
-                    {
                         continue;
-                    }
 
                     yield return symbol;
                 }
@@ -128,12 +125,9 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
                 var semanticModel = compilation.GetSemanticModel(syntaxNode.SyntaxTree);
 
                 if (semanticModel.GetDeclaredSymbol(syntaxNode) is not TSymbol symbol)
-                {
                     continue;
-                }
 
                 yield return symbol;
             }
-        }
     }
 }

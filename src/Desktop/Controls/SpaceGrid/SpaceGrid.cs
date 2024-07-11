@@ -12,19 +12,94 @@ namespace Desktop.Controls.SpaceGrid;
 [AvaloniaProperty("ColumnSpacing", typeof(double))]
 public partial class SpaceGrid : Grid
 {
-    public SpaceGrid() => Children.CollectionChanged += ChildrenOnCollectionChanged;
+    public SpaceGrid()
+    {
+        Children.CollectionChanged += ChildrenOnCollectionChanged;
+    }
 
     /// <summary>
-    /// Returns an enumerable of all the grid's row definitions, <u>excluding</u> spacing rows.
+    ///     Returns an enumerable of all the grid's row definitions, <u>excluding</u> spacing rows.
     /// </summary>
     public IEnumerable<RowDefinition> UserDefinedRowDefinitions =>
         RowDefinitions.Where(definition => definition is not ISpacingDefinition);
 
     /// <summary>
-    /// Returns an enumerable of all the grid's column definitions, <u>excluding</u> spacing columns.
+    ///     Returns an enumerable of all the grid's column definitions, <u>excluding</u> spacing columns.
     /// </summary>
     public IEnumerable<ColumnDefinition> UserDefinedColumnDefinitions =>
         ColumnDefinitions.Where(definition => definition is not ISpacingDefinition);
+
+    private void UpdateSpacedRows()
+    {
+        var userRowDefinitions = UserDefinedRowDefinitions.ToList(); // User-defined rows (e.g. the ones defined in XAML files)
+        var actualRowDefinitions = new RowDefinitions(); // User-defined + spacing rows
+
+        int currentUserDefinition = 0,
+            currentActualDefinition = 0;
+
+        while (currentUserDefinition < userRowDefinitions.Count)
+        {
+            if (currentActualDefinition % 2 == 0) // Even rows are user-defined rows (0, 2, 4, 6, 8, 10, ...)
+            {
+                actualRowDefinitions.Add(userRowDefinitions[currentUserDefinition]);
+                currentUserDefinition++;
+            }
+            else // Odd rows are spacing rows (1, 3, 5, 7, 9, 11, ...)
+            {
+                actualRowDefinitions.Add(new SpacingRowDefinition(RowSpacing));
+            }
+
+            currentActualDefinition++;
+        }
+
+        RowDefinitions = actualRowDefinitions;
+        RowDefinitions.CollectionChanged += delegate
+        {
+            UpdateSpacedRows();
+        };
+    }
+
+    private void UpdateSpacedColumns()
+    {
+        var userColumnDefinitions = UserDefinedColumnDefinitions.ToList(); // User-defined columns (e.g. the ones defined in XAML files)
+        var actualColumnDefinitions = new ColumnDefinitions(); // User-defined + spacing columns
+
+        int currentUserDefinition = 0,
+            currentActualDefinition = 0;
+
+        while (currentUserDefinition < userColumnDefinitions.Count)
+        {
+            if (currentActualDefinition % 2 == 0) // Even columns are user-defined columns (0, 2, 4, 6, 8, 10, ...)
+            {
+                actualColumnDefinitions.Add(userColumnDefinitions[currentUserDefinition]);
+                currentUserDefinition++;
+            }
+            else // Odd columns are spacing columns (1, 3, 5, 7, 9, 11, ...)
+            {
+                actualColumnDefinitions.Add(new SpacingColumnDefinition(ColumnSpacing));
+            }
+
+            currentActualDefinition++;
+        }
+
+        ColumnDefinitions = actualColumnDefinitions;
+        ColumnDefinitions.CollectionChanged += delegate
+        {
+            UpdateSpacedColumns();
+        };
+    }
+
+    private void RecalculateRowSpacing()
+    {
+        foreach (var spacingRow in RowDefinitions.OfType<ISpacingDefinition>())
+            spacingRow.Spacing = RowSpacing;
+    }
+
+    private void RecalculateColumnSpacing()
+    {
+        foreach (var spacingColumn in ColumnDefinitions.OfType<ISpacingDefinition>())
+            spacingColumn.Spacing = ColumnSpacing;
+    }
 
     #region Override Methods
 
@@ -95,72 +170,4 @@ public partial class SpaceGrid : Grid
     }
 
     #endregion
-
-    private void UpdateSpacedRows()
-    {
-        var userRowDefinitions = UserDefinedRowDefinitions.ToList(); // User-defined rows (e.g. the ones defined in XAML files)
-        var actualRowDefinitions = new RowDefinitions(); // User-defined + spacing rows
-
-        int currentUserDefinition = 0,
-            currentActualDefinition = 0;
-
-        while (currentUserDefinition < userRowDefinitions.Count)
-        {
-            if (currentActualDefinition % 2 == 0) // Even rows are user-defined rows (0, 2, 4, 6, 8, 10, ...)
-            {
-                actualRowDefinitions.Add(userRowDefinitions[currentUserDefinition]);
-                currentUserDefinition++;
-            }
-            else // Odd rows are spacing rows (1, 3, 5, 7, 9, 11, ...)
-                actualRowDefinitions.Add(new SpacingRowDefinition(RowSpacing));
-
-            currentActualDefinition++;
-        }
-
-        RowDefinitions = actualRowDefinitions;
-        RowDefinitions.CollectionChanged += delegate
-        {
-            UpdateSpacedRows();
-        };
-    }
-
-    private void UpdateSpacedColumns()
-    {
-        var userColumnDefinitions = UserDefinedColumnDefinitions.ToList(); // User-defined columns (e.g. the ones defined in XAML files)
-        var actualColumnDefinitions = new ColumnDefinitions(); // User-defined + spacing columns
-
-        int currentUserDefinition = 0,
-            currentActualDefinition = 0;
-
-        while (currentUserDefinition < userColumnDefinitions.Count)
-        {
-            if (currentActualDefinition % 2 == 0) // Even columns are user-defined columns (0, 2, 4, 6, 8, 10, ...)
-            {
-                actualColumnDefinitions.Add(userColumnDefinitions[currentUserDefinition]);
-                currentUserDefinition++;
-            }
-            else // Odd columns are spacing columns (1, 3, 5, 7, 9, 11, ...)
-                actualColumnDefinitions.Add(new SpacingColumnDefinition(ColumnSpacing));
-
-            currentActualDefinition++;
-        }
-
-        ColumnDefinitions = actualColumnDefinitions;
-        ColumnDefinitions.CollectionChanged += delegate
-        {
-            UpdateSpacedColumns();
-        };
-    }
-
-    private void RecalculateRowSpacing()
-    {
-        foreach (var spacingRow in RowDefinitions.OfType<ISpacingDefinition>())
-            spacingRow.Spacing = RowSpacing;
-    }
-
-    private void RecalculateColumnSpacing()
-    {
-        foreach (ISpacingDefinition spacingColumn in ColumnDefinitions.OfType<ISpacingDefinition>())
-            spacingColumn.Spacing = ColumnSpacing;
-    }
 }

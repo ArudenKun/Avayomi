@@ -6,7 +6,7 @@ namespace Core.Extensions;
 public static class GuardExtensions
 {
     /// <summary>
-    /// Returns whether specified value is in valid range.
+    ///     Returns whether specified value is in valid range.
     /// </summary>
     /// <typeparam name="T">The type of data to validate.</typeparam>
     /// <param name="guardClause"></param>
@@ -40,7 +40,7 @@ public static class GuardExtensions
     }
 
     /// <summary>
-    /// Validates whether specified value is in valid range, and throws an exception if out of range.
+    ///     Validates whether specified value is in valid range, and throws an exception if out of range.
     /// </summary>
     /// <typeparam name="T">The type of data to validate.</typeparam>
     /// <param name="guardClause"></param>
@@ -65,13 +65,11 @@ public static class GuardExtensions
         if (!guardClause.IsInRange(value, min, minInclusive, max, maxInclusive))
         {
             if (min.HasValue && minInclusive && max.HasValue && maxInclusive)
-            {
                 throw new ArgumentOutOfRangeException(
                     parameterName,
                     value,
                     $"{parameterName} must be between {min} and {max}"
                 );
-            }
 
             var message = guardClause.GetRangeError(
                 value,
@@ -88,7 +86,7 @@ public static class GuardExtensions
     }
 
     /// <summary>
-    /// Returns the range validation message.
+    ///     Returns the range validation message.
     /// </summary>
     /// <typeparam name="T">The type of data to validate.</typeparam>
     /// <param name="guardClause"></param>
@@ -111,9 +109,7 @@ public static class GuardExtensions
         where T : struct, IComparable<T>
     {
         if (guardClause.IsInRange(value, min, minInclusive, max, maxInclusive))
-        {
             return null;
-        }
 
         var messageMin = min.HasValue ? GetOpText(true, minInclusive).FormatInvariant(min) : null;
         var messageMax = max.HasValue ? GetOpText(false, maxInclusive).FormatInvariant(max) : null;
@@ -124,12 +120,14 @@ public static class GuardExtensions
         return message.FormatInvariant(parameterName ?? "", messageMin ?? messageMax, messageMax);
     }
 
-    private static string GetOpText(bool greaterThan, bool inclusive) =>
-        greaterThan && inclusive
+    private static string GetOpText(bool greaterThan, bool inclusive)
+    {
+        return greaterThan && inclusive
             ? "greater than or equal to {0}"
             : greaterThan
                 ? "greater than {0}"
                 : inclusive
                     ? "less than or equal to {0}"
                     : "less than {0}";
+    }
 }

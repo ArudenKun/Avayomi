@@ -10,6 +10,6 @@ namespace Desktop;
 [JsonSerializable(typeof(Settings))]
 [JsonSerializable(typeof(ConcurrentDictionary<string, ManifestEntry>))]
 [JsonSerializable(typeof(FusionCacheDistributedEntry<byte[]>))]
-[JsonSerializable(typeof(FusionCacheDistributedEntry<Dictionary<string,string>>))]
+[JsonSerializable(typeof(FusionCacheDistributedEntry<Dictionary<string, string>>))]
 [JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true)]
 public sealed partial class GlobalJsonContext : JsonSerializerContext;

@@ -75,8 +75,10 @@ public static class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     // ReSharper disable once UnusedMember.Global
-    public static AppBuilder BuildAvaloniaApp() =>
-        AppBuilder.Configure<Application>().UsePlatformDetect().WithInterFont().LogToTrace();
+    public static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure<Application>().UsePlatformDetect().WithInterFont().LogToTrace();
+    }
 
     private static void ConfigureLogging()
     {

@@ -15,5 +15,6 @@ public class Category
 
     [JsonPropertyName("order")]
     public int Order { get; set; }
+
     public Manga[] Mangas { get; set; } = [];
 }

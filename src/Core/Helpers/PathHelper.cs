@@ -12,8 +12,8 @@ public static class PathHelper
     }
 
     /// <summary>
-    /// Returns the absolute path for the specified path string.
-    /// Also searches the environment's PATH variable.
+    ///     Returns the absolute path for the specified path string.
+    ///     Also searches the environment's PATH variable.
     /// </summary>
     /// <param name="fileName">The relative path string.</param>
     /// <returns>The absolute path or null if the file was not found.</returns>
@@ -33,23 +33,21 @@ public static class PathHelper
     public static string GetParent(int levels, string currentPath)
     {
         var path = "";
-        for (int i = 0; i < levels; i++)
-        {
+        for (var i = 0; i < levels; i++)
             path += $"..{Path.DirectorySeparatorChar}";
-        }
 
         return Path.GetFullPath(Path.Combine(currentPath, path));
     }
 
     /// <summary>
-    /// Gets the path of the command executable.
+    ///     Gets the path of the command executable.
     /// </summary>
     /// <param name="cmd"></param>
     /// <returns></returns>
     public static string? GetFromEnvironment(string cmd)
     {
         string? result = null;
-        string whichCommand = OperatingSystem.IsWindows() ? "where" : "which";
+        var whichCommand = OperatingSystem.IsWindows() ? "where" : "which";
 
         using Process process = new();
         process.StartInfo = new ProcessStartInfo
@@ -59,16 +57,14 @@ public static class PathHelper
             RedirectStandardError = true,
             RedirectStandardOutput = true,
             UseShellExecute = false,
-            CreateNoWindow = true,
+            CreateNoWindow = true
         };
 
         process.EnableRaisingEvents = true;
         process.OutputDataReceived += (_, args) =>
         {
             if (args.Data != null)
-            {
                 result = args.Data;
-            }
         };
 
         process.Start();

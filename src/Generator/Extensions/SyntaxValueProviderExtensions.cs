@@ -1,16 +1,11 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Generator.Extensions;
 
 internal static class SyntaxValueProviderExtensions
 {
     /// <summary>
-    ///
     /// </summary>
     /// <param name="source"></param>
     /// <param name="fullyQualifiedMetadataName"></param>
@@ -21,12 +16,12 @@ internal static class SyntaxValueProviderExtensions
     )
     {
         return source.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: fullyQualifiedMetadataName,
-            predicate: static (node, _) =>
+            fullyQualifiedMetadataName,
+            static (node, _) =>
                 node
-                    is ClassDeclarationSyntax { AttributeLists.Count: > 0, }
-                        or RecordDeclarationSyntax { AttributeLists.Count: > 0, },
-            transform: static (context, _) => context
+                    is ClassDeclarationSyntax { AttributeLists.Count: > 0 }
+                        or RecordDeclarationSyntax { AttributeLists.Count: > 0 },
+            static (context, _) => context
         );
     }
 }

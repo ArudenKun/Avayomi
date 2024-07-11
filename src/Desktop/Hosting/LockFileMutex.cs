@@ -11,10 +11,10 @@ namespace Desktop.Hosting;
 /// </summary>
 public sealed class LockFileMutex : IDisposable
 {
-    private readonly ILogger _logger;
-    private readonly string _id;
-    private readonly string _name;
     private readonly string _fileName;
+    private readonly string _id;
+    private readonly ILogger _logger;
+    private readonly string _name;
     private FileStream? _stream;
 
     /// <summary>
@@ -35,6 +35,12 @@ public sealed class LockFileMutex : IDisposable
     ///     Test if the Mutex was created and locked.
     /// </summary>
     public bool IsLocked { get; private set; }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
     /// <summary>
     ///     Create a ResourceMutex for the specified mutex id and resource-name
@@ -57,9 +63,7 @@ public sealed class LockFileMutex : IDisposable
     public bool Lock()
     {
         if (_logger.IsEnabled(LogLevel.Debug))
-        {
             _logger.LogDebug("{0} is trying to get Lock {1}", _name, _id);
-        }
 
         IsLocked = true;
         try
@@ -97,21 +101,13 @@ public sealed class LockFileMutex : IDisposable
         return IsLocked;
     }
 
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
     public void Dispose(bool disposing)
     {
         if (!disposing)
             return;
 
         if (_stream == null)
-        {
             return;
-        }
 
         try
         {

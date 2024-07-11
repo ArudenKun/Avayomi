@@ -48,11 +48,9 @@ public partial class Switch : UserControl
         }
 
         if (CurrentCase?.Value != null && CurrentCase.Value.Equals(Value))
-        {
             // If the current case we're on already matches our current value,
             // then we don't have any work to do.
             return;
-        }
 
         Case? xdefault = null;
         Case? newcase = null;
@@ -74,10 +72,8 @@ public partial class Switch : UserControl
         }
 
         if (newcase == null && xdefault != null)
-        {
             // Inject default if we found one without matching anything
             newcase = xdefault;
-        }
 
         // Only bother changing things around if we actually have a new case.
         if (newcase != CurrentCase)
@@ -89,7 +85,7 @@ public partial class Switch : UserControl
     }
 
     /// <summary>
-    /// Compares two values using the TargetType.
+    ///     Compares two values using the TargetType.
     /// </summary>
     /// <param name="compare">Our main value in our SwitchPresenter.</param>
     /// <param name="value">The value from the case to compare to.</param>
@@ -97,18 +93,14 @@ public partial class Switch : UserControl
     private bool CompareValues(object? compare, object? value)
     {
         if (compare == null || value == null)
-        {
             return compare == value;
-        }
 
         if (
             TargetType == null
             || (TargetType == compare.GetType() && TargetType == value.GetType())
         )
-        {
             // Default direct object comparison or we're all the proper type
             return compare.Equals(value);
-        }
 
         if (compare.GetType() == TargetType)
         {
@@ -129,7 +121,7 @@ public partial class Switch : UserControl
     }
 
     /// <summary>
-    /// Helper method to convert a value from a source type to a target type.
+    ///     Helper method to convert a value from a source type to a target type.
     /// </summary>
     /// <param name="targetType">The target type</param>
     /// <param name="value">The value to convert</param>
@@ -137,18 +129,14 @@ public partial class Switch : UserControl
     private static object ConvertValue(Type targetType, object value)
     {
         if (targetType.IsInstanceOfType(value))
-        {
             return value;
-        }
 
         switch (targetType.IsEnum)
         {
             case true when value is string str:
             {
                 if (Enum.TryParse(targetType, str, out var result))
-                {
                     return result;
-                }
 
                 static object ThrowExceptionForKeyNotFound()
                 {

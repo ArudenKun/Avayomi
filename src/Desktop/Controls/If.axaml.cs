@@ -28,5 +28,8 @@ public partial class If : UserControl
         UpdateContent();
     }
 
-    private void UpdateContent() => Content = Condition ? True : False;
+    private void UpdateContent()
+    {
+        Content = Condition ? True : False;
+    }
 }

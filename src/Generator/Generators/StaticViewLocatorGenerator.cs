@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Generator.Attributes;
 using Generator.Extensions;
 using Generator.Utilities;
@@ -51,9 +50,7 @@ internal sealed class StaticViewLocatorGenerator
                         var view = GetView(viewModelSymbol, compilation);
 
                         if (view is null)
-                        {
                             continue;
-                        }
 
                         source.Line(
                             $"[typeof({viewModelSymbol.ToFullDisplayString()})] = (vm) => new {view.ToFullDisplayString()}() {{ ViewModel = ({viewModelSymbol.ToDisplayString()})vm }},"
@@ -75,9 +72,7 @@ internal sealed class StaticViewLocatorGenerator
         var viewSymbol = compilation.GetTypeByMetadataName(viewName);
 
         if (viewSymbol is not null)
-        {
             return viewSymbol;
-        }
 
         viewName = symbol.ToDisplayString().Replace(".ViewModels.", ".Views.");
         viewName = viewName.Remove(viewName.IndexOf("ViewModel", StringComparison.Ordinal));

@@ -4,35 +4,35 @@ namespace Core.Extensions;
 
 public static class ListExtensions
 {
-    public static void RemoveFirst<T>(this List<T> source) => source.RemoveAt(0);
+    public static void RemoveFirst<T>(this List<T> source)
+    {
+        source.RemoveAt(0);
+    }
 
-    public static void RemoveLast<T>(this List<T> source) => source.RemoveAt(source.Count - 1);
+    public static void RemoveLast<T>(this List<T> source)
+    {
+        source.RemoveAt(source.Count - 1);
+    }
 
     public static int BinarySearchIndexOf<T, TKey>(this IList<T> list, TKey value)
         where T : IComparable<TKey>
     {
         Guard.Against.Null(list);
 
-        int lower = 0;
-        int upper = list.Count - 1;
+        var lower = 0;
+        var upper = list.Count - 1;
 
         while (lower <= upper)
         {
-            int middle = lower + ((upper - lower) / 2);
-            int comparisonResult = list[middle].CompareTo(value);
+            var middle = lower + (upper - lower) / 2;
+            var comparisonResult = list[middle].CompareTo(value);
 
             if (comparisonResult < 0)
-            {
                 lower = middle + 1;
-            }
             else if (comparisonResult > 0)
-            {
                 upper = middle - 1;
-            }
             else
-            {
                 return middle;
-            }
         }
 
         return ~lower;
@@ -58,7 +58,8 @@ public static class ListExtensions
             source.Insert(~index, item);
             return true;
         }
-        else if (!exclusive)
+
+        if (!exclusive)
         {
             source.Insert(index, item);
             return true;

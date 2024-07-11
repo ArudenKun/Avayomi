@@ -9,9 +9,9 @@ namespace Desktop.Hosting;
 
 public sealed class AvayomiApp : IDisposable
 {
-    private readonly ILogger<AvayomiApp> _logger;
-    private readonly IHostedServiceManager _hostedServiceManager;
     private readonly AvayomiAppOptions _avayomiAppOptions;
+    private readonly IHostedServiceManager _hostedServiceManager;
+    private readonly ILogger<AvayomiApp> _logger;
 
     public AvayomiApp(IServiceProvider services)
     {
@@ -23,9 +23,20 @@ public sealed class AvayomiApp : IDisposable
 
     public IServiceProvider Services { get; }
 
-    public static AvayomiAppBuilder CreateBuilder(string[] args) => new(args);
+    public void Dispose()
+    {
+        _hostedServiceManager.Dispose();
+    }
 
-    public void Run() => RunAsync().GetAwaiter().GetResult();
+    public static AvayomiAppBuilder CreateBuilder(string[] args)
+    {
+        return new AvayomiAppBuilder(args);
+    }
+
+    public void Run()
+    {
+        RunAsync().GetAwaiter().GetResult();
+    }
 
     public async Task RunAsync()
     {
@@ -46,6 +57,4 @@ public sealed class AvayomiApp : IDisposable
         await stopTask;
         _logger.LogInformation("Application Stopped");
     }
-
-    public void Dispose() => _hostedServiceManager.Dispose();
 }

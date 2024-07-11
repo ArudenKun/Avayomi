@@ -8,27 +8,40 @@ namespace Generator.Extensions;
 
 internal static class SymbolExtensions
 {
-    public static string NamespaceOrEmpty(this ISymbol symbol) =>
-        symbol.ContainingNamespace.IsGlobalNamespace
+    public static string NamespaceOrEmpty(this ISymbol symbol)
+    {
+        return symbol.ContainingNamespace.IsGlobalNamespace
             ? string.Empty
             : string.Join(".", symbol.ContainingNamespace.ConstituentNamespaces);
+    }
 
-    public static string? NamespaceOrNull(this ISymbol symbol) =>
-        symbol.ContainingNamespace.IsGlobalNamespace
+    public static string? NamespaceOrNull(this ISymbol symbol)
+    {
+        return symbol.ContainingNamespace.IsGlobalNamespace
             ? null
             : string.Join(".", symbol.ContainingNamespace.ConstituentNamespaces);
+    }
 
-    public static bool HasAttribute(this ISymbol symbol, string attributeName) =>
-        symbol.GetAttributes().Any(x => x.AttributeClass?.Name == attributeName);
+    public static bool HasAttribute(this ISymbol symbol, string attributeName)
+    {
+        return symbol.GetAttributes().Any(x => x.AttributeClass?.Name == attributeName);
+    }
 
     public static bool HasAttribute<TAttribute>(this ISymbol symbol)
-        where TAttribute : Attribute => HasAttribute(symbol, typeof(TAttribute).Name);
+        where TAttribute : Attribute
+    {
+        return HasAttribute(symbol, typeof(TAttribute).Name);
+    }
 
-    public static string ToFullDisplayString(this ISymbol s) =>
-        s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+    public static string ToFullDisplayString(this ISymbol s)
+    {
+        return s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+    }
 
-    public static string AsCommaSeparated<T>(this IEnumerable<T> items, string? suffixes = null) =>
-        string.Join($",{suffixes}", items);
+    public static string AsCommaSeparated<T>(this IEnumerable<T> items, string? suffixes = null)
+    {
+        return string.Join($",{suffixes}", items);
+    }
 
     public static bool IsOfBaseType(this ITypeSymbol symbol, string type)
     {
@@ -77,16 +90,12 @@ internal static class SymbolExtensions
                 .GetTypeMembers()
                 .Where(x => IsDerivedFrom(x, targetSymbol))
         )
-        {
             yield return namedTypeSymbol;
-        }
 
         // Recursively collect types from nested namespaces
         foreach (var nestedNamespace in namespaceSymbol.GetNamespaceMembers())
-        {
-            foreach (var nestedTypeSymbol in nestedNamespace.CollectTypeSymbols(targetSymbol))
-                yield return nestedTypeSymbol;
-        }
+        foreach (var nestedTypeSymbol in nestedNamespace.CollectTypeSymbols(targetSymbol))
+            yield return nestedTypeSymbol;
     }
 
     public static bool IsDerivedFrom(
@@ -104,17 +113,21 @@ internal static class SymbolExtensions
         return false;
     }
 
-    public static bool IsSpecialType(this ITypeSymbol symbol) =>
-        symbol is IArrayTypeSymbol
-        || symbol.SpecialType != SpecialType.None
-        || (
-            symbol.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
-            && symbol.BaseType != null
-            && symbol.BaseType.SpecialType != SpecialType.None
-        );
+    public static bool IsSpecialType(this ITypeSymbol symbol)
+    {
+        return symbol is IArrayTypeSymbol
+            || symbol.SpecialType != SpecialType.None
+            || (
+                symbol.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
+                && symbol.BaseType != null
+                && symbol.BaseType.SpecialType != SpecialType.None
+            );
+    }
 
-    public static bool IsSpecialType(this ITypeSymbol symbol, SpecialType specialType) =>
-        symbol.SpecialType == specialType;
+    public static bool IsSpecialType(this ITypeSymbol symbol, SpecialType specialType)
+    {
+        return symbol.SpecialType == specialType;
+    }
 
     public static IEnumerable<IMethodSymbol> GetImplementedPartialMethods(
         this ITypeSymbol typeSymbol,
@@ -132,15 +145,20 @@ internal static class SymbolExtensions
     public static IMethodSymbol? GetImplementedPartialMethod(
         this ITypeSymbol typeSymbol,
         string methodSignature
-    ) =>
-        typeSymbol
+    )
+    {
+        return typeSymbol
             .GetImplementedPartialMethods()
             .FirstOrDefault(x => x.ToDisplayString().Contains(methodSignature));
+    }
 
     public static bool IsPartialMethodImplemented(
         this ITypeSymbol typeSymbol,
         string methodSignature
-    ) => typeSymbol.GetImplementedPartialMethod(methodSignature) is not null;
+    )
+    {
+        return typeSymbol.GetImplementedPartialMethod(methodSignature) is not null;
+    }
 
     public static bool IsPartialMethodImplemented(this IMethodSymbol method)
     {
@@ -159,6 +177,8 @@ internal static class SymbolExtensions
     }
 
     /// <returns>False if it's not defined in source</returns>
-    public static bool IsDefinedInMetadata(this ISymbol symbol) =>
-        symbol.Locations.Any(loc => loc.IsInMetadata);
+    public static bool IsDefinedInMetadata(this ISymbol symbol)
+    {
+        return symbol.Locations.Any(loc => loc.IsInMetadata);
+    }
 }

@@ -31,16 +31,17 @@ public sealed partial class ViewLocator
         return control;
     }
 
-    public bool Match(object? data) => data is INotifyPropertyChanged;
+    public bool Match(object? data)
+    {
+        return data is INotifyPropertyChanged;
+    }
 
     [RequiresUnreferencedCode("Calls Loaded and Unloaded Methods")]
     private static void RegisterActivatable(object viewModel, Control control)
     {
         // ReSharper disable once SuspiciousTypeConversion.Global
         if (viewModel is not IActivatable activatableViewModel)
-        {
             return;
-        }
 
         control = control ?? throw new ArgumentNullException(nameof(control));
 

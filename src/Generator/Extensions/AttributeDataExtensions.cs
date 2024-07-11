@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -9,7 +8,6 @@ namespace Generator.Extensions;
 internal static class AttributeDataExtensions
 {
     /// <summary>
-    ///
     /// </summary>
     /// <param name="attributeData"></param>
     /// <param name="position"></param>
@@ -26,7 +24,6 @@ internal static class AttributeDataExtensions
     }
 
     /// <summary>
-    ///
     /// </summary>
     /// <param name="attributeData"></param>
     /// <param name="name"></param>
@@ -40,8 +37,8 @@ internal static class AttributeDataExtensions
     }
 
     /// <summary>
-    /// <para>Finds the argument with the given name and returns it's value.</para>
-    /// <para>If not found, it returns null.</para>
+    ///     <para>Finds the argument with the given name and returns it's value.</para>
+    ///     <para>If not found, it returns null.</para>
     /// </summary>
     /// <param name="arguments"></param>
     /// <param name="name"></param>
@@ -58,8 +55,8 @@ internal static class AttributeDataExtensions
     }
 
     /// <summary>
-    /// <para>Finds the argument with the given name and returns it's value.</para>
-    /// <para>If not found or value is not castable, it returns default.</para>
+    ///     <para>Finds the argument with the given name and returns it's value.</para>
+    ///     <para>If not found or value is not castable, it returns default.</para>
     /// </summary>
     /// <param name="attributeData"></param>
     /// <param name="name"></param>
@@ -76,8 +73,8 @@ internal static class AttributeDataExtensions
     }
 
     /// <summary>
-    /// <para>Finds the argument with the given name and returns it's value as array.</para>
-    /// <para>If not found or any value is not castable, it returns an empty array.</para>
+    ///     <para>Finds the argument with the given name and returns it's value as array.</para>
+    ///     <para>If not found or any value is not castable, it returns an empty array.</para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="attributeData"></param>

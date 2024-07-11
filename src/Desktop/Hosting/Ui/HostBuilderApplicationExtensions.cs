@@ -8,50 +8,50 @@ using Microsoft.Extensions.Hosting;
 namespace Desktop.Hosting.Ui;
 
 /// <summary>
-/// Contains helper extensions for <see cref="HostApplicationBuilder" /> to
-/// configure the WinUI service hosting.
+///     Contains helper extensions for <see cref="HostApplicationBuilder" /> to
+///     configure the WinUI service hosting.
 /// </summary>
 public static class HostBuilderApplicationExtensions
 {
     /// <summary>
-    /// The key used to access the <see cref="UiContext" /> instance in
-    /// <see cref="IHostApplicationBuilder.Properties" />.
+    ///     The key used to access the <see cref="UiContext" /> instance in
+    ///     <see cref="IHostApplicationBuilder.Properties" />.
     /// </summary>
     public const string HostingContextKey = "UiHostingContext";
 
     /// <summary>
-    /// Configures the host builder for a Windows UI (WinUI) application.
+    ///     Configures the host builder for a Windows UI (WinUI) application.
     /// </summary>
     /// <typeparam name="TApplication">
-    /// The concrete type for the <see cref="Application" /> class.
+    ///     The concrete type for the <see cref="Application" /> class.
     /// </typeparam>
     /// <remarks>
-    /// <para>
-    /// This method configures the host builder to support a Windows UI (WinUI)
-    /// application. It sets up the necessary services, including the hosting
-    /// context, user interface thread, and the hosted service for the user
-    /// interface.
-    /// </para>
-    /// <para>
-    /// It attempts to find a <see cref="UiContext" /> instance from the
-    /// host builder properties and if not available creates one and adds it as
-    /// a singleton service and as an <see cref="UiContext" /> service
-    /// for use by the <see cref="UiThreadHostedService" />.
-    /// </para>
-    /// <para>
-    /// Upon successful completion, the dependency injector will be able to
-    /// provide the single instance of the application as a <typeparamref name="TApplication" />
-    /// and as an <see cref="Application" /> if it is not the same type.
-    /// </para>
+    ///     <para>
+    ///         This method configures the host builder to support a Windows UI (WinUI)
+    ///         application. It sets up the necessary services, including the hosting
+    ///         context, user interface thread, and the hosted service for the user
+    ///         interface.
+    ///     </para>
+    ///     <para>
+    ///         It attempts to find a <see cref="UiContext" /> instance from the
+    ///         host builder properties and if not available creates one and adds it as
+    ///         a singleton service and as an <see cref="UiContext" /> service
+    ///         for use by the <see cref="UiThreadHostedService" />.
+    ///     </para>
+    ///     <para>
+    ///         Upon successful completion, the dependency injector will be able to
+    ///         provide the single instance of the application as a <typeparamref name="TApplication" />
+    ///         and as an <see cref="Application" /> if it is not the same type.
+    ///     </para>
     /// </remarks>
     /// <param name="hostBuilder">
-    /// The host builder to which the WinUI service needs to be added.
+    ///     The host builder to which the WinUI service needs to be added.
     /// </param>
     /// <param name="appBuilderDelegate">Configuration for Avalonia AppBuilder</param>
     /// <param name="hostContextKey">The key to use for the host context</param>
     /// <returns>The host builder for chaining calls.</returns>
     /// <exception cref="ArgumentException">
-    /// When the application's type does not extend <see cref="Application" />.
+    ///     When the application's type does not extend <see cref="Application" />.
     /// </exception>
     public static HostApplicationBuilder ConfigureAvalonia<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TApplication

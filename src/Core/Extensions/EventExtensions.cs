@@ -1,28 +1,15 @@
 ﻿namespace Core.Extensions;
 
 /// <summary>
-/// Extensions that work with <see langword="event"/> <br/>
-/// <![CDATA[Version: 1.0.0.2]]> <br/>
+///     Extensions that work with <see langword="event" /> <br />
+///     <![CDATA[Version: 1.0.0.2]]> <br />
 /// </summary>
 public static class EventExtensions
 {
-    private sealed class WaitObject<T>
-    {
-        public TaskCompletionSource<T>? Source { get; set; }
-
-        // ReSharper disable once UnusedParameter.Local
-#pragma warning disable IDE0060 // Remove unused parameter
-        public void HandleEvent(object sender, T e)
-#pragma warning restore IDE0060 // Remove unused parameter
-        {
-            _ = Source?.TrySetResult(e);
-        }
-    }
-
     /// <summary>
-    /// Asynchronously expects <see langword="event"/> until they occur or until canceled <br/>
-    /// <![CDATA[Version: 1.0.0.2]]> <br/>
-    /// <![CDATA[Dependency: WaitObject]]> <br/>
+    ///     Asynchronously expects <see langword="event" /> until they occur or until canceled <br />
+    ///     <![CDATA[Version: 1.0.0.2]]> <br />
+    ///     <![CDATA[Dependency: WaitObject]]> <br />
     /// </summary>
     /// <param name="value"></param>
     /// <param name="eventName"></param>
@@ -50,7 +37,7 @@ public static class EventExtensions
             () => taskCompletionSource.TrySetCanceled()
         );
 
-        var waitObject = new WaitObject<T> { Source = taskCompletionSource, };
+        var waitObject = new WaitObject<T> { Source = taskCompletionSource };
         var method =
             waitObject.GetType().GetMethod(nameof(WaitObject<int>.HandleEvent))
             ?? throw new InvalidOperationException("HandleEvent method is not found");
@@ -73,9 +60,10 @@ public static class EventExtensions
     }
 
     /// <summary>
-    /// Asynchronously expects <see langword="event"/> until they occur or until canceled <br/>
-    /// <![CDATA[Version: 1.0.0.2]]> <br/>
-    /// <![CDATA[Dependency: WaitEventAsync(this object value, string eventName, CancellationToken cancellationToken = default)]]> <br/>
+    ///     Asynchronously expects <see langword="event" /> until they occur or until canceled <br />
+    ///     <![CDATA[Version: 1.0.0.2]]> <br />
+    ///     <![CDATA[Dependency: WaitEventAsync(this object value, string eventName, CancellationToken cancellationToken = default)]]>
+    ///     <br />
     /// </summary>
     /// <param name="value"></param>
     /// <param name="func"></param>
@@ -106,10 +94,12 @@ public static class EventExtensions
     }
 
     /// <summary>
-    /// Asynchronously expects all <see langword="event"/>'s until they occur or until canceled <br/>
-    /// This method DOES NOT throw an exception after canceling with a CancellationToken, but returns control and current results instantly <br/>
-    /// <![CDATA[Version: 1.0.0.2]]> <br/>
-    /// <![CDATA[Dependency: WaitEventAsync(this object value, string eventName, CancellationToken cancellationToken = default)]]> <br/>
+    ///     Asynchronously expects all <see langword="event" />'s until they occur or until canceled <br />
+    ///     This method DOES NOT throw an exception after canceling with a CancellationToken, but returns control and current
+    ///     results instantly <br />
+    ///     <![CDATA[Version: 1.0.0.2]]> <br />
+    ///     <![CDATA[Dependency: WaitEventAsync(this object value, string eventName, CancellationToken cancellationToken = default)]]>
+    ///     <br />
     /// </summary>
     /// <param name="value"></param>
     /// <param name="func"></param>
@@ -164,10 +154,12 @@ public static class EventExtensions
     }
 
     /// <summary>
-    /// Asynchronously expects any <see langword="event"/> until it occurs or until canceled <br/>
-    /// This method DOES NOT throw an exception after canceling with a CancellationToken, but returns control and current results instantly <br/>
-    /// <![CDATA[Version: 1.0.0.2]]> <br/>
-    /// <![CDATA[Dependency: WaitEventAsync(this object value, string eventName, CancellationToken cancellationToken = default)]]> <br/>
+    ///     Asynchronously expects any <see langword="event" /> until it occurs or until canceled <br />
+    ///     This method DOES NOT throw an exception after canceling with a CancellationToken, but returns control and current
+    ///     results instantly <br />
+    ///     <![CDATA[Version: 1.0.0.2]]> <br />
+    ///     <![CDATA[Dependency: WaitEventAsync(this object value, string eventName, CancellationToken cancellationToken = default)]]>
+    ///     <br />
     /// </summary>
     /// <param name="value"></param>
     /// <param name="func"></param>
@@ -219,5 +211,18 @@ public static class EventExtensions
                 pair =>
                     pair.Item2.IsCompleted && !pair.Item2.IsCanceled ? pair.Item2.Result : default!
             );
+    }
+
+    private sealed class WaitObject<T>
+    {
+        public TaskCompletionSource<T>? Source { get; set; }
+
+        // ReSharper disable once UnusedParameter.Local
+#pragma warning disable IDE0060 // Remove unused parameter
+        public void HandleEvent(object sender, T e)
+#pragma warning restore IDE0060 // Remove unused parameter
+        {
+            _ = Source?.TrySetResult(e);
+        }
     }
 }

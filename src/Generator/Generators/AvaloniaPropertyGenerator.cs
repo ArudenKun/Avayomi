@@ -66,23 +66,17 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                             || genericStyledPropertySymbol is null
                             || avaloniaPropertySymbol is null
                         )
-                        {
                             continue;
-                        }
 
                         var propertyName = attribute.Name + "Property";
 
                         INamedTypeSymbol targetTypeSymbol;
-                        if (!attribute.TypeSymbol.IsSpecialType())
-                        {
+                        if (attribute.TypeSymbol.IsValueType)
+                            targetTypeSymbol = attribute.TypeSymbol;
+                        else
                             targetTypeSymbol = compilation
                                 .GetSpecialType(SpecialType.System_Nullable_T)
                                 .Construct(attribute.TypeSymbol);
-                        }
-                        else
-                        {
-                            targetTypeSymbol = attribute.TypeSymbol;
-                        }
 
                         var type = targetTypeSymbol.ToDisplayString();
 
@@ -99,9 +93,7 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                         );
 
                         if (!onChanged1 && !onChanged2 && !onChanged3)
-                        {
                             continue;
-                        }
 
                         source.Line(
                             $"{propertyName}.Changed.Subscribe(new global::Avalonia.Reactive.AnonymousObserver<global::Avalonia.AvaloniaPropertyChangedEventArgs<{targetTypeSymbol.ToFullDisplayString()}>>(static x =>"
@@ -110,25 +102,19 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                             () =>
                             {
                                 if (onChanged1)
-                                {
                                     source.Line(
                                         $"(({classSymbol.ToFullDisplayString()})x.Sender).On{attribute.Name}Changed();"
                                     );
-                                }
 
                                 if (onChanged2)
-                                {
                                     source.Line(
                                         $"(({classSymbol.ToFullDisplayString()})x.Sender).On{attribute.Name}Changed(({targetTypeSymbol.ToFullDisplayString()})x.NewValue.GetValueOrDefault());"
                                     );
-                                }
 
                                 if (onChanged3)
-                                {
                                     source.Line(
                                         $"(({classSymbol.ToFullDisplayString()})x.Sender).On{attribute.Name}Changed(({targetTypeSymbol.ToFullDisplayString()})x.OldValue.GetValueOrDefault(), ({targetTypeSymbol.ToFullDisplayString()})x.NewValue.GetValueOrDefault());"
                                     );
-                                }
                             },
                             "));"
                         );
@@ -152,21 +138,15 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                         || genericStyledPropertySymbol is null
                         || avaloniaPropertySymbol is null
                     )
-                    {
                         continue;
-                    }
 
                     INamedTypeSymbol targetTypeSymbol;
-                    if (!attribute.TypeSymbol.IsSpecialType())
-                    {
+                    if (attribute.TypeSymbol.IsValueType)
+                        targetTypeSymbol = attribute.TypeSymbol;
+                    else
                         targetTypeSymbol = compilation
                             .GetSpecialType(SpecialType.System_Nullable_T)
                             .Construct(attribute.TypeSymbol);
-                    }
-                    else
-                    {
-                        targetTypeSymbol = attribute.TypeSymbol;
-                    }
 
                     var styledPropertySymbol = genericStyledPropertySymbol.Construct(
                         targetTypeSymbol
@@ -193,9 +173,7 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                     );
 
                     foreach (var propertyAttribute in propertyAttributes)
-                    {
                         source.Line($"[{propertyAttribute.ToFullDisplayString()}]");
-                    }
                     source.Line(
                         $"public {targetTypeSymbol.ToFullDisplayString()} {attribute.Name}"
                     );

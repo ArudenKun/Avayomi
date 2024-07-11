@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 namespace Generator.Utilities;
 
 /// <summary>
-/// A polyfill type that mirrors some methods from <see cref="HashCode"/> on .NET 6.
+///     A polyfill type that mirrors some methods from <see cref="HashCode" /> on .NET 6.
 /// </summary>
 internal struct HashCode : IEquatable<HashCode>
 {
@@ -29,12 +29,12 @@ internal struct HashCode : IEquatable<HashCode>
     private uint _length;
 
     /// <summary>
-    /// Initializes the default seed.
+    ///     Initializes the default seed.
     /// </summary>
     /// <returns>A random seed.</returns>
     private static uint GenerateGlobalSeed()
     {
-        byte[] bytes = new byte[4];
+        var bytes = new byte[4];
 
         using (var generator = RandomNumberGenerator.Create())
         {
@@ -45,7 +45,7 @@ internal struct HashCode : IEquatable<HashCode>
     }
 
     /// <summary>
-    /// Adds a single value to the current hash.
+    ///     Adds a single value to the current hash.
     /// </summary>
     /// <typeparam name="T">The type of the value to add into the hash code.</typeparam>
     /// <param name="value">The value to add into the hash code.</param>
@@ -101,60 +101,56 @@ internal struct HashCode : IEquatable<HashCode>
 
     private void Add(int value)
     {
-        uint val = (uint)value;
-        uint previousLength = this._length++;
-        uint position = previousLength % 4;
+        var val = (uint)value;
+        var previousLength = _length++;
+        var position = previousLength % 4;
 
         if (position == 0)
         {
-            this._queue1 = val;
+            _queue1 = val;
         }
         else if (position == 1)
         {
-            this._queue2 = val;
+            _queue2 = val;
         }
         else if (position == 2)
         {
-            this._queue3 = val;
+            _queue3 = val;
         }
         else
         {
             if (previousLength == 3)
-            {
-                Initialize(out this._v1, out this._v2, out this._v3, out this._v4);
-            }
+                Initialize(out _v1, out _v2, out _v3, out _v4);
 
-            this._v1 = Round(this._v1, this._queue1);
-            this._v2 = Round(this._v2, this._queue2);
-            this._v3 = Round(this._v3, this._queue3);
-            this._v4 = Round(this._v4, val);
+            _v1 = Round(_v1, _queue1);
+            _v2 = Round(_v2, _queue2);
+            _v3 = Round(_v3, _queue3);
+            _v4 = Round(_v4, val);
         }
     }
 
     /// <summary>
-    /// Gets the resulting hashcode from the current instance.
+    ///     Gets the resulting hashcode from the current instance.
     /// </summary>
     /// <returns>The resulting hashcode from the current instance.</returns>
     public int ToHashCode()
     {
-        uint length = this._length;
-        uint position = length % 4;
-        uint hash = length < 4 ? MixEmptyState() : MixState(this._v1, this._v2, this._v3, this._v4);
+        var length = _length;
+        var position = length % 4;
+        var hash = length < 4 ? MixEmptyState() : MixState(_v1, _v2, _v3, _v4);
 
         hash += length * 4;
 
         if (position > 0)
         {
-            hash = QueueRound(hash, this._queue1);
+            hash = QueueRound(hash, _queue1);
 
             if (position > 1)
             {
-                hash = QueueRound(hash, this._queue2);
+                hash = QueueRound(hash, _queue2);
 
                 if (position > 2)
-                {
-                    hash = QueueRound(hash, this._queue3);
-                }
+                    hash = QueueRound(hash, _queue3);
             }
         }
 
@@ -163,20 +159,20 @@ internal struct HashCode : IEquatable<HashCode>
         return (int)hash;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     [Obsolete(
         "HashCode is a mutable struct and should not be compared with other HashCodes. Use ToHashCode to retrieve the computed hash code.",
-        error: true
+        true
     )]
     [EditorBrowsable(EditorBrowsableState.Never)]
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
     public override int GetHashCode() => throw new NotSupportedException();
 #pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     [Obsolete(
         "HashCode is a mutable struct and should not be compared with other HashCodes.",
-        error: true
+        true
     )]
     [EditorBrowsable(EditorBrowsableState.Never)]
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
@@ -184,12 +180,14 @@ internal struct HashCode : IEquatable<HashCode>
 #pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
 
     /// <summary>
-    /// Rotates the specified value left by the specified number of bits.
-    /// Similar in behavior to the x86 instruction ROL.
+    ///     Rotates the specified value left by the specified number of bits.
+    ///     Similar in behavior to the x86 instruction ROL.
     /// </summary>
     /// <param name="value">The value to rotate.</param>
-    /// <param name="offset">The number of bits to rotate by.
-    /// Any value outside the range [0..31] is treated as congruent mod 32.</param>
+    /// <param name="offset">
+    ///     The number of bits to rotate by.
+    ///     Any value outside the range [0..31] is treated as congruent mod 32.
+    /// </param>
     /// <returns>The rotated value.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static uint RotateLeft(uint value, int offset)

@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -23,5 +22,8 @@ internal abstract class SourceGeneratorForDeclaredPropertyWithAttribute<TAttribu
         ISymbol symbol,
         AttributeData attribute,
         AnalyzerConfigOptions options
-    ) => GenerateCode(compilation, node, (IPropertySymbol)symbol, attribute, options);
+    )
+    {
+        return GenerateCode(compilation, node, (IPropertySymbol)symbol, attribute, options);
+    }
 }

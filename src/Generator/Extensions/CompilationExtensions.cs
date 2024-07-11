@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Generator.Utilities;
 using Microsoft.CodeAnalysis;
@@ -78,7 +77,9 @@ internal static class CompilationExtensions
             .FirstOrDefault(x => CompareNameIgnoreCase(x.Name));
         return typeSymbol?.Name ?? type;
 
-        bool CompareNameIgnoreCase(string name) =>
-            string.Equals(type, name, StringComparison.OrdinalIgnoreCase);
+        bool CompareNameIgnoreCase(string name)
+        {
+            return string.Equals(type, name, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

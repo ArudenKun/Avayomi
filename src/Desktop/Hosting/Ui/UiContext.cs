@@ -4,8 +4,8 @@ using Avalonia.Threading;
 namespace Desktop.Hosting.Ui;
 
 /// <summary>
-/// Encapsulates the information needed to manage the hosting of a WinUI based
-/// User Interface service and associated thread.
+///     Encapsulates the information needed to manage the hosting of a WinUI based
+///     User Interface service and associated thread.
 /// </summary>
 public class UiContext : BaseUiContext
 {

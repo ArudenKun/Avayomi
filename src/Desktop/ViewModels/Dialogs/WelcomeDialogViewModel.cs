@@ -2,7 +2,4 @@
 
 namespace Desktop.ViewModels.Dialogs;
 
-public class WelcomeDialogViewModel : BaseViewModel
-{
-    
-}
+public class WelcomeDialogViewModel : BaseViewModel { }
