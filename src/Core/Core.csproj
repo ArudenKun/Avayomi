@@ -27,7 +27,7 @@
         <PackageReference Include="Serilog.Sinks.Console"/>
         <PackageReference Include="Serilog.Sinks.FileEx"/>
         <PackageReference Include="Supernova.Enum.Generators"/>
-        <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson"/>
+        <PackageReference Include="ZiggyCreatures.FusionCache" />
     </ItemGroup>
 
     <ItemGroup>

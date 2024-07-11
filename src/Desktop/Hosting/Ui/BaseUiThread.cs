@@ -97,11 +97,14 @@ public abstract class BaseUiThread<T> : IDisposable, IUiThread
         if (!UiContext.IsLifetimeLinked)
             return;
 
-        Logger.LogDebug("Stopping hosted application due to UiThread exit.");
         if (
             !_hostApplicationLifetime.ApplicationStopped.IsCancellationRequested
             && !_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested
         )
+        {
+            Logger.LogDebug("Stopping UiThread");
             _hostApplicationLifetime.StopApplication();
+            Logger.LogDebug("Stopped UiThread");
+        }
     }
 }

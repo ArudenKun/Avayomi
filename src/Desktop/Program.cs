@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Avalonia;
+using Core.Caching;
 using Core.Helpers;
 using Desktop.Extensions;
 using Desktop.Hosting;
 using Desktop.Hosting.Ui;
 using Generator.Core.DependencyInjection;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,6 +18,8 @@ using Serilog.Enrichers.ClassName;
 using Serilog.Events;
 using Serilog.Sinks.FileEx;
 using Velopack;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Serialization;
 
 namespace Desktop;
 
@@ -33,7 +39,20 @@ public static class Program
         builder.ConfigureAvalonia<App>();
         builder.Configuration.AddJsonFile("appsettings.json", true, true);
         builder
-            .Services.AddCore()
+            .Services.AddSingleton<IJsonTypeInfoResolver>(GlobalJsonContext.Default)
+            .AddSingleton(
+                new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    TypeInfoResolver = GlobalJsonContext.Default
+                }
+            )
+            .AddSingleton(
+                new FileCacheOptions(EnvironmentHelper.ApplicationDataPath.JoinPath("cache"))
+            )
+            .AddSingleton<IDistributedCache, FileCache>()
+            .AddSingleton<IFusionCacheSerializer, FileCacheSerializer>()
+            .AddCore()
             .AddSerilog(loggerConfig =>
             {
                 const string logTemplate =
@@ -58,7 +77,14 @@ public static class Program
                     )
                     .Enrich.FromLogContext()
                     .Enrich.WithClassName();
-            });
+            })
+            .AddFusionCache()
+            .TryWithAutoSetup()
+            .WithDefaultEntryOptions(opt =>
+                opt.SetDuration(TimeSpan.FromMinutes(5))
+                    .SetFailSafe(true)
+                    .SetFactoryTimeouts(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30))
+            );
 
         using var app = builder.Build();
 

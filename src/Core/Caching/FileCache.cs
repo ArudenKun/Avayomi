@@ -1,10 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using AutoInterfaceAttributes;
 using Core.Helpers;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
 
 namespace Core.Caching;
@@ -16,7 +16,7 @@ public sealed class FileCache : IFileCache
     private readonly Task _backgroundRemovingExpiredTask;
     private readonly ConcurrentDictionary<string, AsyncReaderWriterLock> _fileLock;
 
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
+    private readonly JsonTypeInfo _rootTypeInfo;
     private readonly ILogger<FileCache> _logger;
 
     private readonly SemaphoreSlim _manifestLock = new(1, 1);
@@ -31,14 +31,15 @@ public sealed class FileCache : IFileCache
 
     public FileCache(
         FileCacheOptions options,
-        JsonSerializerOptions? jsonSerializerOptions,
-        ILogger<FileCache>? logger = null
+        JsonSerializerOptions jsonSerializerOptions,
+        ILogger<FileCache> logger
     )
     {
         _options = options;
-        _jsonSerializerOptions =
-            jsonSerializerOptions ?? new JsonSerializerOptions { WriteIndented = true };
-        _logger = logger ?? NullLogger<FileCache>.Instance;
+        _logger = logger;
+        _rootTypeInfo = jsonSerializerOptions.GetTypeInfo(
+            typeof(ConcurrentDictionary<string, ManifestEntry>)
+        );
         _manifestPath = Path.Combine(options.DirectoryPath, "manifest.json");
         _fileLock = new ConcurrentDictionary<string, AsyncReaderWriterLock>(StringComparer.Ordinal);
 
@@ -240,7 +241,7 @@ public sealed class FileCache : IFileCache
             if (!Directory.Exists(_options.DirectoryPath))
                 Directory.CreateDirectory(_options.DirectoryPath);
 
-            SerializeFile(_manifestPath, _cacheManifest);
+            SerializeFile();
         }
         finally
         {
@@ -260,7 +261,7 @@ public sealed class FileCache : IFileCache
             if (!Directory.Exists(_options.DirectoryPath))
                 Directory.CreateDirectory(_options.DirectoryPath);
 
-            await SerializeFileAsync(_manifestPath, _cacheManifest);
+            await SerializeFileAsync();
         }
         finally
         {
@@ -307,39 +308,23 @@ public sealed class FileCache : IFileCache
         return Task.Run(RemoveExpired);
     }
 
-    private void SerializeFile<T>(string path, T value)
-    {
-        using var stream = new FileStream(
-            path,
-            FileMode.Create,
-            FileAccess.Write,
-            FileShare.None,
-            1024
+    private void SerializeFile() =>
+        File.WriteAllBytes(
+            _manifestPath,
+            JsonSerializer.SerializeToUtf8Bytes(_cacheManifest, _rootTypeInfo)
         );
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, _jsonSerializerOptions);
-        using var memStream = new MemoryStream(bytes);
-        memStream.Seek(0, SeekOrigin.Begin);
-        memStream.CopyTo(stream);
-    }
 
-    private Task SerializeFileAsync<T>(string path, T value)
-    {
-        return Task.Run(() => SerializeFile(path, value));
-    }
-
-    private T? DeserializeFile<T>(string path)
-    {
-        using var stream = new FileStream(
-            path,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read,
-            1024
+    private async Task SerializeFileAsync() =>
+        await File.WriteAllBytesAsync(
+            _manifestPath,
+            JsonSerializer.SerializeToUtf8Bytes(_cacheManifest, _rootTypeInfo)
         );
-        using var memStream = new MemoryStream((int)stream.Length);
-        stream.CopyTo(memStream);
-        memStream.Seek(0, SeekOrigin.Begin);
-        return JsonSerializer.Deserialize<T>(memStream, _jsonSerializerOptions);
+
+    private ConcurrentDictionary<string, ManifestEntry>? DeserializeFile()
+    {
+        using var stream = File.OpenRead(_manifestPath);
+        return (ConcurrentDictionary<string, ManifestEntry>?)
+            JsonSerializer.Deserialize(stream, _rootTypeInfo);
     }
 
     private void TryLoadManifest()
@@ -357,9 +342,7 @@ public sealed class FileCache : IFileCache
 
             if (File.Exists(_manifestPath))
             {
-                _cacheManifest = DeserializeFile<ConcurrentDictionary<string, ManifestEntry>>(
-                    _manifestPath
-                );
+                _cacheManifest = DeserializeFile();
                 _cacheManifest ??= new ConcurrentDictionary<string, ManifestEntry>();
             }
             else
@@ -368,7 +351,7 @@ public sealed class FileCache : IFileCache
                     Directory.CreateDirectory(_options.DirectoryPath);
 
                 _cacheManifest = new ConcurrentDictionary<string, ManifestEntry>();
-                SerializeFile(_manifestPath, _cacheManifest);
+                SerializeFile();
             }
         }
         finally

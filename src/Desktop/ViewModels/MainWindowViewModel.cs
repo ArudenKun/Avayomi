@@ -14,6 +14,4 @@ public sealed class MainWindowViewModel : BaseViewModel
     }
 
     public IReadOnlyCollection<BasePageViewModel> Pages { get; }
-
-    public string Greeting => nameof(Greeting);
 }

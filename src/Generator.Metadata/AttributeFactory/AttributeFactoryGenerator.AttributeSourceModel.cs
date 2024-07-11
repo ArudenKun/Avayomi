@@ -62,9 +62,9 @@ internal partial class AttributeFactoryGenerator
                 _ => string.Empty
             };
 
-            var source = _sourceTemplate
-                .Replace(_declarationKeywordPlaceholder, declarationKeyword)
-                .Replace(_sourceTextMacro, quotedSourceText);
+            var source = SourceTemplate
+                .Replace(DeclarationKeywordPlaceholder, declarationKeyword)
+                .Replace(SourceTextMacro, quotedSourceText);
 
 #pragma warning disable IDE0045 // Convert to conditional expression
             if (
@@ -74,10 +74,10 @@ internal partial class AttributeFactoryGenerator
                 && context.Attributes[0].NamedArguments[0].Value.Value is bool omitTypeCheck
                 && omitTypeCheck
             )
-                source = source.Replace(_typeCheckPlaceholder, "");
+                source = source.Replace(TypeCheckPlaceholder, "");
             else
                 source = source.Replace(
-                    _typeCheckPlaceholder,
+                    TypeCheckPlaceholder,
                     """
                                 if(data.AttributeClass != null &&
                                    data.AttributeClass.MetadataName == "{METADATANAME}" &&
@@ -99,11 +99,11 @@ internal partial class AttributeFactoryGenerator
             return result;
         }
 
-        private static readonly Regex _rawStringValuePattern = new("\"*", RegexOptions.Compiled);
+        private static readonly Regex RawStringValuePattern = new("\"*", RegexOptions.Compiled);
 
         private static string GetRawSourceTextValue(string sourceText)
         {
-            var longestMatch = _rawStringValuePattern
+            var longestMatch = RawStringValuePattern
                 .Matches(sourceText)
                 .OfType<Match>()
                 .Select(m => m.Length)
@@ -116,7 +116,7 @@ internal partial class AttributeFactoryGenerator
             return result;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is AttributeSourceModel model && Equals(model);
         }

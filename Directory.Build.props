@@ -7,4 +7,10 @@
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     </PropertyGroup>
+    <PropertyGroup>
+        <Authors>ArudenKun</Authors>
+        <RepositoryUrl>https://github.com/ArudenKun/Avayomi</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>Suwayomi desktop client made in Avalonia</Description>
+    </PropertyGroup>
 </Project>

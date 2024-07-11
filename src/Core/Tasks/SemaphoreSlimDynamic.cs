@@ -47,7 +47,6 @@ public class SemaphoreSlimDynamic : SemaphoreSlim
     public void ChangeCapacity(int newSize)
     {
         Guard.Against.CheckRange(newSize, 1, MaximumCapacity);
-        // newSize.CheckRange(nameof(newSize), min: 1, max: MaximumCapacity);
 
         var adjust = 0;
         if (newSize != Capacity)

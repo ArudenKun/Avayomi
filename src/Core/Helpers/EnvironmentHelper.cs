@@ -56,7 +56,7 @@ public static class EnvironmentHelper
         }
 
         var defaultPath = GetDefaultPath();
-        Directory.CreateDirectory(defaultPath);
+        IoHelper.EnsureContainingDirectoryExists(defaultPath);
         return defaultPath.JoinPath(parts);
     }
 

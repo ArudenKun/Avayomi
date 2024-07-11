@@ -12,7 +12,7 @@ namespace Generator.Metadata.AttributeFactory;
 internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
 {
     //source: https://stackoverflow.com/a/58853591
-    private static readonly Regex _camelCasePattern =
+    private static readonly Regex CamelCasePattern =
         new(@"([A-Z])([A-Z]+|[a-z0-9_]+)($|[A-Z]\w*)", RegexOptions.Compiled);
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -21,14 +21,14 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
 
         var provider = context
             .SyntaxProvider.ForAttributeWithMetadataName(
-                _generateFactoryAttributeFullyQualifiedName,
-                static (n, t) =>
+                GenerateFactoryAttributeFullyQualifiedName,
+                static (n, _) =>
                     n is TypeDeclarationSyntax tds && tds.Modifiers.Any(SyntaxKind.PartialKeyword),
                 static (c, t) => AttributeSourceModel.Create(c, t)
             )
             .Where(m => targetSet.Add(m.Symbol))
             .Select(
-                static (m, t) =>
+                static (m, _) =>
                 {
                     var typeProps = m
                         .Symbol.GetMembers()
@@ -96,15 +96,15 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                         );
 
                     var source = m
-                        .Source.Replace(_targetPropCasesPlaceholder, string.Join("\n", propCases))
-                        .Replace(_targetSymbolsPlaceholder, string.Join("\n", symbolProps))
-                        .Replace(_targetContainersPlaceholder, string.Join("\n", containerFields));
+                        .Source.Replace(TargetPropCasesPlaceholder, string.Join("\n", propCases))
+                        .Replace(TargetSymbolsPlaceholder, string.Join("\n", symbolProps))
+                        .Replace(TargetContainersPlaceholder, string.Join("\n", containerFields));
 
                     return m.WithSource(source);
                 }
             )
             .Select(
-                static (m, t) =>
+                static (m, _) =>
                 {
                     var ctorCases = m
                         .Symbol.Constructors.Where(static c =>
@@ -112,9 +112,8 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                                 .Select(static a => a.AttributeClass)
                                 .Any(static c =>
                                     c != null
-                                    && c.Name == _excludeConstructorAttributeName
-                                    && c.ContainingNamespace.ToDisplayString()
-                                        == _attributeNamespace
+                                    && c.Name == ExcludeConstructorAttributeName
+                                    && c.ContainingNamespace.ToDisplayString() == AttributeNamespace
                                 )
                         )
                         .GroupBy(static c => c.Parameters.Length)
@@ -206,13 +205,13 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
 
                     var ctorCasesSource = string.Concat(ctorCases);
 
-                    var source = m.Source.Replace(_targetCtorCasesPlaceholder, ctorCasesSource);
+                    var source = m.Source.Replace(TargetCtorCasesPlaceholder, ctorCasesSource);
 
                     return m.WithSource(source);
                 }
             )
             .Select(
-                static (m, t) =>
+                static (m, _) =>
                 {
                     var metadataName = GetFullMetadataName(m.Symbol);
                     var genericParamList =
@@ -229,17 +228,17 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
                             : string.Empty;
 
                     var source = m
-                        .Source.Replace(_targetMetadataNamePlaceholder, metadataName)
-                        .Replace(_genericParamLisTMacro, genericParamList)
-                        .Replace(_genericParamNamesPlaceholder, genericParamNames)
-                        .Replace(_genericParamCommenTMacro, genericParamComment)
-                        .Replace(_targetNamePlaceholder, m.Symbol.Name)
+                        .Source.Replace(TargetMetadataNamePlaceholder, metadataName)
+                        .Replace(GenericParamLisTMacro, genericParamList)
+                        .Replace(GenericParamNamesPlaceholder, genericParamNames)
+                        .Replace(GenericParamCommentMacro, genericParamComment)
+                        .Replace(TargetNamePlaceholder, m.Symbol.Name)
                         .Replace(
-                            _targetAccessibilityPlaceholder,
+                            TargetAccessibilityPlaceholder,
                             SyntaxFacts.GetText(m.Symbol.DeclaredAccessibility)
                         )
                         .Replace(
-                            _targetNamespacePlaceholder,
+                            TargetNamespacePlaceholder,
                             m.Symbol.ContainingNamespace.ToDisplayString()
                         );
 
@@ -305,7 +304,7 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
             );
 
         context.RegisterPostInitializationOutput(static c =>
-            c.AddSource(_attributesHint, _attributeSource)
+            c.AddSource(AttributesHint, AttributeSource)
         );
         context.RegisterSourceOutput(provider, static (c, s) => c.AddSource(s.Hint, s.Source));
     }
@@ -319,7 +318,7 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
             return name;
 
         //source: https://stackoverflow.com/a/58853591
-        var result = _camelCasePattern.Replace(
+        var result = CamelCasePattern.Replace(
             name,
             m => m.Groups[1].Value.ToLower() + m.Groups[2].Value.ToLower() + m.Groups[3].Value
         );
@@ -328,9 +327,9 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
     }
 
     //source: https://stackoverflow.com/a/27106959
-    private static string GetFullMetadataName(ISymbol s)
+    private static string GetFullMetadataName(ISymbol? s)
     {
-        if (s == null || isRootNamespace(s))
+        if (s == null || IsRootNamespace(s))
             return string.Empty;
 
         var sb = new StringBuilder(s.MetadataName);
@@ -338,7 +337,7 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
 
         s = s.ContainingSymbol;
 
-        while (!isRootNamespace(s))
+        while (!IsRootNamespace(s))
         {
             _ = s is ITypeSymbol && last is ITypeSymbol ? sb.Insert(0, '+') : sb.Insert(0, '.');
 
@@ -349,7 +348,7 @@ internal sealed partial class AttributeFactoryGenerator : IIncrementalGenerator
 
         return sb.ToString();
 
-        static bool isRootNamespace(ISymbol symbol)
+        static bool IsRootNamespace(ISymbol symbol)
         {
             return symbol is INamespaceSymbol s && s.IsGlobalNamespace;
         }

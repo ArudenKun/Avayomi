@@ -792,16 +792,6 @@
           "System.IO.Pipelines": "6.0.0"
         }
       },
-      "ZiggyCreatures.FusionCache": {
-        "type": "Transitive",
-        "resolved": "1.2.0",
-        "contentHash": "9FmlBhQQ9exk663bOFyIMuKgj9AKxpdTgZcuN1gaDYL/due8VHUD6GE+q0ma8v+Rb9Du8dVWCJTFjaSBtA3lmw==",
-        "dependencies": {
-          "Microsoft.Extensions.Caching.Memory": "8.0.0",
-          "System.Diagnostics.DiagnosticSource": "8.0.0",
-          "System.Threading.Tasks.Extensions": "4.5.4"
-        }
-      },
       "core": {
         "type": "Project",
         "dependencies": {
@@ -818,7 +808,7 @@
           "Serilog.Sinks.Console": "[6.0.0, )",
           "Serilog.Sinks.FileEx": "[5.1.8, )",
           "Supernova.Enum.Generators": "[1.0.17, )",
-          "ZiggyCreatures.FusionCache.Serialization.SystemTextJson": "[1.2.0, )"
+          "ZiggyCreatures.FusionCache": "[1.2.0, )"
         }
       },
       "generator": {
@@ -936,14 +926,15 @@
         "resolved": "1.0.17",
         "contentHash": "tf4/FzCFGY0Wbld7+bhh3u+OsqJ5qWwZMKyoohbvfC9QoOe4FE8lpem2jO6c1uwuXbzf21JPOAat2Zay1SCgMQ=="
       },
-      "ZiggyCreatures.FusionCache.Serialization.SystemTextJson": {
+      "ZiggyCreatures.FusionCache": {
         "type": "CentralTransitive",
         "requested": "[1.2.0, )",
         "resolved": "1.2.0",
-        "contentHash": "bRh724L9t4qoeHIkMrji8uoiSMKqNyVvOyURLfvC5QLN/go1OdpWjkyT7PtKjsovjcz09cTa660f8SeDLFVxgw==",
+        "contentHash": "9FmlBhQQ9exk663bOFyIMuKgj9AKxpdTgZcuN1gaDYL/due8VHUD6GE+q0ma8v+Rb9Du8dVWCJTFjaSBtA3lmw==",
         "dependencies": {
-          "System.Text.Json": "8.0.2",
-          "ZiggyCreatures.FusionCache": "1.2.0"
+          "Microsoft.Extensions.Caching.Memory": "8.0.0",
+          "System.Diagnostics.DiagnosticSource": "8.0.0",
+          "System.Threading.Tasks.Extensions": "4.5.4"
         }
       }
     },
