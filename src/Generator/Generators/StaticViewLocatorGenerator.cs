@@ -1,6 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Generator.Attributes;
 using Generator.Extensions;
+using Generator.Interfaces;
+using Generator.Metadata.CopyCode;
 using Generator.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -11,6 +15,26 @@ namespace Generator.Generators;
 internal sealed class StaticViewLocatorGenerator
     : SourceGeneratorForDeclaredTypeWithAttribute<StaticViewLocatorAttribute>
 {
+    protected override IEnumerable<(string Name, string Source)> StaticSources =>
+        [
+            (
+                $"{MetadataNames.Attributes}.{nameof(StaticViewLocatorAttribute)}.g.cs",
+                Copy.GeneratorAttributesStaticViewLocatorAttribute
+            ),
+            (
+                $"{MetadataNames.Attributes}.{nameof(SingletonAttribute)}.g.cs",
+                Copy.GeneratorAttributesSingletonAttribute
+            ),
+            (
+                $"{MetadataNames.Attributes}.{nameof(IgnoreAttribute)}.g.cs",
+                Copy.GeneratorAttributesIgnoreAttribute
+            ),
+            (
+                $"{MetadataNames.Attributes}.{nameof(IActivatable)}.g.cs",
+                Copy.GeneratorInterfacesIActivatable
+            )
+        ];
+
     protected override (string GeneratedCode, DiagnosticDetail Error) GenerateCode(
         Compilation compilation,
         SyntaxNode node,

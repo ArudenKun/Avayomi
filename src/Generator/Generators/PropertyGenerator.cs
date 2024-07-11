@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -7,7 +8,6 @@ using Generator.Extensions;
 using Generator.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Generator.Generators;
 
@@ -21,26 +21,18 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
             GetSyntaxTarget
         );
 
-        var compilationProvider = context
-            .CompilationProvider.Combine(syntaxProvider.Collect())
-            .Combine(context.AnalyzerConfigOptionsProvider);
+        var compilationProvider = context.CompilationProvider.Combine(syntaxProvider.Collect());
         context.RegisterImplementationSourceOutput(
             compilationProvider,
             (sourceProductionContext, provider) =>
-                OnExecute(
-                    sourceProductionContext,
-                    provider.Left.Left,
-                    provider.Left.Right,
-                    provider.Right
-                )
+                OnExecute(sourceProductionContext, provider.Left, provider.Right)
         );
     }
 
     private static void OnExecute(
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<ClassDeclarationSyntax> nodes,
-        AnalyzerConfigOptionsProvider _
+        ImmutableArray<ClassDeclarationSyntax> nodes
     )
     {
         var targetSymbol = compilation.GetTypeByMetadataName(MetadataNames.ObservableObject);
@@ -61,15 +53,12 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
 
             var source = new SourceStringBuilder(viewSymbol);
 
-            source.PartialTypeBlockBrace(
-                $"Generator.Interfaces.IView<{viewModelSymbol.ToDisplayString()}>",
-                () =>
-                {
-                    source.Line(
-                        $"public {viewModelSymbol.ToDisplayString()} ViewModel {{ get; init; }}"
-                    );
-                }
-            );
+            source.PartialTypeBlockBrace(() =>
+            {
+                source.Line(
+                    $"public {viewModelSymbol.ToDisplayString()} ViewModel {{ get; init; }}"
+                );
+            });
 
             context.AddSource($"{viewSymbol.ToDisplayString()}.Property.g.cs", source.ToString());
         }

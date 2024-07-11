@@ -1,9 +1,12 @@
-﻿using Generator.Metadata;
+﻿using System;
+using Generator.Metadata;
+using Generator.Metadata.CopyCode;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace Generator.Attributes;
 
+[Copy]
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 #if GENERATOR
 [GenerateFactory]

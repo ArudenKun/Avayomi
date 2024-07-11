@@ -1,5 +1,8 @@
-﻿namespace Generator.Interfaces;
+﻿using Generator.Metadata.CopyCode;
 
+namespace Generator.Interfaces;
+
+[Copy]
 public interface IActivatable
 {
     public void Activate();

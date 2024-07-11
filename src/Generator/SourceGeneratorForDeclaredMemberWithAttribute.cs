@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -220,15 +221,18 @@ internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<
 
     protected virtual string GenerateFilename(ISymbol symbol)
     {
-        var gn = $"{Format(symbol)}{Ext}";
+        var gn = $"{Format()}{Ext}";
         Log.Debug($"Generated Filename ({gn.Length}): {gn}\n");
         return gn;
 
-        static string Format(ISymbol symbol)
-        {
-            return string.Join("_", $"{symbol}".Split(InvalidFileNameChars))
+        string Format() =>
+            string.Join(
+                    "_",
+                    $"{symbol}.{GetType().Name.Replace(nameof(Generator), "")}".Split(
+                        InvalidFileNameChars
+                    )
+                )
                 .Truncate(MaxFileLength - Ext.Length);
-        }
     }
 
     protected virtual SyntaxNode Node(TDeclarationSyntax node)

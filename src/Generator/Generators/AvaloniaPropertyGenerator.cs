@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Generator.Attributes;
 using Generator.Extensions;
+using Generator.Metadata.CopyCode;
 using Generator.Utilities;
 using Microsoft.CodeAnalysis;
 
@@ -11,6 +12,14 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        context.RegisterPostInitializationOutput(ctx =>
+        {
+            ctx.AddSource(
+                $"{MetadataNames.Attributes}.{nameof(AvaloniaPropertyAttribute)}.g.cs",
+                Copy.GeneratorAttributesAvaloniaPropertyAttribute
+            );
+        });
+
         var syntaxProvider = context.SyntaxProvider.ForAttributeWithMetadataNameOfClassesAndRecords(
             $"{typeof(AvaloniaPropertyAttribute).FullName}"
         );

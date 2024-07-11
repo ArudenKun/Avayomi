@@ -7,7 +7,7 @@ using Core.Helpers;
 using Desktop.Extensions;
 using Desktop.Hosting;
 using Desktop.Hosting.Ui;
-using Generator.Core.DependencyInjection;
+using Generator.DependencyInjection;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,12 +79,12 @@ public static class Program
                     .Enrich.WithClassName();
             })
             .AddFusionCache()
-            .TryWithAutoSetup()
             .WithDefaultEntryOptions(opt =>
                 opt.SetDuration(TimeSpan.FromMinutes(5))
                     .SetFailSafe(true)
                     .SetFactoryTimeouts(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30))
-            );
+            )
+            .TryWithAutoSetup();
 
         using var app = builder.Build();
 
