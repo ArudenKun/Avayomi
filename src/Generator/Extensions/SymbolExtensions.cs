@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Generator.Extensions;
 
@@ -10,6 +11,11 @@ internal static class SymbolExtensions
     public static string NamespaceOrEmpty(this ISymbol symbol) =>
         symbol.ContainingNamespace.IsGlobalNamespace
             ? string.Empty
+            : string.Join(".", symbol.ContainingNamespace.ConstituentNamespaces);
+
+    public static string? NamespaceOrNull(this ISymbol symbol) =>
+        symbol.ContainingNamespace.IsGlobalNamespace
+            ? null
             : string.Join(".", symbol.ContainingNamespace.ConstituentNamespaces);
 
     public static bool HasAttribute(this ISymbol symbol, string attributeName) =>
@@ -81,19 +87,78 @@ internal static class SymbolExtensions
             foreach (var nestedTypeSymbol in nestedNamespace.CollectTypeSymbols(targetSymbol))
                 yield return nestedTypeSymbol;
         }
-
-        yield break;
-
-        static bool IsDerivedFrom(INamedTypeSymbol? classSymbol, INamedTypeSymbol targetSymbol)
-        {
-            while (classSymbol != null)
-            {
-                if (SymbolEqualityComparer.Default.Equals(classSymbol.BaseType, targetSymbol))
-                    return true;
-                classSymbol = classSymbol.BaseType;
-            }
-
-            return false;
-        }
     }
+
+    public static bool IsDerivedFrom(
+        this INamedTypeSymbol? classSymbol,
+        INamedTypeSymbol targetSymbol
+    )
+    {
+        while (classSymbol != null)
+        {
+            if (SymbolEqualityComparer.Default.Equals(classSymbol.BaseType, targetSymbol))
+                return true;
+            classSymbol = classSymbol.BaseType;
+        }
+
+        return false;
+    }
+
+    public static bool IsSpecialType(this ITypeSymbol symbol) =>
+        symbol is IArrayTypeSymbol
+        || symbol.SpecialType != SpecialType.None
+        || (
+            symbol.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
+            && symbol.BaseType != null
+            && symbol.BaseType.SpecialType != SpecialType.None
+        );
+
+    public static bool IsSpecialType(this ITypeSymbol symbol, SpecialType specialType) =>
+        symbol.SpecialType == specialType;
+
+    public static IEnumerable<IMethodSymbol> GetImplementedPartialMethods(
+        this ITypeSymbol typeSymbol,
+        Func<IMethodSymbol, bool>? predicate = null
+    )
+    {
+        var partialMethods = typeSymbol
+            .GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(x => x.IsPartialMethodImplemented());
+
+        return predicate is not null ? partialMethods.Where(predicate) : partialMethods;
+    }
+
+    public static IMethodSymbol? GetImplementedPartialMethod(
+        this ITypeSymbol typeSymbol,
+        string methodSignature
+    ) =>
+        typeSymbol
+            .GetImplementedPartialMethods()
+            .FirstOrDefault(x => x.ToDisplayString().Contains(methodSignature));
+
+    public static bool IsPartialMethodImplemented(
+        this ITypeSymbol typeSymbol,
+        string methodSignature
+    ) => typeSymbol.GetImplementedPartialMethod(methodSignature) is not null;
+
+    public static bool IsPartialMethodImplemented(this IMethodSymbol method)
+    {
+        if (method.IsDefinedInMetadata())
+            return true;
+
+        foreach (var r in method.DeclaringSyntaxReferences)
+        {
+            if (r.GetSyntax() is not MethodDeclarationSyntax node)
+                continue;
+            if (node.Body != null || !node.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <returns>False if it's not defined in source</returns>
+    public static bool IsDefinedInMetadata(this ISymbol symbol) =>
+        symbol.Locations.Any(loc => loc.IsInMetadata);
 }

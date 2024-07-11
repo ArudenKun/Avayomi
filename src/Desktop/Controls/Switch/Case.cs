@@ -1,8 +1,8 @@
 ﻿using Avalonia.Controls;
-using DependencyPropertyGenerator;
+using Generator.Attributes;
 
 namespace Desktop.Controls.Switch;
 
-[DependencyProperty<bool>("IsDefault")]
-[DependencyProperty<object>("Value")]
+[AvaloniaProperty("IsDefault", typeof(bool))]
+[AvaloniaProperty("Value", typeof(object))]
 public partial class Case : ContentControl;

@@ -2,29 +2,27 @@
     x:Class="Desktop.Views.Pages.BrowsePage"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:Desktop.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:suki="using:SukiUI.Controls"
-    xmlns:switch="clr-namespace:Desktop.Controls.Switch"
     xmlns:vp="using:Desktop.Views.Pages"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vp:BrowsePage"
     mc:Ignorable="d">
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <switch:Switch TargetType="x:Boolean" Value="{Binding ViewModel.LoadingState}">
-            <switch:Case IsDefault="True" Value="{x:True}">
+        <Switch TargetType="x:Boolean" Value="{Binding ViewModel.LoadingState}">
+            <Case IsDefault="True" Value="{x:True}">
                 <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock FontSize="20">True Content</TextBlock>
                 </Panel>
-            </switch:Case>
-            <switch:Case Value="{x:False}">
+            </Case>
+            <Case Value="{x:False}">
                 <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Effect="blur(5)" FontSize="20">False Content</TextBlock>
                 </Panel>
-            </switch:Case>
-        </switch:Switch>
+            </Case>
+        </Switch>
         <Button Command="{Binding ViewModel.ChangeLoadingStateCommand}">Change State</Button>
         <TextBlock Text="{Binding ViewModel.LoadingState}" />
     </StackPanel>

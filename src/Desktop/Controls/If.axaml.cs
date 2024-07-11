@@ -1,11 +1,11 @@
 ﻿using Avalonia.Controls;
-using DependencyPropertyGenerator;
+using Generator.Attributes;
 
 namespace Desktop.Controls;
 
-[DependencyProperty<bool>("Condition")]
-[DependencyProperty<Control>("True")]
-[DependencyProperty<Control>("False")]
+[AvaloniaProperty("Condition", typeof(bool))]
+[AvaloniaProperty("True", typeof(Control))]
+[AvaloniaProperty("False", typeof(Control))]
 public partial class If : UserControl
 {
     public If()
@@ -13,11 +13,20 @@ public partial class If : UserControl
         InitializeComponent();
     }
 
-    partial void OnConditionChanged() => UpdateContent();
+    partial void OnConditionChanged()
+    {
+        UpdateContent();
+    }
 
-    partial void OnTrueChanged() => UpdateContent();
+    partial void OnTrueChanged()
+    {
+        UpdateContent();
+    }
 
-    partial void OnFalseChanged() => UpdateContent();
+    partial void OnFalseChanged()
+    {
+        UpdateContent();
+    }
 
     private void UpdateContent() => Content = Condition ? True : False;
 }

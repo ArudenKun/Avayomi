@@ -9,7 +9,7 @@ internal abstract class SourceGeneratorForDeclaredTypeWithAttribute<TAttribute>
     : SourceGeneratorForDeclaredMemberWithAttribute<TAttribute, TypeDeclarationSyntax>
     where TAttribute : Attribute
 {
-    protected abstract (string GeneratedCode, DiagnosticDetail Error) GenerateCode(
+    protected abstract (string? GeneratedCode, DiagnosticDetail Error) GenerateCode(
         Compilation compilation,
         SyntaxNode node,
         INamedTypeSymbol symbol,
@@ -17,7 +17,7 @@ internal abstract class SourceGeneratorForDeclaredTypeWithAttribute<TAttribute>
         AnalyzerConfigOptions options
     );
 
-    protected sealed override (string GeneratedCode, DiagnosticDetail Error) GenerateCode(
+    protected sealed override (string? GeneratedCode, DiagnosticDetail Error) GenerateCode(
         Compilation compilation,
         SyntaxNode node,
         ISymbol symbol,

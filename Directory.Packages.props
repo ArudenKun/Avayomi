@@ -4,8 +4,8 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Ardalis.GuardClauses" Version="4.5.0" />
-    <PackageVersion Include="AsyncAwaitBestPractices" Version="7.0.0" />
+    <PackageVersion Include="Ardalis.GuardClauses" Version="4.6.0" />
+    <PackageVersion Include="AsyncAwaitBestPractices" Version="8.0.0" />
     <PackageVersion Include="AutoInterface" Version="2.3.0" />
     <PackageVersion Include="Avalonia.Desktop" Version="11.1.0-beta2" />
     <PackageVersion Include="Avalonia.Diagnostics" Version="11.1.0-beta2" />
@@ -14,7 +14,6 @@
     <PackageVersion Include="Cogwheel" Version="2.1.0" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageVersion Include="CSharpier.MsBuild" Version="0.28.2" />
-    <PackageVersion Include="DependencyPropertyGenerator" Version="1.4.0" />
     <PackageVersion Include="Flurl.Http" Version="4.0.2" />
     <PackageVersion Include="H.Ipc" Version="1.0.1" />
     <PackageVersion Include="H.Pipes" Version="2.1.0-dev.322" />

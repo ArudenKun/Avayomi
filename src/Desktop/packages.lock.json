@@ -48,12 +48,6 @@
         "resolved": "8.2.2",
         "contentHash": "r0g0k9tGYdrnz8R7T3x5UiokDffeevzK/2P/9SBL6fqLgN8B157MIi/bVUWI1KAz6ZorZrK9AdABCWUeXZZsvA=="
       },
-      "DependencyPropertyGenerator": {
-        "type": "Direct",
-        "requested": "[1.4.0, )",
-        "resolved": "1.4.0",
-        "contentHash": "Ckbuo9lAmtHZXlypbbK04tr7NQC/JUPsKuRt1RgFEqZU4QBWh1i4adLmSkYVFCMVC/e8Fuqmm2pu+rcW8vhUGQ=="
-      },
       "H.Ipc": {
         "type": "Direct",
         "requested": "[1.0.1, )",
@@ -171,11 +165,6 @@
           "Microsoft.Extensions.Logging.Abstractions": "8.0.0",
           "NuGet.Versioning": "6.10.0"
         }
-      },
-      "AsyncAwaitBestPractices": {
-        "type": "Transitive",
-        "resolved": "7.0.0",
-        "contentHash": "RhUokh7YKNpr+W0xzQWTGPyJtv/jVEalyKyBYAhFNyhUa0Ncsrz5S6PYxNDZ4ye/TK//qrpRInn5hzLBTQpehw=="
       },
       "Avalonia": {
         "type": "Transitive",
@@ -816,8 +805,8 @@
       "core": {
         "type": "Project",
         "dependencies": {
-          "Ardalis.GuardClauses": "[4.5.0, )",
-          "AsyncAwaitBestPractices": "[7.0.0, )",
+          "Ardalis.GuardClauses": "[4.6.0, )",
+          "AsyncAwaitBestPractices": "[8.0.0, )",
           "AutoInterface": "[2.3.0, )",
           "Cogwheel": "[2.1.0, )",
           "Flurl.Http": "[4.0.2, )",
@@ -837,9 +826,15 @@
       },
       "Ardalis.GuardClauses": {
         "type": "CentralTransitive",
-        "requested": "[4.5.0, )",
-        "resolved": "4.5.0",
-        "contentHash": "9ajMCMD3gIWUsVb//ftJFsFm+TDvP3y05dVC1S9ANLP4Bo7V2xbCeQbTVomXR0mTYkX4mX6Lp3SPtdcKag4rZg=="
+        "requested": "[4.6.0, )",
+        "resolved": "4.6.0",
+        "contentHash": "ckLr6V8tRXHu0kGVlen70sjXkZcbe6ZFknM3UDkeNzY75kXEe4Z5xru5weMU5IEAsuuqMKvVb7ikbUZ7JcHUSQ=="
+      },
+      "AsyncAwaitBestPractices": {
+        "type": "CentralTransitive",
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "oL+t1uj/i/RWp20w46/j4YKO+1F4cluAIMl6z/wB8GmycWhBzh6cEXLR7Ova/QH5JgismOQlJoOSvid3KSLQ2Q=="
       },
       "AutoInterface": {
         "type": "CentralTransitive",

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Generator.Extensions;
 using Microsoft.CodeAnalysis;
 
@@ -49,6 +48,7 @@ internal sealed class SourceStringBuilder
     public SourceStringBuilder()
     {
         _sourceBuilder.Append(TopMessage);
+        _sourceBuilder.AppendLine();
     }
 
     public void Raw(string rawText)
@@ -168,9 +168,15 @@ internal sealed class SourceStringBuilder
         BlockBrace(writeInner);
     }
 
+    public void StaticConstructor(Action writeInner)
+    {
+        Line($"static {_typeSymbol.Name}()");
+        BlockBrace(writeInner);
+    }
+
     public override string ToString()
     {
         _sourceBuilder.AppendLine();
-        return _sourceBuilder.AppendLine(BottomMessage).ToString();
+        return _sourceBuilder.Append(BottomMessage).ToString();
     }
 }

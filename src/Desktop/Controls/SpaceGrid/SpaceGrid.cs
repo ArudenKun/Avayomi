@@ -4,16 +4,15 @@ using System.Collections.Specialized;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using DependencyPropertyGenerator;
+using Generator.Attributes;
 
 namespace Desktop.Controls.SpaceGrid;
 
-[DependencyProperty<double>("RowSpacing")]
-[DependencyProperty<double>("ColumnSpacing")]
+[AvaloniaProperty("RowSpacing", typeof(double))]
+[AvaloniaProperty("ColumnSpacing", typeof(double))]
 public partial class SpaceGrid : Grid
 {
-    public SpaceGrid()
-        => Children.CollectionChanged += ChildrenOnCollectionChanged;
+    public SpaceGrid() => Children.CollectionChanged += ChildrenOnCollectionChanged;
 
     /// <summary>
     /// Returns an enumerable of all the grid's row definitions, <u>excluding</u> spacing rows.
@@ -33,8 +32,14 @@ public partial class SpaceGrid : Grid
     {
         base.OnInitialized();
 
-        RowDefinitions.CollectionChanged += delegate { UpdateSpacedRows(); };
-        ColumnDefinitions.CollectionChanged += delegate { UpdateSpacedColumns(); };
+        RowDefinitions.CollectionChanged += delegate
+        {
+            UpdateSpacedRows();
+        };
+        ColumnDefinitions.CollectionChanged += delegate
+        {
+            UpdateSpacedColumns();
+        };
 
         UpdateSpacedRows();
         UpdateSpacedColumns();
@@ -62,9 +67,14 @@ public partial class SpaceGrid : Grid
 
     private void ChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.Action != NotifyCollectionChangedAction.Add && e.Action != NotifyCollectionChangedAction.Replace) return;
+        if (
+            e.Action != NotifyCollectionChangedAction.Add
+            && e.Action != NotifyCollectionChangedAction.Replace
+        )
+            return;
 
-        if (e.NewItems == null) return;
+        if (e.NewItems == null)
+            return;
 
         foreach (Control item in e.NewItems)
             item.Initialized += ItemOnInitialized;
@@ -72,7 +82,8 @@ public partial class SpaceGrid : Grid
 
     private void ItemOnInitialized(object? sender, EventArgs e)
     {
-        if (sender is not Control item) return;
+        if (sender is not Control item)
+            return;
 
         item.Initialized -= ItemOnInitialized;
 
@@ -87,8 +98,7 @@ public partial class SpaceGrid : Grid
 
     private void UpdateSpacedRows()
     {
-        var userRowDefinitions =
-            UserDefinedRowDefinitions.ToList(); // User-defined rows (e.g. the ones defined in XAML files)
+        var userRowDefinitions = UserDefinedRowDefinitions.ToList(); // User-defined rows (e.g. the ones defined in XAML files)
         var actualRowDefinitions = new RowDefinitions(); // User-defined + spacing rows
 
         int currentUserDefinition = 0,
@@ -108,13 +118,15 @@ public partial class SpaceGrid : Grid
         }
 
         RowDefinitions = actualRowDefinitions;
-        RowDefinitions.CollectionChanged += delegate { UpdateSpacedRows(); };
+        RowDefinitions.CollectionChanged += delegate
+        {
+            UpdateSpacedRows();
+        };
     }
 
     private void UpdateSpacedColumns()
     {
-        var userColumnDefinitions =
-            UserDefinedColumnDefinitions.ToList(); // User-defined columns (e.g. the ones defined in XAML files)
+        var userColumnDefinitions = UserDefinedColumnDefinitions.ToList(); // User-defined columns (e.g. the ones defined in XAML files)
         var actualColumnDefinitions = new ColumnDefinitions(); // User-defined + spacing columns
 
         int currentUserDefinition = 0,
@@ -134,7 +146,10 @@ public partial class SpaceGrid : Grid
         }
 
         ColumnDefinitions = actualColumnDefinitions;
-        ColumnDefinitions.CollectionChanged += delegate { UpdateSpacedColumns(); };
+        ColumnDefinitions.CollectionChanged += delegate
+        {
+            UpdateSpacedColumns();
+        };
     }
 
     private void RecalculateRowSpacing()

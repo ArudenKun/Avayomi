@@ -1,51 +1,29 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Metadata;
-using DependencyPropertyGenerator;
+using Generator.Attributes;
 
 namespace Desktop.Controls.Switch;
 
-[DependencyProperty<Case>("CurrentCase")]
-[DependencyProperty<object>("Value")]
-[DependencyProperty<Type>("TargetType")]
+[AvaloniaProperty("CurrentCase", typeof(Case))]
+[AvaloniaProperty("SwitchCases", typeof(CaseCollection), Attributes = [typeof(ContentAttribute)])]
+[AvaloniaProperty("Value", typeof(object))]
+[AvaloniaProperty("TargetType", typeof(Type))]
 [RequiresUnreferencedCode("Calls TypeDescriptor.GetConverter(Type) which uses reflection")]
 public partial class Switch : UserControl
 {
-    public static readonly StyledProperty<CaseCollection?> SwitchCasesProperty =
-        AvaloniaProperty.Register<Switch, CaseCollection?>(
-            name: "SwitchCases",
-            defaultValue: default,
-            inherits: false,
-            defaultBindingMode: Avalonia.Data.BindingMode.OneWay,
-            validate: null,
-            coerce: null
-        );
-
     public Switch()
     {
         InitializeComponent();
         SwitchCases = new CaseCollection();
     }
 
-    static Switch()
+    partial void OnValueChanged()
     {
-        ValueProperty.Changed.AddClassHandler<Switch>(
-            (@switch, _) =>
-            {
-                @switch.EvaluateCases();
-            }
-        );
-    }
-
-    [Content]
-    public CaseCollection? SwitchCases
-    {
-        get => GetValue(SwitchCasesProperty);
-        set => SetValue(SwitchCasesProperty, value);
+        EvaluateCases();
     }
 
     protected override void OnLoaded(RoutedEventArgs e)

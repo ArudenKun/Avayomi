@@ -25,10 +25,6 @@
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"/>
         <PackageReference Include="CliWrap" />
         <PackageReference Include="CommunityToolkit.Mvvm"/>
-        <PackageReference Include="DependencyPropertyGenerator">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="H.Ipc" />
         <PackageReference Include="H.Pipes" />
         <PackageReference Include="Material.Icons.Avalonia"/>

@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -14,23 +12,20 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Generator;
 
-internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<TAttribute, TDeclarationSyntax>
-    : IIncrementalGenerator
+internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<
+    TAttribute,
+    TDeclarationSyntax
+> : IIncrementalGenerator
     where TAttribute : Attribute
     where TDeclarationSyntax : MemberDeclarationSyntax
 {
-    protected static readonly string AttributeType = typeof(TAttribute).Name;
+    private static string AttributeType { get; } = typeof(TAttribute).Name;
 
     // ReSharper disable once StaticMemberInGenericType
-    protected static readonly string AttributeName = Regex.Replace(
-        AttributeType,
-        "Attribute$",
-        "",
-        RegexOptions.Compiled
-    );
+    private static string AttributeName { get; } =
+        Regex.Replace(AttributeType, "Attribute$", "", RegexOptions.Compiled);
 
-    protected virtual IEnumerable<(string Name, string Source)> StaticSources =>
-        [];
+    protected virtual IEnumerable<(string Name, string Source)> StaticSources => [];
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -41,15 +36,20 @@ internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<TAttribute
             IsSyntaxTarget,
             GetSyntaxTarget
         );
-
         var compilationProvider = context
             .CompilationProvider.Combine(syntaxProvider.Collect())
             .Combine(context.AnalyzerConfigOptionsProvider);
         context.RegisterImplementationSourceOutput(
             compilationProvider,
             (sourceProductionContext, provider) =>
-                OnExecute(sourceProductionContext, provider.Left.Left, provider.Left.Right, provider.Right)
+                OnExecute(
+                    sourceProductionContext,
+                    provider.Left.Left,
+                    provider.Left.Right,
+                    provider.Right
+                )
         );
+        return;
 
         static bool IsSyntaxTarget(SyntaxNode node, CancellationToken _)
         {
@@ -87,10 +87,15 @@ internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<TAttribute
 
                     var model = compilation.GetSemanticModel(node.SyntaxTree);
                     var symbol = model.GetDeclaredSymbol(Node(node));
+
                     var attribute = symbol
                         ?.GetAttributes()
                         .SingleOrDefault(x => x.AttributeClass?.Name == AttributeType);
+
                     if (attribute is null)
+                        continue;
+
+                    if (symbol is null)
                         continue;
 
                     var (generatedCode, error) = _GenerateCode(
@@ -130,7 +135,7 @@ internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<TAttribute
         }
     }
 
-    protected abstract (string GeneratedCode, DiagnosticDetail Error) GenerateCode(
+    protected abstract (string? GeneratedCode, DiagnosticDetail Error) GenerateCode(
         Compilation compilation,
         SyntaxNode node,
         ISymbol symbol,
@@ -138,7 +143,7 @@ internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<TAttribute
         AnalyzerConfigOptions options
     );
 
-    private (string GeneratedCode, DiagnosticDetail Error) _GenerateCode(
+    private (string? GeneratedCode, DiagnosticDetail Error) _GenerateCode(
         Compilation compilation,
         SyntaxNode node,
         ISymbol symbol,
@@ -157,7 +162,7 @@ internal abstract class SourceGeneratorForDeclaredMemberWithAttribute<TAttribute
         }
 
         static DiagnosticDetail InternalError(Exception e) =>
-            new("Internal Error", Message: e.Message) { Title = "Internal Error", Message = e.Message };
+            new() { Title = "Internal Error", Message = e.Message };
     }
 
     private const string Ext = ".g.cs";
