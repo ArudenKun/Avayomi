@@ -1,8 +1,10 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using Generator.Attributes;
 using Generator.Extensions;
-using Generator.Metadata.CopyCode;
+using Generator.Models;
 using Generator.Utilities;
+using H;
 using H.Generators.Extensions;
 using Microsoft.CodeAnalysis;
 
@@ -11,18 +13,15 @@ namespace Generator.Generators;
 [Generator]
 internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
 {
+    private const string Id = "APG";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(ctx =>
         {
             ctx.AddSource(
                 $"{typeof(AvaloniaPropertyAttribute).FullName}.g.cs",
-                Copy.GeneratorAttributesAvaloniaPropertyAttribute
-            );
-
-            ctx.AddSource(
-                $"{typeof(AvaloniaPropertyAttribute<>).FullName}.g.cs",
-                Copy.GeneratorAttributesAvaloniaPropertyAttribute_T_
+                Resources.AvaloniaPropertyAttribute_cs.AsString()
             );
         });
 
@@ -34,25 +33,173 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
             $"{typeof(AvaloniaPropertyAttribute<>).FullName}"
         );
 
-        var nonGenericCompilationProvider = context.CompilationProvider.Combine(
-            nonGeneric.Collect()
+        var staticConstructorSyntaxProvider = context
+            .SyntaxProvider.ForAttributeWithMetadataNameOfClassesAndRecords(
+                $"{typeof(AvaloniaPropertyAttribute).FullName}"
+            )
+            .SelectManyAllAttributesOfCurrentClassSyntax()
+            .SelectAndReportExceptions(PrepareData, context, Id)
+            .WhereNotNull()
+            .CollectAsEquatableArray();
+
+        context
+            .CompilationProvider.Combine(staticConstructorSyntaxProvider)
+            .SelectAndReportExceptions(x => GetSourceCode(x.Left, x.Right), context, Id)
+            .AddSource(context);
+
+        context.SyntaxProvider.ForAttributeWithMetadataNameOfClassesAndRecords(
+            $"{typeof(AvaloniaPropertyAttribute<>).FullName}"
         );
-        var genericCompilationProvider = context.CompilationProvider.Combine(generic.Collect());
+
+        var combinedCompilationProvider = context
+            .CompilationProvider.Combine(nonGeneric.Collect())
+            .Combine(generic.Collect());
 
         context.RegisterImplementationSourceOutput(
-            nonGenericCompilationProvider,
+            combinedCompilationProvider,
             (sourceProductionContext, provider) =>
-                OnExecute(sourceProductionContext, provider.Left, provider.Right, false)
-        );
-
-        context.RegisterImplementationSourceOutput(
-            genericCompilationProvider,
-            (sourceProductionContext, provider) =>
-                OnExecute(sourceProductionContext, provider.Left, provider.Right, true)
+                OnExecute(
+                    sourceProductionContext,
+                    provider.Left.Left,
+                    provider.Left.Right,
+                    provider.Right
+                )
         );
     }
 
+    private static (ClassData Class, AvaloniaPropertyData AvaloniaProperty)? PrepareData(
+        ClassWithAttributesContext context
+    )
+    {
+        var (_, attributes, _, classSymbol) = context;
+        if (attributes.FirstOrDefault() is not { } attribute)
+        {
+            return null;
+        }
+
+        var classData = classSymbol.GetClassData();
+        var dependencyPropertyData = attribute.GetAvaloniaPropertyData();
+
+        return (classData, dependencyPropertyData);
+    }
+
+    private static FileWithName GetSourceCode(
+        Compilation compilation,
+        EquatableArray<(ClassData Class, AvaloniaPropertyData AvaloniaProperty)> values
+    )
+    {
+        if (values.AsImmutableArray().IsDefaultOrEmpty)
+        {
+            return FileWithName.Empty;
+        }
+
+        var @class = values.First().Class;
+        var classSymbol = @class.TypeSymbol;
+        var avaloniaProperties = values.Select(static x => x.AvaloniaProperty).ToArray();
+        if (!avaloniaProperties.Where(static property => !property.IsDirect).Any())
+            return FileWithName.Empty;
+        {
+            var source = new SourceStringBuilder(classSymbol);
+
+            var genericStyledPropertySymbol = compilation.GetTypeByMetadataName(
+                "Avalonia.StyledProperty`1"
+            );
+
+            var avaloniaPropertySymbol = compilation.GetTypeByMetadataName(
+                "Avalonia.AvaloniaProperty"
+            );
+
+            source.Line("#nullable enable");
+
+            source.PartialTypeBlockBrace(() =>
+            {
+                source.StaticConstructor(() =>
+                {
+                    foreach (var avaloniaProperty in avaloniaProperties)
+                    {
+                        if (genericStyledPropertySymbol is null || avaloniaPropertySymbol is null)
+                            continue;
+
+                        var propertyName = avaloniaProperty.Name + "Property";
+
+                        INamedTypeSymbol targetTypeSymbol;
+                        if (avaloniaProperty.TypeSymbol.IsValueType)
+                            targetTypeSymbol = avaloniaProperty.TypeSymbol;
+                        else
+                            targetTypeSymbol = compilation
+                                .GetSpecialType(SpecialType.System_Nullable_T)
+                                .Construct(avaloniaProperty.TypeSymbol);
+
+                        var type = targetTypeSymbol.ToDisplayString();
+
+                        var onChanged1 = classSymbol.IsPartialMethodImplemented(
+                            $"On{avaloniaProperty.Name}Changed()"
+                        );
+
+                        var onChanged2 = classSymbol.IsPartialMethodImplemented(
+                            $"On{avaloniaProperty.Name}Changed({type})"
+                        );
+
+                        var onChanged3 = classSymbol.IsPartialMethodImplemented(
+                            $"On{avaloniaProperty.Name}Changed({type}, {type})"
+                        );
+
+                        if (!onChanged1 && !onChanged2 && !onChanged3)
+                            continue;
+
+                        source.Line(
+                            $"{propertyName}.Changed.Subscribe(new global::Avalonia.Reactive.AnonymousObserver<global::Avalonia.AvaloniaPropertyChangedEventArgs<{targetTypeSymbol.ToFullDisplayString()}>>(static x =>"
+                        );
+                        source.BlockDecl(
+                            () =>
+                            {
+                                if (onChanged1)
+                                    source.Line(
+                                        $"(({classSymbol.ToFullDisplayString()})x.Sender).On{avaloniaProperty.Name}Changed();"
+                                    );
+
+                                if (onChanged2)
+                                    source.Line(
+                                        $"(({classSymbol.ToFullDisplayString()})x.Sender).On{avaloniaProperty.Name}Changed(({targetTypeSymbol.ToFullDisplayString()})x.NewValue.GetValueOrDefault());"
+                                    );
+
+                                if (onChanged3)
+                                    source.Line(
+                                        $"(({classSymbol.ToFullDisplayString()})x.Sender).On{avaloniaProperty.Name}Changed(({targetTypeSymbol.ToFullDisplayString()})x.OldValue.GetValueOrDefault(), ({targetTypeSymbol.ToFullDisplayString()})x.NewValue.GetValueOrDefault());"
+                                    );
+                            },
+                            "));"
+                        );
+                    }
+                });
+            });
+
+            var text = source.ToString();
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                return new FileWithName(
+                    Name: $"{@class.FullName}.StaticConstructor.g.cs",
+                    Text: text
+                );
+            }
+        }
+
+        return FileWithName.Empty;
+    }
+
     private static void OnExecute(
+        SourceProductionContext context,
+        Compilation compilation,
+        ImmutableArray<GeneratorAttributeSyntaxContext> nonGenerics,
+        ImmutableArray<GeneratorAttributeSyntaxContext> generics
+    )
+    {
+        GenerateCode(context, compilation, nonGenerics, false);
+        GenerateCode(context, compilation, generics, true);
+    }
+
+    private static void GenerateCode(
         SourceProductionContext context,
         Compilation compilation,
         ImmutableArray<GeneratorAttributeSyntaxContext> syntaxContexts,
@@ -63,7 +210,7 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
         {
             var classSymbol = (INamedTypeSymbol)syntaxContext.TargetSymbol;
 
-            var attributeDatas = classSymbol.GetAttributes();
+            var attributeDatas = syntaxContext.Attributes;
 
             var genericStyledPropertySymbol = compilation.GetTypeByMetadataName(
                 "Avalonia.StyledProperty`1"
@@ -80,98 +227,17 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
             source.Line();
             source.PartialTypeBlockBrace(() =>
             {
-                source.StaticConstructor(() =>
-                {
-                    foreach (var attributeData in attributeDatas)
-                    {
-                        var attribute = AvaloniaPropertyAttribute.TryCreate(
-                            attributeData,
-                            out var result
-                        )
-                            ? result
-                            : null;
-
-                        if (
-                            attribute is null
-                            || genericStyledPropertySymbol is null
-                            || avaloniaPropertySymbol is null
-                        )
-                            continue;
-
-                        var propertyName = attribute.Name + "Property";
-
-                        INamedTypeSymbol targetTypeSymbol;
-                        if (attribute.TypeSymbol.IsValueType)
-                            targetTypeSymbol = attribute.TypeSymbol;
-                        else
-                            targetTypeSymbol = compilation
-                                .GetSpecialType(SpecialType.System_Nullable_T)
-                                .Construct(attribute.TypeSymbol);
-
-                        var type = targetTypeSymbol.ToDisplayString();
-
-                        var onChanged1 = classSymbol.IsPartialMethodImplemented(
-                            $"On{attribute.Name}Changed()"
-                        );
-
-                        var onChanged2 = classSymbol.IsPartialMethodImplemented(
-                            $"On{attribute.Name}Changed({type})"
-                        );
-
-                        var onChanged3 = classSymbol.IsPartialMethodImplemented(
-                            $"On{attribute.Name}Changed({type}, {type})"
-                        );
-
-                        if (!onChanged1 && !onChanged2 && !onChanged3)
-                            continue;
-
-                        source.Line(
-                            $"{propertyName}.Changed.Subscribe(new global::Avalonia.Reactive.AnonymousObserver<global::Avalonia.AvaloniaPropertyChangedEventArgs<{targetTypeSymbol.ToFullDisplayString()}>>(static x =>"
-                        );
-                        source.BlockDecl(
-                            () =>
-                            {
-                                if (onChanged1)
-                                    source.Line(
-                                        $"(({classSymbol.ToFullDisplayString()})x.Sender).On{attribute.Name}Changed();"
-                                    );
-
-                                if (onChanged2)
-                                    source.Line(
-                                        $"(({classSymbol.ToFullDisplayString()})x.Sender).On{attribute.Name}Changed(({targetTypeSymbol.ToFullDisplayString()})x.NewValue.GetValueOrDefault());"
-                                    );
-
-                                if (onChanged3)
-                                    source.Line(
-                                        $"(({classSymbol.ToFullDisplayString()})x.Sender).On{attribute.Name}Changed(({targetTypeSymbol.ToFullDisplayString()})x.OldValue.GetValueOrDefault(), ({targetTypeSymbol.ToFullDisplayString()})x.NewValue.GetValueOrDefault());"
-                                    );
-                            },
-                            "));"
-                        );
-                        source.Line();
-                    }
-                });
-
-                source.Line();
-
-                foreach (var attributeData in attributeDatas)
-                {
-                    var attribute = AvaloniaPropertyAttribute.TryCreate(
-                        attributeData,
-                        out var result
+                foreach (
+                    var attribute in attributeDatas.Select(attributeData =>
+                        attributeData.GetAvaloniaPropertyData()
                     )
-                        ? result
-                        : null;
-
-                    if (
-                        attribute is null
-                        || genericStyledPropertySymbol is null
-                        || avaloniaPropertySymbol is null
-                    )
+                )
+                {
+                    if (genericStyledPropertySymbol is null || avaloniaPropertySymbol is null)
                         continue;
 
-                    INamedTypeSymbol targetTypeSymbol;
-                    if (attribute.TypeSymbol.IsValueType)
+                    ITypeSymbol targetTypeSymbol;
+                    if (attribute.IsValueType)
                         targetTypeSymbol = attribute.TypeSymbol;
                     else
                         targetTypeSymbol = compilation
@@ -198,12 +264,8 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                     source.BlockTab(() => source.Line(");"));
                     source.Line();
 
-                    var propertyAttributes = attributeData.GetArgumentArray<INamedTypeSymbol>(
-                        nameof(Attributes)
-                    );
-
-                    foreach (var propertyAttribute in propertyAttributes)
-                        source.Line($"[{propertyAttribute.ToFullDisplayString()}]");
+                    foreach (var propertyAttribute in attribute.PropertyAttributes)
+                        source.Line($"[{propertyAttribute}]");
                     source.Line(
                         $"public {targetTypeSymbol.ToFullDisplayString()} {attribute.Name}"
                     );
@@ -225,7 +287,7 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                 }
             });
 
-            string hintName = $"{classSymbol.ToDisplayString()}.AvaloniaProperty";
+            var hintName = $"{classSymbol.ToDisplayString()}.AvaloniaProperty";
             if (isGeneric)
             {
                 hintName += "`1";

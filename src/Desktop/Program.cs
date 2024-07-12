@@ -3,7 +3,7 @@ using System.IO.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Avalonia;
-using CommunityToolkit.Mvvm.DependencyInjection;
+using Avalonia.Data;
 using Desktop.Extensions;
 using Desktop.Helpers;
 using Desktop.Hosting;

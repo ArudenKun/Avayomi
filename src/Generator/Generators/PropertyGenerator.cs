@@ -6,8 +6,8 @@ using System.Threading;
 using Generator.Attributes;
 using Generator.Extensions;
 using Generator.Interfaces;
-using Generator.Metadata.CopyCode;
 using Generator.Utilities;
+using H;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -22,7 +22,7 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
         {
             ctx.AddSource(
                 $"{typeof(IView<>).FullName?.SanitizeName()}.g.cs",
-                Copy.GeneratorInterfacesIView_TViewModel_
+                Resources.IView_cs.AsString()
             );
         });
 

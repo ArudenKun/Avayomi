@@ -4,8 +4,8 @@ using System.Linq;
 using Generator.Attributes;
 using Generator.Extensions;
 using Generator.Interfaces;
-using Generator.Metadata.CopyCode;
 using Generator.Utilities;
+using H;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -19,11 +19,11 @@ internal sealed class StaticViewLocatorGenerator
         [
             (
                 $"{typeof(StaticViewLocatorAttribute).FullName}",
-                Copy.GeneratorAttributesStaticViewLocatorAttribute
+                Resources.StaticViewLocatorAttribute_cs.AsString()
             ),
-            ($"{typeof(SingletonAttribute).FullName}", Copy.GeneratorAttributesSingletonAttribute),
-            ($"{typeof(IgnoreAttribute).FullName}", Copy.GeneratorAttributesIgnoreAttribute),
-            ($"{typeof(IActivatable).FullName}", Copy.GeneratorInterfacesIActivatable)
+            ($"{typeof(SingletonAttribute).FullName}", Resources.SingletonAttribute_cs.AsString()),
+            ($"{typeof(IgnoreAttribute).FullName}", Resources.IgnoreAttribute_cs.AsString()),
+            ($"{typeof(IActivatable).FullName}", Resources.IActivatable_cs.AsString())
         ];
 
     protected override (string GeneratedCode, DiagnosticDetail Error) GenerateCode(

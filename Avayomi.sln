@@ -14,8 +14,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Desktop", "src\Desktop\Desk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator", "src\Generator\Generator.csproj", "{CD462F2D-25C0-4C57-9BA4-46A2E0465761}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator.Metadata", "src\Generator.Metadata\Generator.Metadata.csproj", "{C485B638-8DDF-4FA9-A05E-EA71D392F580}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,7 +22,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0C2B9FB0-C323-4090-9A5F-6A6418F687F2} = {1167DDEF-6475-45EB-A6F7-5258F059A973}
 		{CD462F2D-25C0-4C57-9BA4-46A2E0465761} = {1167DDEF-6475-45EB-A6F7-5258F059A973}
-		{C485B638-8DDF-4FA9-A05E-EA71D392F580} = {1167DDEF-6475-45EB-A6F7-5258F059A973}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0C2B9FB0-C323-4090-9A5F-6A6418F687F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -35,9 +32,5 @@ Global
 		{CD462F2D-25C0-4C57-9BA4-46A2E0465761}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD462F2D-25C0-4C57-9BA4-46A2E0465761}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD462F2D-25C0-4C57-9BA4-46A2E0465761}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C485B638-8DDF-4FA9-A05E-EA71D392F580}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C485B638-8DDF-4FA9-A05E-EA71D392F580}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C485B638-8DDF-4FA9-A05E-EA71D392F580}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C485B638-8DDF-4FA9-A05E-EA71D392F580}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

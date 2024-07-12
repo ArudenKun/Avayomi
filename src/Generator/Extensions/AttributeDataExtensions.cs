@@ -2,39 +2,42 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using H.Generators.Extensions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Generator.Extensions;
 
 internal static class AttributeDataExtensions
 {
-    /// <summary>
-    /// </summary>
-    /// <param name="attributeData"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    public static ITypeSymbol? GetGenericTypeArgument(
-        this AttributeData attributeData,
-        int position
+    public static string? GetNamedArgumentExpression(
+        this AttributeSyntax attributeSyntax,
+        string name
     )
     {
-        attributeData = attributeData ?? throw new ArgumentNullException(nameof(attributeData));
+        attributeSyntax =
+            attributeSyntax ?? throw new ArgumentNullException(nameof(attributeSyntax));
 
-        return attributeData.AttributeClass?.TypeArguments.ElementAtOrDefault(position);
+        return attributeSyntax
+            .ArgumentList?.Arguments.FirstOrDefault(x =>
+            {
+                var nameEquals = x.NameEquals?.ToFullString().Trim('=', ' ', '\t', '\r', '\n');
+
+                return nameEquals == name;
+            })
+            ?.Expression.ToFullString();
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="attributeData"></param>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    public static TypedConstant GetNamedArgument(this AttributeData attributeData, string name)
+    public static ITypeSymbol? GetGenericTypeArgumentOrNamed(
+        this AttributeData attribute,
+        int position,
+        string name
+    )
     {
-        attributeData = attributeData ?? throw new ArgumentNullException(nameof(attributeData));
+        attribute = attribute ?? throw new ArgumentNullException(nameof(attribute));
 
-        return attributeData.NamedArguments.FirstOrDefault(pair => pair.Key == name).Value;
+        return attribute.GetGenericTypeArgument(position)
+            ?? attribute.GetNamedArgument(name).Value as ITypeSymbol;
     }
 
     /// <summary>
@@ -62,7 +65,7 @@ internal static class AttributeDataExtensions
     /// <param name="attributeData"></param>
     /// <param name="name"></param>
     /// <returns></returns>
-    internal static T? GetArgument<T>(this AttributeData attributeData, string name)
+    internal static T? GetNamedArgument<T>(this AttributeData attributeData, string name)
     {
         var arguments = attributeData.NamedArguments;
 

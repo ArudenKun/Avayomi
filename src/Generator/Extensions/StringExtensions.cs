@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -52,5 +53,14 @@ internal static class StringExtensions
         }
 
         return new string(output);
+    }
+
+    public static string RemoveNameof(this string value)
+    {
+        value = value ?? throw new ArgumentNullException(nameof(value));
+
+        return value.Contains("nameof(")
+            ? value[(value.LastIndexOf('.') + 1)..].TrimEnd(')', ' ')
+            : value;
     }
 }

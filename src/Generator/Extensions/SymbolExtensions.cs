@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using Generator.Models;
+using H.Generators.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -37,38 +40,6 @@ internal static class SymbolExtensions
     public static string ToFullDisplayString(this ISymbol s)
     {
         return s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-    }
-
-    public static string GetFullNameWithArity(
-        this INamedTypeSymbol namedTypeSymbol,
-        bool includeGlobalPrefix
-    )
-    {
-        var name = namedTypeSymbol.Name;
-        if (namedTypeSymbol.IsGenericType)
-        {
-            name += "`" + namedTypeSymbol.TypeArguments.Length;
-        }
-
-        if (
-            namedTypeSymbol.ContainingNamespace == null
-            || namedTypeSymbol.ContainingNamespace.IsGlobalNamespace
-        )
-            return name;
-
-        var namespaceName = namedTypeSymbol.ContainingNamespace.ToDisplayString();
-        if (includeGlobalPrefix)
-        {
-            namespaceName = "global::" + namespaceName;
-        }
-        name = namespaceName + "." + name;
-
-        return name;
-    }
-
-    public static string AsCommaSeparated<T>(this IEnumerable<T> items, string? suffixes = null)
-    {
-        return string.Join($",{suffixes}", items);
     }
 
     public static bool IsOfBaseType(this ITypeSymbol symbol, string type)
@@ -141,8 +112,13 @@ internal static class SymbolExtensions
         return false;
     }
 
-    public static bool IsSpecialType(this ITypeSymbol symbol)
+    public static bool? IsSpecialType(this ITypeSymbol? symbol)
     {
+        if (symbol == null)
+        {
+            return null;
+        }
+
         return symbol is IArrayTypeSymbol
             || symbol.SpecialType != SpecialType.None
             || (
@@ -208,5 +184,37 @@ internal static class SymbolExtensions
     public static bool IsDefinedInMetadata(this ISymbol symbol)
     {
         return symbol.Locations.Any(loc => loc.IsInMetadata);
+    }
+
+    public static ClassData GetClassData(this INamedTypeSymbol classSymbol)
+    {
+        classSymbol = classSymbol ?? throw new ArgumentNullException(nameof(classSymbol));
+
+        var fullClassName = classSymbol.ToString() ?? string.Empty;
+        var type = classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var @namespace = fullClassName[..fullClassName.LastIndexOf('.')];
+        var className = fullClassName[(fullClassName.LastIndexOf('.') + 1)..];
+        var isStaticClass = classSymbol.IsStatic;
+        var classModifiers = classSymbol.IsStatic ? "public static " : string.Empty;
+        var methods = classSymbol
+            .GetMembers()
+            .OfType<IMethodSymbol>()
+            // Roslyn bug?
+            //.Where(static value => value.PartialImplementationPart != null)
+            .Select(static value =>
+                value.ToDisplayString().Replace("?", string.Empty).TrimStart('.')
+            )
+            .ToArray();
+
+        return new ClassData(
+            Namespace: @namespace,
+            Name: className,
+            FullName: fullClassName,
+            Type: type,
+            TypeSymbol: classSymbol,
+            Modifiers: classModifiers,
+            IsStatic: isStaticClass,
+            Methods: methods.ToImmutableArray().AsEquatableArray()
+        );
     }
 }

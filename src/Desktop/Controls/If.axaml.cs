@@ -11,6 +11,8 @@ namespace Desktop.Controls;
 [AvaloniaProperty("False", typeof(Control))]
 public partial class If : UserControl
 {
+    // public StyledProperty<bool> TestProperty = AvaloniaProperty.Register<bool>(name: "", defaultBindingMode: );
+
     public If()
     {
         InitializeComponent();

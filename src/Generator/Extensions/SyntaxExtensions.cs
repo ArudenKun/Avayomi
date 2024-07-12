@@ -34,4 +34,19 @@ internal static class SyntaxExtensions
             .Select(x => (x.Identifier.ToString(), x.GetLeadingComments().Replace(strip, "")))
             .Where(x => !string.IsNullOrWhiteSpace(x.Item2));
     }
+
+    public static AttributeSyntax? TryFindAttributeSyntax(
+        this ClassDeclarationSyntax classSyntax,
+        AttributeData attribute
+    )
+    {
+        var name = attribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+
+        return classSyntax
+            .AttributeLists.SelectMany(static x => x.Attributes)
+            .FirstOrDefault(x =>
+                x.ArgumentList?.Arguments.FirstOrDefault()?.ToString().Trim('"').RemoveNameof()
+                == name
+            );
+    }
 }

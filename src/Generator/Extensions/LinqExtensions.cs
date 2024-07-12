@@ -8,4 +8,9 @@ internal static class LinqExtensions
     {
         return source.TryGetValue(key, out var value) ? value : default;
     }
+
+    public static string AsCommaSeparated<T>(this IEnumerable<T> items, string? suffixes = null)
+    {
+        return string.Join($",{suffixes}", items);
+    }
 }

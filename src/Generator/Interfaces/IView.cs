@@ -1,10 +1,9 @@
-﻿using Generator.Metadata.CopyCode;
+﻿using System.ComponentModel;
 
 namespace Generator.Interfaces;
 
-[Copy]
 public interface IView<TViewModel>
-    where TViewModel : System.ComponentModel.INotifyPropertyChanged
+    where TViewModel : INotifyPropertyChanged
 {
     TViewModel ViewModel { get; init; }
 }

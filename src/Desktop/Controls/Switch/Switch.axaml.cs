@@ -9,8 +9,12 @@ using Generator.Attributes;
 namespace Desktop.Controls.Switch;
 
 [AvaloniaProperty("CurrentCase", typeof(Case))]
-[AvaloniaProperty("SwitchCases", typeof(CaseCollection), Attributes = [typeof(ContentAttribute)])]
-[AvaloniaProperty("Value", typeof(object))]
+[AvaloniaProperty(
+    "SwitchCases",
+    typeof(CaseCollection),
+    PropertyAttributes = [typeof(ContentAttribute)]
+)]
+[AvaloniaProperty<object>("Value")]
 [AvaloniaProperty("TargetType", typeof(Type))]
 [RequiresUnreferencedCode("Calls TypeDescriptor.GetConverter(Type) which uses reflection")]
 public partial class Switch : UserControl
