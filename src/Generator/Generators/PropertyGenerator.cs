@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using Generator.Attributes;
 using Generator.Extensions;
+using Generator.Interfaces;
+using Generator.Metadata.CopyCode;
 using Generator.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,6 +18,14 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        context.RegisterPostInitializationOutput(ctx =>
+        {
+            ctx.AddSource(
+                $"{typeof(IView<>).FullName?.SanitizeName()}.g.cs",
+                Copy.GeneratorInterfacesIView_TViewModel_
+            );
+        });
+
         var syntaxProvider = context.SyntaxProvider.CreateSyntaxProvider(
             IsSyntaxTarget,
             GetSyntaxTarget
@@ -32,10 +42,14 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
     private static void OnExecute(
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<ClassDeclarationSyntax> nodes
+        ImmutableArray<BaseTypeDeclarationSyntax> nodes
     )
     {
         var targetSymbol = compilation.GetTypeByMetadataName(MetadataNames.ObservableObject);
+
+        var viewInterfaceSymbol = compilation.GetTypeByMetadataName(
+            $"{MetadataNames.Interfaces}.IView`1"
+        );
 
         var viewModelSymbols = GetAll<INamedTypeSymbol>(nodes, compilation)
             .Where(x => !x.IsAbstract)
@@ -53,12 +67,15 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
 
             var source = new SourceStringBuilder(viewSymbol);
 
-            source.PartialTypeBlockBrace(() =>
-            {
-                source.Line(
-                    $"public {viewModelSymbol.ToDisplayString()} ViewModel {{ get; init; }}"
-                );
-            });
+            source.PartialTypeBlockBrace(
+                $"{viewInterfaceSymbol?.Construct(viewModelSymbol).ToFullDisplayString()}",
+                () =>
+                {
+                    source.Line(
+                        $"public {viewModelSymbol.ToFullDisplayString()} ViewModel {{ get; init; }}"
+                    );
+                }
+            );
 
             context.AddSource($"{viewSymbol.ToDisplayString()}.Property.g.cs", source.ToString());
         }
@@ -66,15 +83,15 @@ internal sealed class PropertyGenerator : IIncrementalGenerator
 
     private static bool IsSyntaxTarget(SyntaxNode node, CancellationToken _)
     {
-        return node is ClassDeclarationSyntax;
+        return node is BaseTypeDeclarationSyntax;
     }
 
-    private static ClassDeclarationSyntax GetSyntaxTarget(
+    private static BaseTypeDeclarationSyntax GetSyntaxTarget(
         GeneratorSyntaxContext context,
         CancellationToken _
     )
     {
-        return (ClassDeclarationSyntax)context.Node;
+        return (BaseTypeDeclarationSyntax)context.Node;
     }
 
     private static INamedTypeSymbol? GetView(ISymbol symbol, Compilation compilation)

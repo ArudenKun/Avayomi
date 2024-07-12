@@ -18,21 +18,12 @@ internal sealed class StaticViewLocatorGenerator
     protected override IEnumerable<(string Name, string Source)> StaticSources =>
         [
             (
-                $"{MetadataNames.Attributes}.{nameof(StaticViewLocatorAttribute)}.g.cs",
+                $"{typeof(StaticViewLocatorAttribute).FullName}",
                 Copy.GeneratorAttributesStaticViewLocatorAttribute
             ),
-            (
-                $"{MetadataNames.Attributes}.{nameof(SingletonAttribute)}.g.cs",
-                Copy.GeneratorAttributesSingletonAttribute
-            ),
-            (
-                $"{MetadataNames.Attributes}.{nameof(IgnoreAttribute)}.g.cs",
-                Copy.GeneratorAttributesIgnoreAttribute
-            ),
-            (
-                $"{MetadataNames.Attributes}.{nameof(IActivatable)}.g.cs",
-                Copy.GeneratorInterfacesIActivatable
-            )
+            ($"{typeof(SingletonAttribute).FullName}", Copy.GeneratorAttributesSingletonAttribute),
+            ($"{typeof(IgnoreAttribute).FullName}", Copy.GeneratorAttributesIgnoreAttribute),
+            ($"{typeof(IActivatable).FullName}", Copy.GeneratorInterfacesIActivatable)
         ];
 
     protected override (string GeneratedCode, DiagnosticDetail Error) GenerateCode(

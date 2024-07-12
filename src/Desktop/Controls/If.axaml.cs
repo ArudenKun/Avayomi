@@ -3,6 +3,9 @@ using Generator.Attributes;
 
 namespace Desktop.Controls;
 
+// [AvaloniaProperty<bool>("Condition")]
+// [AvaloniaProperty<Control>("True")]
+// [AvaloniaProperty<Control>("False")]
 [AvaloniaProperty("Condition", typeof(bool))]
 [AvaloniaProperty("True", typeof(Control))]
 [AvaloniaProperty("False", typeof(Control))]

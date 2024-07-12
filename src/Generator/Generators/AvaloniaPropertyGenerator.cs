@@ -3,6 +3,7 @@ using Generator.Attributes;
 using Generator.Extensions;
 using Generator.Metadata.CopyCode;
 using Generator.Utilities;
+using H.Generators.Extensions;
 using Microsoft.CodeAnalysis;
 
 namespace Generator.Generators;
@@ -15,27 +16,47 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
         context.RegisterPostInitializationOutput(ctx =>
         {
             ctx.AddSource(
-                $"{MetadataNames.Attributes}.{nameof(AvaloniaPropertyAttribute)}.g.cs",
+                $"{typeof(AvaloniaPropertyAttribute).FullName}.g.cs",
                 Copy.GeneratorAttributesAvaloniaPropertyAttribute
+            );
+
+            ctx.AddSource(
+                $"{typeof(AvaloniaPropertyAttribute<>).FullName}.g.cs",
+                Copy.GeneratorAttributesAvaloniaPropertyAttribute_T_
             );
         });
 
-        var syntaxProvider = context.SyntaxProvider.ForAttributeWithMetadataNameOfClassesAndRecords(
+        var nonGeneric = context.SyntaxProvider.ForAttributeWithMetadataNameOfClassesAndRecords(
             $"{typeof(AvaloniaPropertyAttribute).FullName}"
         );
 
-        var compilationProvider = context.CompilationProvider.Combine(syntaxProvider.Collect());
+        var generic = context.SyntaxProvider.ForAttributeWithMetadataNameOfClassesAndRecords(
+            $"{typeof(AvaloniaPropertyAttribute<>).FullName}"
+        );
+
+        var nonGenericCompilationProvider = context.CompilationProvider.Combine(
+            nonGeneric.Collect()
+        );
+        var genericCompilationProvider = context.CompilationProvider.Combine(generic.Collect());
+
         context.RegisterImplementationSourceOutput(
-            compilationProvider,
+            nonGenericCompilationProvider,
             (sourceProductionContext, provider) =>
-                OnExecute(sourceProductionContext, provider.Left, provider.Right)
+                OnExecute(sourceProductionContext, provider.Left, provider.Right, false)
+        );
+
+        context.RegisterImplementationSourceOutput(
+            genericCompilationProvider,
+            (sourceProductionContext, provider) =>
+                OnExecute(sourceProductionContext, provider.Left, provider.Right, true)
         );
     }
 
     private static void OnExecute(
         SourceProductionContext context,
         Compilation compilation,
-        ImmutableArray<GeneratorAttributeSyntaxContext> syntaxContexts
+        ImmutableArray<GeneratorAttributeSyntaxContext> syntaxContexts,
+        bool isGeneric
     )
     {
         foreach (var syntaxContext in syntaxContexts)
@@ -204,10 +225,13 @@ internal sealed class AvaloniaPropertyGenerator : IIncrementalGenerator
                 }
             });
 
-            context.AddSource(
-                $"{classSymbol.ToDisplayString()}.AvaloniaProperty.g.cs",
-                source.ToString()
-            );
+            string hintName = $"{classSymbol.ToDisplayString()}.AvaloniaProperty";
+            if (isGeneric)
+            {
+                hintName += "`1";
+            }
+
+            context.AddSource($"{hintName}.g.cs", source.ToString());
         }
     }
 }

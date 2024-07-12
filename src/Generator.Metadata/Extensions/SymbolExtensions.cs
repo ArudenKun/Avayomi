@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Generator.Extensions;
+namespace Generator.Metadata.Extensions;
 
 internal static class SymbolExtensions
 {
@@ -37,33 +37,6 @@ internal static class SymbolExtensions
     public static string ToFullDisplayString(this ISymbol s)
     {
         return s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-    }
-
-    public static string GetFullNameWithArity(
-        this INamedTypeSymbol namedTypeSymbol,
-        bool includeGlobalPrefix
-    )
-    {
-        var name = namedTypeSymbol.Name;
-        if (namedTypeSymbol.IsGenericType)
-        {
-            name += "`" + namedTypeSymbol.TypeArguments.Length;
-        }
-
-        if (
-            namedTypeSymbol.ContainingNamespace == null
-            || namedTypeSymbol.ContainingNamespace.IsGlobalNamespace
-        )
-            return name;
-
-        var namespaceName = namedTypeSymbol.ContainingNamespace.ToDisplayString();
-        if (includeGlobalPrefix)
-        {
-            namespaceName = "global::" + namespaceName;
-        }
-        name = namespaceName + "." + name;
-
-        return name;
     }
 
     public static string AsCommaSeparated<T>(this IEnumerable<T> items, string? suffixes = null)

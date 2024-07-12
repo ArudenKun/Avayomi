@@ -6,11 +6,11 @@ using Generator.Metadata.CopyCode;
 
 namespace Generator.Attributes;
 
-[Copy]
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 #if GENERATOR
 [GenerateFactory]
 #endif
+[Copy]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public partial class AvaloniaPropertyAttribute : Attribute
 {
     /// <summary>
@@ -44,4 +44,12 @@ public partial class AvaloniaPropertyAttribute : Attribute
     public Type Type { get; }
 
     public Type[] Attributes { get; set; } = [];
+}
+
+[Copy]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class AvaloniaPropertyAttribute<T> : AvaloniaPropertyAttribute
+{
+    public AvaloniaPropertyAttribute(string name)
+        : base(name, typeof(T)) { }
 }

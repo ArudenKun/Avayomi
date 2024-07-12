@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Generator.Extensions;
+namespace Generator.Metadata.Extensions;
 
 internal static class SyntaxValueProviderExtensions
 {

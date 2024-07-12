@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace Generator.Extensions;
+namespace Generator.Metadata.Extensions;
 
 internal static class StringExtensions
 {
@@ -37,20 +35,5 @@ internal static class StringExtensions
     public static string Truncate(this string source, int maxChars)
     {
         return source.Length <= maxChars ? source : source[..maxChars];
-    }
-
-    public static string SanitizeName(this string name, char replacementChar = '_')
-    {
-        var blackList = new HashSet<char>(Path.GetInvalidFileNameChars()) { '"' }; // '"' not invalid in Linux, but causes problems
-        var output = name.ToCharArray();
-        for (int i = 0, ln = output.Length; i < ln; i++)
-        {
-            if (blackList.Contains(output[i]))
-            {
-                output[i] = replacementChar;
-            }
-        }
-
-        return new string(output);
     }
 }
