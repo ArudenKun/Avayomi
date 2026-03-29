@@ -1,0 +1,39 @@
+﻿<UserControl
+    x:Class="Avayomi.Views.SplashView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:avayomi="https://github.com/arudenkun/avayomi"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="avayomi:SplashViewModel"
+    mc:Ignorable="d">
+    <Panel>
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="4">
+            <Image
+                Width="120"
+                Height="120"
+                VerticalAlignment="Center"
+                Source="/Assets/logo.png" />
+        </StackPanel>
+        <StackPanel
+            Margin="40"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            Spacing="6">
+            <ProgressBar
+                Height="6"
+                IsIndeterminate="True" />
+            <TextBlock
+                Margin="0,4,0,0"
+                HorizontalAlignment="Center"
+                FontSize="20"
+                Foreground="{DynamicResource SukiText}"
+                Text="{Binding StatusText}" />
+        </StackPanel>
+    </Panel>
+</UserControl>
