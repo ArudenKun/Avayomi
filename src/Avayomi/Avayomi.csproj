@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Antelcat.AutoGen" Version="3.0.5" />
+    <PackageReference Include="AsyncAwaitBestPractices" Version="10.0.0" />
+    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.7.0" />
+    <PackageReference Include="Avalonia.Controls.WebView" Version="11.4.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.13" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.13">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="FFmpegVideoPlayer.Avalonia" Version="2.6.1" />
+    <PackageReference Include="Lucide.Avalonia" Version="0.1.63" />
+    <PackageReference Include="R3Extensions.Avalonia" Version="1.3.0" />
+    <PackageReference Include="Replicant" Version="2.0.6" />
+    <PackageReference Include="Serilog.Enrichers.Demystifier" Version="1.0.3" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="ServiceScan.SourceGenerator" Version="3.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Sortable.Avalonia" Version="2.1.1" />
+    <PackageReference Include="SukiUI.Dock" Version="6.0.4-nightly20260328" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="10.1.1" />
+    <PackageReference Include="Volo.Abp.Caching" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Avayomi.Hosting\Avayomi.Hosting.csproj" />
+    <ProjectReference Include="..\Avayomi.Providers\Avayomi.Providers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Navigation\NavigationHost.axaml" />
+  </ItemGroup>
+</Project>
