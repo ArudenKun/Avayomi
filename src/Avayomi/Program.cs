@@ -9,6 +9,7 @@ using Avayomi.Hosting;
 using Avayomi.Services;
 using Avayomi.Settings;
 using Avayomi.ViewModels;
+using HotAvalonia;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -53,6 +54,7 @@ public static class Program
                             .CreateLogger("R3")
                             .LogError(ex, "An Unhandled R3 Exception occurred")
                     )
+                    .UseHotReload()
                     .LogToDelegate(s =>
                         loggerFactory.CreateLogger("Avalonia").LogWarning("{Log}", s)
                     )

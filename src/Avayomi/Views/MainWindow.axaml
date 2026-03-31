@@ -27,7 +27,8 @@
         <!--  ReSharper disable once Xaml.StyleClassNotFound  -->
         <Button
             Classes="WindowControlsButton"
-            Command="{Binding ShowSettingsCommand}"
+            Command="{Binding ChangePageCommand}"
+            CommandParameter="{x:Type avayomi:SettingsPageViewModel}"
             Content="{LucideIconContent Settings}" />
     </suki:SukiWindow.RightWindowTitleBarControls>
     <avayomi:NavigationHost avayomi:NavigationHostManager.HostName="{x:Static avayomi:HostNames.Main}" />

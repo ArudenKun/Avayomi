@@ -134,6 +134,6 @@ public sealed class DialogService : IDialogService, ISingletonDependency
         var builder = _manager.CreateDialog().WithViewModel(viewModel);
         builder.Completion = viewModel.Completion;
         await builder.TryShowAsync();
-        return viewModel.DialogResult;
+        return viewModel.Result;
     }
 }

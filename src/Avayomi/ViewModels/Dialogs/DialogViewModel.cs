@@ -21,24 +21,17 @@ public abstract partial class DialogViewModel<TResult> : ViewModel
 
     protected ISukiDialog Dialog { get; private set; }
 
-    public TResult? DialogResult { get; private set; }
+    public TResult? Result { get; private set; }
     public TaskCompletionSource<bool> Completion { get; private set; } = new();
 
     /// <summary>
     /// Gets the title of the dialog.
     /// </summary>
-    public virtual string DialogTitle => string.Empty;
+    public virtual string Title => string.Empty;
 
     public override void OnLoaded()
     {
         base.OnLoaded();
-
-        Reset();
-    }
-
-    public override void OnUnloaded()
-    {
-        base.OnUnloaded();
 
         Reset();
     }
@@ -48,7 +41,7 @@ public abstract partial class DialogViewModel<TResult> : ViewModel
     [RelayCommand(CanExecute = nameof(CanExecuteClose))]
     protected void Close(object? result = null)
     {
-        DialogResult = result is TResult t ? t : default;
+        Result = result is TResult t ? t : default;
         Completion.SetResult(true);
         _isResultSet = true;
         Dialog.Dismiss();
@@ -65,7 +58,7 @@ public abstract partial class DialogViewModel<TResult> : ViewModel
             return;
 
         Completion = new TaskCompletionSource<bool>(false);
-        DialogResult = default;
+        Result = default;
         _isResultSet = false;
     }
 }

@@ -9,5 +9,5 @@
     d:DesignWidth="800"
     x:DataType="avayomi:AnimePageViewModel"
     mc:Ignorable="d">
-    Anime Page
+    Anime Page 3
 </UserControl>

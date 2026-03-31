@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using Avayomi.Services.Dialogs;
-using Avayomi.ViewModels.Dialogs;
+﻿using System;
+using Avayomi.Messaging.Messages;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using SukiUI.Dialogs;
 using SukiUI.Toasts;
@@ -22,12 +22,8 @@ public sealed partial class MainWindowViewModel : ViewModel
     }
 
     [RelayCommand]
-    private async Task ShowSettingsAsync()
+    private void ChangePage(Type pageViewMoelType)
     {
-        await DialogService.ShowDialogAsync(
-            ServiceProvider.GetRequiredService<SettingsDialogViewModel>()
-        );
-
-        // Messenger.Send(new ChangePageMessage(typeof(SettingsPageViewModel)));
+        Messenger.Send(new ChangePageMessage(pageViewMoelType));
     }
 }

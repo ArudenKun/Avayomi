@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using R3;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
+using Volo.Abp.EventBus.Local;
 
 namespace Avayomi.ViewModels;
 
@@ -36,12 +37,16 @@ public abstract partial class ViewModel
     public required IServiceProvider ServiceProvider { protected get; init; }
     public required ITransientCachedServiceProvider CachedServiceProvider { protected get; init; }
 
-    protected ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
+    protected ILoggerFactory LoggerFactory =>
+        CachedServiceProvider.GetRequiredService<ILoggerFactory>();
 
     protected ILogger Logger =>
         CachedServiceProvider.GetService(LoggerFactory.CreateLogger(GetType().FullName!));
 
-    protected IMessenger Messenger => ServiceProvider.GetRequiredService<IMessenger>();
+    protected IMessenger Messenger => CachedServiceProvider.GetRequiredService<IMessenger>();
+
+    protected ILocalEventBus LocalEventBus =>
+        CachedServiceProvider.GetRequiredService<ILocalEventBus>();
 
     protected INavigationHostManager NavigationHostManager =>
         ServiceProvider.GetRequiredService<INavigationHostManager>();

@@ -36,11 +36,21 @@
         </suki:SukiSideMenu.ItemTemplate>
         <suki:SukiSideMenu.IsSelectedItemContentMovable />
         <suki:SukiSideMenu.HeaderContent>
-            <TextBlock
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontWeight="Bold"
-                Text="{x:Static core:AvayomiCoreConsts.Name}" />
+            <StackPanel>
+                <TextBlock
+                    Margin="0,0,0,30"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="24"
+                    FontWeight="Bold"
+                    Text="{x:Static core:AvayomiCoreConsts.Name}" />
+                <!--  <Image  -->
+                <!--  Width="80"  -->
+                <!--  Height="80"  -->
+                <!--  Margin="30,30,30,30"  -->
+                <!--  Classes="AppIcon"  -->
+                <!--  Source="/Assets/logo.png" />  -->
+            </StackPanel>
         </suki:SukiSideMenu.HeaderContent>
     </suki:SukiSideMenu>
 </UserControl>
