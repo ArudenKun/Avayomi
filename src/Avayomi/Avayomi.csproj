@@ -45,6 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Avayomi.AniList\Avayomi.AniList.csproj" />
     <ProjectReference Include="..\Avayomi.Hosting\Avayomi.Hosting.csproj" />
     <ProjectReference Include="..\Avayomi.Providers\Avayomi.Providers.csproj" />
   </ItemGroup>

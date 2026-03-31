@@ -15,7 +15,7 @@ namespace Avayomi;
 /// </summary>
 public sealed partial class ViewLocator : IDataTemplate
 {
-    private readonly ReadOnlyDictionary<Type, Func<Control>> _viewFactory;
+    private readonly ReadOnlyDictionary<Type, Func<ViewModel, Control>> _viewFactory;
 
     public ViewLocator()
     {
@@ -38,8 +38,7 @@ public sealed partial class ViewLocator : IDataTemplate
             return CreateText($"Could not find view for {viewModelType.FullName}");
         }
 
-        var view = factory();
-        view.DataContext = viewModel;
+        var view = factory(viewModel);
         return view;
     }
 
@@ -60,9 +59,10 @@ public sealed partial class ViewLocator : IDataTemplate
 
     private static ViewDefinitions GetViewDefinitionsHandler<TView, TViewModel>()
         where TView : Control, IView<TViewModel>, new()
-        where TViewModel : ViewModel => new(typeof(TViewModel), () => new TView());
+        where TViewModel : ViewModel =>
+        new(typeof(TViewModel), viewModel => new TView { DataContext = viewModel });
 
     private static TextBlock CreateText(string text) => new() { Text = text };
 
-    private sealed record ViewDefinitions(Type ViewModelType, Func<Control> ViewFactory);
+    private sealed record ViewDefinitions(Type ViewModelType, Func<ViewModel, Control> ViewFactory);
 }

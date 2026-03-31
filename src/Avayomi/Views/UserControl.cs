@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avayomi.Utilities;
 using Avayomi.ViewModels;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.Views;

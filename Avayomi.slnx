@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Avayomi.AniList/Avayomi.AniList.csproj" />
     <Project Path="src/Avayomi.Core/Avayomi.Core.csproj" />
     <Project Path="src/Avayomi.Extractors/Avayomi.Extractors.csproj" />
     <Project Path="src/Avayomi.Hosting/Avayomi.Hosting.csproj" />

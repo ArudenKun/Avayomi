@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
+using Avayomi.AniList;
 using Avayomi.Core;
 using Avayomi.Messaging;
 using Avayomi.Navigation.Extensions;
@@ -23,7 +24,7 @@ using Volo.Abp.Modularity;
 
 namespace Avayomi;
 
-[DependsOn(typeof(AvayomiCoreModule), typeof(AbpCachingModule))]
+[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiAniListModule), typeof(AbpCachingModule))]
 public sealed class AvayomiModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
