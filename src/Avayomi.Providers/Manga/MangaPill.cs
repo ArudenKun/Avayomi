@@ -1,0 +1,157 @@
+﻿// namespace Avayomi.Providers.Manga;
+//
+// /// <summary>
+// /// Client for interacting with MangaPill.
+// /// </summary>
+// /// <remarks>
+// /// Initializes an instance of <see cref="MangaPill"/>.
+// /// </remarks>
+// public class MangaPill(IHttpClientFactory httpClientFactory) : IMangaProvider
+// {
+//     private readonly HttpClient _http = httpClientFactory.CreateClient();
+//
+//     public string Key => Name;
+//
+//     /// <inheritdoc />
+//     public string Name { get; set; } = "MangaPill";
+//
+//     /// <inheritdoc />
+//     public string Language => "en";
+//
+//     /// <inheritdoc />
+//     public string BaseUrl => "https://mangapill.com";
+//
+//     /// <inheritdoc />
+//     public string Logo => "";
+//
+//     /// <summary>
+//     /// Initializes an instance of <see cref="MangaPill"/>.
+//     /// </summary>
+//     public MangaPill(Func<HttpClient> httpClientProvider)
+//         : this(new HttpClientFactory(httpClientProvider)) { }
+//
+//     /// <summary>
+//     /// Initializes an instance of <see cref="MangaPill"/>.
+//     /// </summary>
+//     public MangaPill()
+//         : this(Http.ClientProvider) { }
+//
+//     /// <inheritdoc/>
+//     public async ValueTask<List<IMangaResult>> SearchAsync(
+//         string query,
+//         CancellationToken cancellationToken = default!
+//     )
+//     {
+//         var response = await _http.ExecuteAsync(
+//             $"{BaseUrl}/quick-search?q={Uri.EscapeDataString(query)}",
+//             cancellationToken
+//         );
+//
+//         var document = Html.Parse(response);
+//
+//         return document
+//                 .DocumentNode.SelectNodes(".//a[contains(@class, 'bg-card')]")
+//                 ?.Select(el =>
+//                     (IMangaResult)
+//                         new MangaResult()
+//                         {
+//                             Id = el.Attributes["href"].Value,
+//                             Title = el.SelectSingleNode(".//div[@class='font-black']")?.InnerText,
+//                             Image = el.SelectSingleNode(".//img")?.Attributes["src"]?.Value,
+//                             Headers = new() { ["Referer"] = BaseUrl },
+//                         }
+//                 )
+//                 .ToList()
+//             ?? [];
+//     }
+//
+//     /// <inheritdoc />
+//     public async ValueTask<IMangaInfo> GetMangaInfoAsync(
+//         string mangaId,
+//         CancellationToken cancellationToken = default!
+//     )
+//     {
+//         var url = BaseUrl + mangaId;
+//         var response = await _http.ExecuteAsync(url, cancellationToken);
+//
+//         var document = Html.Parse(response);
+//
+//         var mangaInfo = new MangaInfo { Id = mangaId };
+//
+//         mangaInfo.Description = document
+//             .DocumentNode.SelectSingleNode(".//div[@class='flex flex-col']/div[2]/p")
+//             ?.InnerText.Trim();
+//         mangaInfo.Genres =
+//             document
+//                 .DocumentNode.SelectNodes(".//div[@class='flex flex-col']/div[4]/a")
+//                 ?.Select(el => el.InnerText)
+//                 .ToList()
+//             ?? [];
+//
+//         var statusText = document
+//             .DocumentNode.SelectSingleNode(".//div[@class='flex flex-col']/div[3]/div[2]/div")
+//             ?.InnerText.Trim();
+//         mangaInfo.Status = statusText switch
+//         {
+//             "finished" => MediaStatus.Completed,
+//             "publishing" => MediaStatus.Ongoing,
+//             _ => MediaStatus.Unknown,
+//         };
+//
+//         var count = 1;
+//
+//         mangaInfo.Chapters =
+//             document
+//                 .DocumentNode.SelectNodes(".//div[@id='chapters']/div/a")
+//                 ?.Reverse()
+//                 ?.Select(el =>
+//                 {
+//                     count++;
+//
+//                     return (IMangaChapter)
+//                         new MangaChapter()
+//                         {
+//                             Id = el.Attributes["href"].Value,
+//                             Number = int.TryParse(
+//                                 el.InnerText.ToLower().Replace("chapter", "").Trim(),
+//                                 out var num
+//                             )
+//                                 ? num
+//                                 : count,
+//                             Title = el.InnerText,
+//                         };
+//                 })
+//                 .ToList()
+//             ?? [];
+//
+//         return mangaInfo;
+//     }
+//
+//     /// <inheritdoc />
+//     public async ValueTask<List<IMangaChapterPage>> GetChapterPagesAsync(
+//         string chapterId,
+//         CancellationToken cancellationToken = default!
+//     )
+//     {
+//         var url = BaseUrl + chapterId;
+//         var response = await _http.ExecuteAsync(url, cancellationToken);
+//
+//         var document = Html.Parse(response);
+//
+//         var i = 1;
+//
+//         return document
+//                 .DocumentNode.SelectNodes(".//img[@class='js-page']")
+//                 ?.Select(el =>
+//                     (IMangaChapterPage)
+//                         new MangaChapterPage()
+//                         {
+//                             Image = el.Attributes["data-src"]!.Value,
+//                             Headers = new() { ["Referer"] = BaseUrl },
+//                             Page = i++,
+//                         }
+//                 )
+//                 .ToList()
+//             ?? [];
+//     }
+// }

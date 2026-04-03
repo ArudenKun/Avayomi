@@ -1,0 +1,15 @@
+﻿using System.Runtime.Serialization;
+
+namespace Avayomi.Core.AniList.Models.Media.Review;
+
+public enum MediaReviewRating
+{
+    [EnumMember(Value = "NO_VOTE")]
+    NoVote,
+
+    [EnumMember(Value = "UP_VOTE")]
+    UpVote,
+
+    [EnumMember(Value = "DOWN_VOTE")]
+    DownVote,
+}
