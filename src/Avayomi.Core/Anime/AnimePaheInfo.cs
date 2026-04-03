@@ -13,8 +13,6 @@ public class AnimePaheInfo : AnimeInfo
 
     public int MalId { get; set; }
 
-    public int Episodes { get; set; }
-
     public string Season { get; set; } = null!;
 
     public int Year { get; set; }

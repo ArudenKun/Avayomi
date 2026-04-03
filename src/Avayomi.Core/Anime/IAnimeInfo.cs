@@ -1,15 +1,19 @@
-﻿namespace Avayomi.Core.Anime;
+﻿using Volo.Abp.Data;
+
+namespace Avayomi.Core.Anime;
 
 /// <summary>
 /// The Class which contains all the information about an Anime
 /// </summary>
-public interface IAnimeInfo
+public interface IAnimeInfo : IHasExtraProperties
 {
     public string Id { get; set; }
 
     public AnimeSites Site { get; set; }
 
     public string Title { get; set; }
+
+    public int Episodes { get; set; }
 
     public string? Released { get; set; }
 

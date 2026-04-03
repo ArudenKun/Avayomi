@@ -2,9 +2,13 @@
     x:Class="Avayomi.Views.Pages.AnimePageView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:aniList="using:Avayomi.Core.AniList.Models.Media"
+    xmlns:anime="clr-namespace:Avayomi.Core.Anime;assembly=Avayomi.Core"
+    xmlns:asyncImageLaoder="using:AsyncImageLoader"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:suki="https://github.com/kikipoulet/SukiUI"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="avayomi:AnimePageViewModel"
@@ -22,10 +26,82 @@
     <!--         </StackPanel> -->
     <!--     </ScrollViewer> -->
     <!-- </Grid> -->
-    <StackPanel>
-        <TextBox Text="{Binding Search}" />
-        <Button
-            Command="{Binding SubmitCommand}"
-            Content="Submit" />
-    </StackPanel>
+    <Grid RowDefinitions="Auto, *">
+        <StackPanel
+            Grid.Row="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+            <TextBox
+                MinWidth="100"
+                Text="{Binding Search,
+                               Delay=300}" />
+            <Button
+                Command="{Binding SubmitCommand}"
+                Content="Submit"
+                IsEnabled="{Binding !IsBusy}" />
+            <Button
+                Command="{Binding SubmitCancelCommand}"
+                Content="Cancel"
+                IsEnabled="{Binding IsBusy}" />
+            <Button
+                Command="{Binding LoginCommand}"
+                Content="Login" />
+            <ComboBox
+                ItemsSource="{Binding AnimeProviders.Keys}"
+                PlaceholderText="Providers"
+                SelectedItem="{Binding ProviderName}" />
+        </StackPanel>
+        <suki:BusyArea
+            Grid.Row="1"
+            BusyText="{Binding BusyText}"
+            IsBusy="{Binding IsBusy}">
+            <DataGrid
+                IsReadOnly="True"
+                IsVisible="{Binding !NoResultsFound}"
+                ItemsSource="{Binding Animes}">
+                <DataGrid.Styles>
+                    <Style Selector="DataGridRowGroupHeader">
+                        <Setter Property="IsItemCountVisible" Value="True" />
+                    </Style>
+                </DataGrid.Styles>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Thumbnail">
+                        <DataTemplate DataType="anime:IAnimeInfo">
+                            <Image
+                                MaxWidth="100"
+                                MaxHeight="100"
+                                asyncImageLaoder:ImageLoader.Source="{Binding Image}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn
+                        Binding="{Binding Title,
+                                          Mode=OneWay}"
+                        Header="Title" />
+                    <!--  <DataGridTextColumn  -->
+                    <!--  Binding="{Binding Title.EnglishTitle,  -->
+                    <!--  Mode=OneWay}"  -->
+                    <!--  Header="English Title" />  -->
+                    <DataGridTextColumn
+                        Binding="{Binding Status,
+                                          Mode=OneWay}"
+                        Header="Status" />
+                    <!--  <DataGridTextColumn  -->
+                    <!--  Binding="{Binding Episodes}"  -->
+                    <!--  Header="Episodes" />  -->
+                </DataGrid.Columns>
+            </DataGrid>
+        </suki:BusyArea>
+        <Grid
+            Grid.Row="1"
+            IsVisible="{Binding NoResultsFound}">
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="24"
+                FontWeight="Bold">
+                No Results Found
+            </TextBlock>
+        </Grid>
+    </Grid>
 </UserControl>

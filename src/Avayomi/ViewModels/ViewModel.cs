@@ -78,7 +78,7 @@ public abstract partial class ViewModel
     public virtual partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    public partial string IsBusyText { get; set; } = string.Empty;
+    public partial string BusyText { get; set; } = string.Empty;
 
     public virtual void OnLoaded() { }
 
@@ -86,10 +86,14 @@ public abstract partial class ViewModel
 
     protected void OnAllPropertiesChanged() => OnPropertyChanged(string.Empty);
 
-    public async Task SetBusyAsync(Func<Task> func, string busyText = "", bool showException = true)
+    protected virtual async Task SetBusyAsync(
+        Func<Task> func,
+        string busyText = "",
+        bool showException = true
+    )
     {
         IsBusy = true;
-        IsBusyText = busyText;
+        BusyText = busyText;
         try
         {
             await func();
@@ -101,11 +105,11 @@ public abstract partial class ViewModel
         finally
         {
             IsBusy = false;
-            IsBusyText = string.Empty;
+            BusyText = string.Empty;
         }
     }
 
-    public bool LogException(Exception? ex, bool shouldCatch = false, bool shouldDisplay = false)
+    protected bool LogException(Exception? ex, bool shouldCatch = false, bool shouldDisplay = false)
     {
         if (ex is null)
         {

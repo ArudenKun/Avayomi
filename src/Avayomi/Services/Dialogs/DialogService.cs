@@ -14,17 +14,17 @@ namespace Avayomi.Services.Dialogs;
 [ExposeServices(typeof(IDialogService))]
 public sealed class DialogService : IDialogService, ISingletonDependency
 {
-    private readonly ISukiDialogManager _manager;
-
     public DialogService(ISukiDialogManager manager, IServiceProvider serviceProvider)
     {
-        _manager = manager;
+        Manager = manager;
         ServiceProvider = serviceProvider;
     }
 
     public IServiceProvider ServiceProvider { get; }
 
-    public SukiDialogBuilder CreateDialog() => _manager.CreateDialog();
+    public ISukiDialogManager Manager { get; }
+
+    public SukiDialogBuilder CreateDialog() => Manager.CreateDialog();
 
     public SukiDialogBuilder CreateDialog(
         string? title,
@@ -35,7 +35,7 @@ public sealed class DialogService : IDialogService, ISingletonDependency
         params IEnumerable<DialogActionButton> buttons
     )
     {
-        var dialog = _manager.CreateDialog().WithContent(content);
+        var dialog = Manager.CreateDialog().WithContent(content);
         dialog.SetCanDismissWithBackgroundClick(dismissOnClick);
         dialog.ShowCardBackground(showBackground);
         dialog.OnDismissed(onDismiss);
@@ -59,7 +59,7 @@ public sealed class DialogService : IDialogService, ISingletonDependency
         bool canDismissWithBackgroundClick
     )
     {
-        var builder = _manager.CreateDialog().OfType(type).WithTitle(title).WithContent(message);
+        var builder = Manager.CreateDialog().OfType(type).WithTitle(title).WithContent(message);
         if (canDismissWithBackgroundClick)
         {
             builder.Dismiss().ByClickingBackground();
@@ -116,7 +116,7 @@ public sealed class DialogService : IDialogService, ISingletonDependency
 
     public void ShowDialog<TViewModel>(TViewModel viewModel)
         where TViewModel : DialogViewModel =>
-        _manager
+        Manager
             .CreateDialog()
             .WithViewModel(d =>
             {
@@ -131,7 +131,7 @@ public sealed class DialogService : IDialogService, ISingletonDependency
 
     public async Task<TResult?> ShowDialogAsync<TResult>(DialogViewModel<TResult> viewModel)
     {
-        var builder = _manager.CreateDialog().WithViewModel(viewModel);
+        var builder = Manager.CreateDialog().WithViewModel(viewModel);
         builder.Completion = viewModel.Completion;
         await builder.TryShowAsync();
         return viewModel.Result;

@@ -5,10 +5,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
-using Avayomi.AniList;
 using Avayomi.Core;
 using Avayomi.Messaging;
 using Avayomi.Navigation.Extensions;
+using Avayomi.Providers;
 using Avayomi.Services.Settings;
 using Avayomi.ViewModels;
 using CommunityToolkit.Mvvm.Messaging;
@@ -24,7 +24,7 @@ using Volo.Abp.Modularity;
 
 namespace Avayomi;
 
-[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiAniListModule), typeof(AbpCachingModule))]
+[DependsOn(typeof(AvayomiCoreModule), typeof(AbpCachingModule), typeof(AvayomiProvidersModule))]
 public sealed class AvayomiModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
@@ -59,6 +59,7 @@ public sealed class AvayomiModule : AbpModule
         context.Services.AddSingleton<ISukiToastManager, SukiToastManager>();
 
         context.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+        context.Services.AddHttpClient();
     }
 
     public override void OnApplicationShutdown(ApplicationShutdownContext context)

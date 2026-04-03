@@ -6,24 +6,24 @@ namespace Avayomi.Core;
 
 public static class AvayomiCoreConsts
 {
-    public static bool IsDebug { get; set; }
+    public const bool IsDebug
 #if DEBUG
-        = true;
+    = true;
 #else
-        = false;
+    = false;
 #endif
-    public static string Name { get; set; } = "Avayomi";
+    public const string Name = "Avayomi";
 
     public static class Paths
     {
-        public static string AppDir { get; set; } = AppDomain.CurrentDomain.BaseDirectory;
+        public static string AppDir { get; } = AppDomain.CurrentDomain.BaseDirectory;
 
-        public static string ContentRootDir { get; set; } =
+        public static string ContentRootDir { get; } =
             AppContext.BaseDirectory[
                 ..AppContext.BaseDirectory.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase)
             ];
 
-        public static string RoamingDir { get; set; } =
+        public static string RoamingDir { get; } =
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
         public static string DataDir
@@ -35,16 +35,19 @@ public static class AvayomiCoreConsts
                     && !Directory.Exists(AppDir.Combine("data"))
                     && !IsDebug
                 )
+#pragma warning disable CS0162 // Unreachable code detected
+                    // ReSharper disable once HeuristicUnreachableCode
                     return RoamingDir.Combine(Name);
+#pragma warning restore CS0162 // Unreachable code detected
                 var dataDir = AppDir.Combine("data");
                 DirectoryHelper.CreateIfNotExists(dataDir);
                 return dataDir;
             }
         }
 
-        public static string CacheDir { get; set; } = DataDir.Combine("Cache");
-        public static string LogsDir { get; set; } = DataDir.Combine("Logs");
-        public static string SettingsPath { get; set; } = DataDir.Combine("settings.json");
+        public static string CacheDir { get; } = DataDir.Combine("Cache");
+        public static string LogsDir { get; } = DataDir.Combine("Logs");
+        public static string SettingsPath { get; } = DataDir.Combine("settings.json");
     }
 
     public static class OperatingSystem

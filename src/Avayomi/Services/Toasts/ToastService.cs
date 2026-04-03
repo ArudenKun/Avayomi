@@ -13,18 +13,19 @@ namespace Avayomi.Services.Toasts;
 [ExposeServices(typeof(IToastService))]
 public sealed class ToastService : IToastService, ISingletonDependency
 {
-    private readonly ISukiToastManager _manager;
     private readonly AppearanceSettings _appearanceSettings;
 
     public ToastService(ISukiToastManager manager, ISettingsService settingsService)
     {
-        _manager = manager;
+        Manager = manager;
         _appearanceSettings = settingsService.Get<AppearanceSettings>();
     }
 
-    public SukiToastBuilder CreateToast() => _manager.CreateToast();
+    public ISukiToastManager Manager { get; }
 
-    public SukiToastBuilder CreateSimpleInfoToast() => _manager.CreateSimpleInfoToast();
+    public SukiToastBuilder CreateToast() => Manager.CreateToast();
+
+    public SukiToastBuilder CreateSimpleInfoToast() => Manager.CreateSimpleInfoToast();
 
     /// <summary>
     /// Creates a toast notification with the specified title, content, and buttons.
@@ -41,7 +42,7 @@ public sealed class ToastService : IToastService, ISingletonDependency
         params IEnumerable<ToastActionButton> buttons
     )
     {
-        var toast = _manager.CreateToast().WithContent(content);
+        var toast = Manager.CreateToast().WithContent(content);
 
         if (autoDismiss)
         {

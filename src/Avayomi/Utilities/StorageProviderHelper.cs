@@ -2,7 +2,7 @@
 
 namespace Avayomi.Utilities;
 
-public static class StorageServiceHelper
+public static class StorageProviderHelper
 {
     public static FilePickerFileType All { get; } =
         new("All") { Patterns = ["*.*"], MimeTypes = ["*/*"] };

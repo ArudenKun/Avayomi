@@ -1,5 +1,7 @@
+using System;
 using AsyncImageLoader;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
@@ -12,12 +14,18 @@ namespace Avayomi;
 
 public sealed class App : Application
 {
+    public static new App Current =>
+        (App?)Application.Current
+        ?? throw new InvalidOperationException("Applications is not yet initialized.");
+
+    public static TopLevel TopLevel { get; internal set; } = null!;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
 
         var replicantImageLoader = new ReplicantImageLoader(
-            AvayomiCoreConsts.Paths.CacheDir.Combine("http")
+            AvayomiCoreConsts.Paths.CacheDir.Combine("Images")
         );
         ImageLoader.AsyncImageLoader = replicantImageLoader;
         ImageBrushLoader.AsyncImageLoader = replicantImageLoader;
