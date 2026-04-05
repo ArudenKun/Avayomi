@@ -16,12 +16,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using R3;
 using Volo.Abp.DependencyInjection;
-using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi.ViewModels;
 
 [PublicAPI]
-public abstract partial class ViewModel : ObservableValidator, IDisposable, ITransientDependency
+public abstract partial class ViewModel
+    : ObservableValidator,
+        INavigationAware,
+        IAsyncNavigationAware,
+        IDisposable,
+        ITransientDependency
 {
     public required IServiceProvider ServiceProvider { protected get; init; }
     public required ITransientCachedServiceProvider CachedServiceProvider { protected get; init; }
@@ -57,7 +61,6 @@ public abstract partial class ViewModel : ObservableValidator, IDisposable, ITra
 
     public IClipboard Clipboard => ServiceProvider.GetRequiredService<IClipboard>();
     public ILauncher Launcher => ServiceProvider.GetRequiredService<ILauncher>();
-    public IFusionCache FusionCache => ServiceProvider.GetRequiredService<IFusionCache>();
 
     [ObservableProperty]
     public virtual partial bool IsBusy { get; set; }
@@ -109,6 +112,44 @@ public abstract partial class ViewModel : ObservableValidator, IDisposable, ITra
 
         return shouldCatch;
     }
+
+    #region Navigation
+
+    public virtual bool CanNavigateTo(object? parameter)
+    {
+        return true;
+    }
+
+    public virtual void OnNavigatedTo(object? parameter) { }
+
+    public virtual bool CanNavigateFrom()
+    {
+        return true;
+    }
+
+    public virtual void OnNavigatedFrom() { }
+
+    public virtual Task<bool> CanNavigateToAsync(object? parameter)
+    {
+        return Task.FromResult(true);
+    }
+
+    public virtual Task OnNavigatedToAsync(object? parameter)
+    {
+        return Task.CompletedTask;
+    }
+
+    public virtual Task<bool> CanNavigateFromAsync()
+    {
+        return Task.FromResult(true);
+    }
+
+    public virtual Task OnNavigatedFromAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    #endregion
 
     #region Disposal
 

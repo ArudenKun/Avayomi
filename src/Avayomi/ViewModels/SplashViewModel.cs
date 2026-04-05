@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
-using Avayomi.Navigation;
 using Avayomi.Services;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -10,7 +9,7 @@ using Volo.Abp.DependencyInjection;
 namespace Avayomi.ViewModels;
 
 [Dependency(ServiceLifetime.Singleton)]
-public sealed partial class SplashViewModel : ViewModel, INavigationAware
+public sealed partial class SplashViewModel : ViewModel
 {
     private readonly IAniListService _aniListService;
 
@@ -56,18 +55,4 @@ public sealed partial class SplashViewModel : ViewModel, INavigationAware
         //    : new SplashFinishedMessage(typeof(MainView));
         //Messenger.Send(message);
     }
-
-    public bool CanNavigateTo(object? parameter)
-    {
-        return true;
-    }
-
-    public void OnNavigatedTo(object? parameter) { }
-
-    public bool CanNavigateFrom()
-    {
-        return true;
-    }
-
-    public void OnNavigatedFrom() { }
 }

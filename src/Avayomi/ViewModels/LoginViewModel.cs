@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
-using Avayomi.Navigation;
 using Avayomi.Services;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class LoginViewModel : ViewModel, INavigationAware
+public sealed partial class LoginViewModel : ViewModel
 {
     private readonly TopLevel _topLevel;
     private readonly IAniListService _aniListService;
@@ -85,18 +84,4 @@ public sealed partial class LoginViewModel : ViewModel, INavigationAware
             Logger.LogError(ex, "An unexpected error occurred during login.");
         }
     }
-
-    public bool CanNavigateTo(object? parameter)
-    {
-        return true;
-    }
-
-    public void OnNavigatedTo(object? parameter) { }
-
-    public bool CanNavigateFrom()
-    {
-        return true;
-    }
-
-    public void OnNavigatedFrom() { }
 }

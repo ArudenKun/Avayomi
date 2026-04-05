@@ -1,10 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Humanizer;
 using Lucide.Avalonia;
 
 namespace Avayomi.ViewModels.Pages;
 
 public abstract partial class PageViewModel : ViewModel
 {
+    protected PageViewModel()
+    {
+        DisplayName = GetType()
+            .Name.Replace("PageViewModel", string.Empty)
+            .Humanize(LetterCasing.Title);
+    }
+
     /// <summary>
     /// The index of the page.
     /// </summary>
@@ -13,7 +21,7 @@ public abstract partial class PageViewModel : ViewModel
     /// <summary>
     /// The display name of the page.
     /// </summary>
-    public virtual string DisplayName => GetType().Name.Replace("PageViewModel", string.Empty);
+    public virtual string DisplayName { get; }
 
     /// <summary>
     /// The icon of the page.

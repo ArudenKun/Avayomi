@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Collections;
+using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avayomi.Core.AniList.Models.User;
 using Avayomi.Messaging.Messages;
-using Avayomi.Navigation;
 using Avayomi.Services;
 using Avayomi.ViewModels.Pages;
 using Avayomi.Views;
@@ -14,35 +14,28 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Lucide.Avalonia;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ServiceScan.SourceGenerator;
 using SukiUI.Controls;
 using ZLinq;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class MainViewModel
-    : ViewModel,
-        INavigationAware,
-        IRecipient<ChangePageMessage>
+public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMessage>
 {
     private readonly IAniListService _aniListService;
-    private readonly HashSet<Type> _pageTypes;
 
-    public MainViewModel(IServiceProvider serviceProvider, IAniListService aniListService)
+    public MainViewModel(IEnumerable<PageViewModel> pageViewModels, IAniListService aniListService)
     {
         _aniListService = aniListService;
 
-        // 1. Create the initial structure.
-        var orderedPages = serviceProvider
-            .GetRequiredService<IEnumerable<PageViewModel>>()
+        var orderedPageViewModels = pageViewModels
             .AsValueEnumerable()
             .OrderBy(x => x.Index)
-            .Cast<PageViewModel>()
             .ToList();
 
         Pages.AddRange(
-            orderedPages.Select(x => new SukiSideMenuItem
+            orderedPageViewModels.Select(x => new SukiSideMenuItem
             {
                 Header = x.DisplayName,
                 IsVisible = x.IsVisibleOnSideMenu,
@@ -55,17 +48,10 @@ public sealed partial class MainViewModel
                 Tag = x.GetType(),
             })
         );
-
-        // 2. Cache valid types for O(1) lookups during navigation
-        _pageTypes = orderedPages.Select(vm => vm.GetType()).ToHashSet();
     }
 
-    // Marked as nullable to prevent null-reference exceptions on startup before first load
     [ObservableProperty]
-    public partial PageViewModel? Page { get; set; }
-
-    [ObservableProperty]
-    public partial SukiSideMenuItem? PageItem { get; set; }
+    public partial SukiSideMenuItem? Page { get; set; }
 
     public IAvaloniaList<SukiSideMenuItem> Pages { get; } = new AvaloniaList<SukiSideMenuItem>();
 
@@ -78,7 +64,7 @@ public sealed partial class MainViewModel
 
         // Assigning PageItem instead of calling ChangePage directly.
         // This keeps the UI selection visually in sync with the current page.
-        PageItem = Pages.FirstOrDefault(x => x.IsVisible);
+        Page = Pages.FirstOrDefault(x => x.IsVisible);
     }
 
     [RelayCommand]
@@ -102,76 +88,46 @@ public sealed partial class MainViewModel
         }
 
         // Setting PageItem automatically triggers OnPageItemChanged -> ChangePage
-        PageItem = item;
+        Page = item;
     }
 
-    partial void OnPageItemChanged(SukiSideMenuItem? value)
+    partial void OnPageChanged(SukiSideMenuItem? value)
     {
         if (value?.Tag is not Type viewModelType)
             return;
         Logger.LogInformation("PageItemChange {Header}", value.Header);
-        ChangePage(viewModelType);
+        ChangeContent(viewModelType);
     }
 
-    private void ChangePage(Type viewModelType)
+    private void ChangeContent(Type viewModelType)
     {
-        if (!_pageTypes.Contains(viewModelType))
+        var itemDefinition = GetSideMenuItemDefinitions()
+            .FirstOrDefault(x => x.ViewModelType == viewModelType);
+        if (itemDefinition is null)
             return;
+        NavigationHostManager.Navigate(HostNames.SideMenuMain, itemDefinition.ViewType);
+    }
 
-        var newPage = (PageViewModel)ServiceProvider.GetRequiredService(viewModelType);
-
-        // Handle Cleanup (Crucial for Transient ViewModels)
-        var oldPage = Page;
-        if (!ReferenceEquals(oldPage, newPage) && oldPage is IDisposable disposableVm)
+    public override async Task OnNavigatedToAsync(object? parameter)
+    {
+        if (parameter is not User user)
         {
-            try
-            {
-                disposableVm.Dispose();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(
-                    e,
-                    "An exception occurred while disposing the old page: {PageType}",
-                    oldPage.GetType().Name
-                );
-            }
+            user = await _aniListService.GetAuthenticatedUserAsync();
         }
 
-        Page = newPage;
+        User = user;
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
+    [ScanForTypes(
+        AssignableTo = typeof(UserControl<>),
+        TypeNameFilter = "*PageView",
+        Handler = nameof(GetSideMenuItemDefinitionHandler)
+    )]
+    private static partial SideMenuItemDefinition[] GetSideMenuItemDefinitions();
 
-        if (disposing)
-        {
-            try
-            {
-                Page?.Dispose();
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e, "Failed to dispose the current page during teardown.");
-            }
-        }
-    }
+    private static SideMenuItemDefinition GetSideMenuItemDefinitionHandler<TView, TViewModel>()
+        where TView : Control
+        where TViewModel : PageViewModel => new(typeof(TView), typeof(TViewModel));
 
-    public bool CanNavigateTo(object? parameter)
-    {
-        return true;
-    }
-
-    public void OnNavigatedTo(object? parameter)
-    {
-        User = parameter as User;
-    }
-
-    public bool CanNavigateFrom()
-    {
-        return true;
-    }
-
-    public void OnNavigatedFrom() { }
+    private sealed record SideMenuItemDefinition(Type ViewType, Type ViewModelType);
 }
