@@ -59,12 +59,12 @@ public class AniListService : IAniListService, ISingletonDependency
         }
     }
 
-    public async Task AuthenticateAsync(string accessToken)
+    public async Task AuthenticateAsync(string accessToken, bool persist = true)
     {
         IsAuthenticated = await _aniListClient.TryAuthenticateAsync(accessToken);
         if (IsAuthenticated)
         {
-            await _tokenService.SaveAsync(accessToken);
+            await _tokenService.SaveAsync(accessToken, persist);
         }
     }
 

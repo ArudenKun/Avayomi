@@ -14,12 +14,12 @@ public partial class AnimePageView : UserControl<AnimePageViewModel>
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter)
+        if (e.Key is not Key.Enter)
+            return;
+
+        if (ViewModel.SubmitCommand.CanExecute(null))
         {
-            if (ViewModel.SubmitCommand.CanExecute(null))
-            {
-                ViewModel.SubmitCommand.Execute(null);
-            }
+            ViewModel.SubmitCommand.Execute(null);
         }
     }
 }

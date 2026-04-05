@@ -41,47 +41,46 @@ public sealed partial class LoginViewModel : ViewModel
     }
 
     [RelayCommand]
-    private async Task LoginAsync()
-    {
-        try
+    private async Task LoginAsync() =>
+        await SetBusyAsync(async () =>
         {
-            var requestUrl = new RequestUrl("https://anilist.co/api/v2/oauth/authorize");
-            var startUrl = requestUrl.CreateAuthorizeUrl(ClientId, ResponseType);
-            var result = await WebAuthenticationBroker.AuthenticateAsync(
-                _topLevel,
-                new WebAuthenticatorOptions(new Uri(startUrl), new Uri(RedirectUrl))
-            );
-            var authorizeResponse = new AuthorizeResponse(result.CallbackUri.AbsoluteUri);
-            var accessToken = authorizeResponse.AccessToken;
-
-            if (!string.IsNullOrEmpty(accessToken))
+            try
             {
-                await _aniListService.AuthenticateAsync(accessToken);
-                if (_aniListService.IsAuthenticated)
+                var requestUrl = new RequestUrl("https://anilist.co/api/v2/oauth/authorize");
+                var startUrl = requestUrl.CreateAuthorizeUrl(ClientId, ResponseType);
+                var result = await WebAuthenticationBroker.AuthenticateAsync(
+                    _topLevel,
+                    new WebAuthenticatorOptions(new Uri(startUrl), new Uri(RedirectUrl))
+                );
+                var authorizeResponse = new AuthorizeResponse(result.CallbackUri.AbsoluteUri);
+                var accessToken = authorizeResponse.AccessToken;
+                if (!string.IsNullOrEmpty(accessToken))
                 {
-                    await NavigationHostManager.NavigateAsync<MainView>(
-                        HostNames.Main,
-                        await _aniListService.GetAuthenticatedUserAsync()
-                    );
+                    await _aniListService.AuthenticateAsync(accessToken, RememberMe);
+                    if (_aniListService.IsAuthenticated)
+                    {
+                        await NavigationHostManager.NavigateAsync<MainView>(
+                            HostNames.Main,
+                            await _aniListService.GetAuthenticatedUserAsync()
+                        );
+                    }
+                    return;
                 }
 
-                return;
+                await _aniListService.LogoutAsync();
+                ToastService.ShowToast(
+                    NotificationType.Warning,
+                    "Login Failed",
+                    "Login was cancelled or an error occured while logging in"
+                );
             }
-
-            await _aniListService.LogoutAsync();
-            ToastService.ShowToast(
-                NotificationType.Warning,
-                "Login Failed",
-                "Login was cancelled or an error occured while logging in"
-            );
-        }
-        catch (TaskCanceledException)
-        {
-            Logger.LogInformation("Login was cancelled by the user.");
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "An unexpected error occurred during login.");
-        }
-    }
+            catch (TaskCanceledException)
+            {
+                Logger.LogInformation("Login was cancelled by the user.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "An unexpected error occurred during login.");
+            }
+        });
 }

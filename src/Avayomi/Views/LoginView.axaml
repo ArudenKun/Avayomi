@@ -47,6 +47,7 @@
         <CheckBox
             HorizontalAlignment="Center"
             Content="Remember Me"
-            IsChecked="{Binding RememberMe}" />
+            IsChecked="{Binding RememberMe}"
+            IsEnabled="{Binding !IsBusy}" />
     </StackPanel>
 </UserControl>

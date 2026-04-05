@@ -96,7 +96,7 @@ public sealed class TokenService : ITokenService, ISingletonDependency
         return _token;
     }
 
-    public async Task SaveAsync(string accessToken)
+    public async Task SaveAsync(string accessToken, bool persist = true)
     {
         if (string.IsNullOrWhiteSpace(accessToken))
             return;
@@ -106,16 +106,14 @@ public sealed class TokenService : ITokenService, ISingletonDependency
         {
             _token = accessToken;
 
-            var directory = Path.GetDirectoryName(StorePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            if (persist)
             {
-                Directory.CreateDirectory(directory);
+                var directory = Path.GetDirectoryName(StorePath) ?? string.Empty;
+                DirectoryHelper.CreateIfNotExists(directory);
+                var encryptedBase64 = Encrypt(accessToken);
+                await using var stream = File.Create(StorePath);
+                await JsonSerializer.SerializeAsync(stream, encryptedBase64);
             }
-
-            var encryptedBase64 = Encrypt(accessToken);
-
-            await using var stream = File.Create(StorePath);
-            await JsonSerializer.SerializeAsync(stream, encryptedBase64);
         }
         catch (Exception ex)
         {
