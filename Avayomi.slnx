@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/solution/">
+    <File Path=".gitignore" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Avayomi.Core/Avayomi.Core.csproj" />
     <Project Path="src/Avayomi.Extractors/Avayomi.Extractors.csproj" />

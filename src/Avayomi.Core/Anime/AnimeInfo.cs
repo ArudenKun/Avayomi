@@ -17,8 +17,6 @@ public class AnimeInfo
 
     public string Id { get; set; } = string.Empty;
 
-    public string AniListId { get; set; } = string.Empty;
-
     public string Provider { get; set; } = string.Empty;
 
     public string Title { get; set; } = string.Empty;

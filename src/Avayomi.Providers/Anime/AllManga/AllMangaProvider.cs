@@ -76,7 +76,7 @@ internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
                     Summary = x.Description,
                     Title = x.Name,
                     Episodes = int.TryParse(x.EpisodeCount, out var count) ? count : 0,
-                    OtherNames = x.NativeName,
+                    OtherNames = x.EnglishName,
                     Type = "Anime",
                     Provider = Name,
                     Metadata = { ["aniListId"] = x.AniListId },

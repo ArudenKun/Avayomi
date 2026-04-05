@@ -45,18 +45,7 @@ public class AniListService : IAniListService, ISingletonDependency
             IsAuthenticated = false;
             return;
         }
-
         IsAuthenticated = await _aniListClient.TryAuthenticateAsync(accessToken);
-        if (!IsAuthenticated)
-        {
-            _logger.LogWarning("Failed to authenticate");
-        }
-        else
-        {
-            var user = await _aniListClient.GetAuthenticatedUserAsync();
-            _logger.LogInformation("User: {Name}", user.Name);
-            _logger.LogInformation("Using Cached AniList Login");
-        }
     }
 
     public async Task AuthenticateAsync(string accessToken, bool persist = true)
@@ -84,21 +73,6 @@ public class AniListService : IAniListService, ISingletonDependency
             async ct => await _aniListClient.GetAuthenticatedUserAsync(ct),
             options => options.SetDuration(30.Minutes()),
             [UserTag],
-            cancellationToken
-        );
-        return user;
-    }
-
-    public async ValueTask<User> GetUserAsync(
-        int userId,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var user = await _fusionCache.GetOrSetAsync(
-            $"AniListUser-{userId}",
-            async ct => await _aniListClient.GetUserAsync(userId, ct),
-            _ => { },
-            [UserTag, $"{userId}"],
             cancellationToken
         );
         return user;

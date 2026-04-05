@@ -1,18 +1,19 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
 using Avalonia.Collections;
 using Avalonia.Controls.Notifications;
-using Avayomi.Core.Anime;
 using Avayomi.Services;
 using Avayomi.Services.Toasts;
+using Avayomi.ViewModels.Components;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lucide.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NinjaNye.SearchExtensions.Levenshtein;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.ViewModels.Pages;
@@ -26,14 +27,14 @@ public sealed partial class AnimePageViewModel : PageViewModel
     {
         _animeService = animeService;
 
-        Animes = new AvaloniaList<AnimeInfo>();
+        Animes = new AvaloniaList<AnimeCardViewModel>();
     }
 
     public override int Index => 1;
 
     public override LucideIconKind IconKind => LucideIconKind.Tv;
 
-    public IAvaloniaList<AnimeInfo> Animes { get; }
+    public IAvaloniaList<AnimeCardViewModel> Animes { get; }
 
     [ObservableProperty]
     public partial string AnimeProvider { get; set; } = string.Empty;
@@ -54,13 +55,13 @@ public sealed partial class AnimePageViewModel : PageViewModel
 
     public override void OnLoaded()
     {
-        StartAsync().SafeFireAndForget();
-
+        AnimeProviders.Clear();
         AnimeProviders.AddRange(_animeService.GetProviders());
         if (!GeneralSettings.Provider.IsNullOrEmpty())
         {
             _animeService.SetProvider(GeneralSettings.Provider);
         }
+
         AnimeProvider = _animeService.CurrentProvider;
     }
 
@@ -81,13 +82,29 @@ public sealed partial class AnimePageViewModel : PageViewModel
                 {
                     Logger.LogInformation("{Provider} Searching: {Search}", AnimeProvider, Search);
                     Animes.Clear();
-                    var animes = await _animeService.SearchAsync(Search, cancellationToken);
-                    if (animes.Count is 0)
+                    var animeResults = await _animeService.SearchAsync(Search, cancellationToken);
+                    if (animeResults.Count is 0)
                     {
                         Logger.LogInformation("No results found");
                         return;
                     }
-                    Animes.AddRange(animes);
+
+                    var animes = animeResults
+                        .LevenshteinDistanceOf(x => x.Title, x => x.OtherNames)
+                        .ComparedTo(Search)
+                        .OrderBy(x => x.Distance)
+                        .Select(x => x.Item);
+
+                    Animes.AddRange(
+                        animes.Select(x =>
+                        {
+                            var vm = ServiceProvider.GetRequiredService<AnimeCardViewModel>();
+                            vm.Id = x.Id;
+                            vm.Title = x.Title;
+                            vm.CoverUrl = x.Image ?? string.Empty;
+                            return vm;
+                        })
+                    );
                 }
                 catch (TaskCanceledException)
                 {
@@ -119,19 +136,22 @@ public sealed partial class AnimePageViewModel : PageViewModel
             false
         );
 
-    private async Task StartAsync() { }
-
     partial void OnAnimeProviderChanged(string oldValue, string newValue)
     {
         if (!newValue.IsNullOrEmpty())
         {
-            GeneralSettings.Provider = newValue;
+            if (!GeneralSettings.Provider.Equals(newValue, StringComparison.OrdinalIgnoreCase))
+            {
+                GeneralSettings.Provider = newValue;
+            }
+
             _animeService.SetProvider(newValue);
             if (CanSubmit())
             {
                 SubmitCommand.Execute(null);
             }
         }
+
         Logger.LogInformation("Provider: {OldValue} => {NewValue}", oldValue, newValue);
     }
 }

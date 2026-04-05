@@ -48,7 +48,9 @@ public class AnimeService : IAnimeService, ISingletonDependency
 
     public void SetProvider(string provider)
     {
-        _logger.LogInformation("Setting provider {provider}", provider);
+        if (CurrentProvider.Equals(provider, StringComparison.InvariantCultureIgnoreCase))
+            return;
+        _logger.LogInformation("Provider {provider}", provider);
         _currentProvider = (IAnimeProvider)
             _serviceProvider.GetRequiredService(_animeProviders[provider]);
     }

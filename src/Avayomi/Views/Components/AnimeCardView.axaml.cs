@@ -1,10 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avayomi.ViewModels.Components;
 
 namespace Avayomi.Views.Components;
 
-public partial class AnimeCardView : UserControl
+public partial class AnimeCardView : UserControl<AnimeCardViewModel>
 {
     public AnimeCardView()
     {

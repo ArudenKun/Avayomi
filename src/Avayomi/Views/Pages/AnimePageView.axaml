@@ -2,8 +2,6 @@
     x:Class="Avayomi.Views.Pages.AnimePageView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:anime="clr-namespace:Avayomi.Core.Anime;assembly=Avayomi.Core"
-    xmlns:asyncImageLaoder="using:AsyncImageLoader"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -12,19 +10,6 @@
     d:DesignWidth="800"
     x:DataType="avayomi:AnimePageViewModel"
     mc:Ignorable="d">
-    <!--  <Grid  -->
-    <!--  ColumnDefinitions="*,Auto"  -->
-    <!--  RowDefinitions="*">  -->
-    <!--  <ScrollViewer  -->
-    <!--  Grid.Row="0"  -->
-    <!--  Grid.Column="0"  -->
-    <!--  HorizontalScrollBarVisibility="Disabled"  -->
-    <!--  VerticalScrollBarVisibility="Hidden">  -->
-    <!--         <StackPanel> -->
-    <!--  ~1~  //  @1@  -->
-    <!--         </StackPanel> -->
-    <!--     </ScrollViewer> -->
-    <!-- </Grid> -->
     <Grid RowDefinitions="Auto, *">
         <StackPanel
             Grid.Row="0"
@@ -52,41 +37,26 @@
             Grid.Row="1"
             BusyText="{Binding BusyText}"
             IsBusy="{Binding IsBusy}">
-            <DataGrid
-                IsReadOnly="True"
-                IsVisible="{Binding !NoResultsFound}"
-                ItemsSource="{Binding Animes}">
-                <DataGrid.Styles>
-                    <Style Selector="DataGridRowGroupHeader">
-                        <Setter Property="IsItemCountVisible" Value="True" />
-                    </Style>
-                </DataGrid.Styles>
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Thumbnail">
-                        <DataTemplate DataType="anime:AnimeInfo">
-                            <Image
-                                MaxWidth="100"
-                                MaxHeight="100"
-                                asyncImageLaoder:ImageLoader.Source="{Binding Image}" />
+            <ScrollViewer
+                Name="PopularThisSeasonScroller"
+                Margin="25,0,0,0">
+                <ItemsRepeater
+                    ItemsSource="{Binding Animes}"
+                    ScrollViewer.IsScrollChainingEnabled="True">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout
+                            ItemsStretch="Fill"
+                            MinColumnSpacing="15"
+                            MinRowSpacing="5"
+                            Orientation="Horizontal" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}" />
                         </DataTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn
-                        Binding="{Binding Title,
-                                          Mode=OneWay}"
-                        Header="Title" />
-                    <!--  <DataGridTextColumn  -->
-                    <!--  Binding="{Binding Title.EnglishTitle,  -->
-                    <!--  Mode=OneWay}"  -->
-                    <!--  Header="English Title" />  -->
-                    <DataGridTextColumn
-                        Binding="{Binding Status,
-                                          Mode=OneWay}"
-                        Header="Status" />
-                    <!--  <DataGridTextColumn  -->
-                    <!--  Binding="{Binding Episodes}"  -->
-                    <!--  Header="Episodes" />  -->
-                </DataGrid.Columns>
-            </DataGrid>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
         </suki:BusyArea>
         <Grid
             Grid.Row="1"

@@ -58,6 +58,7 @@ public static class Program
                     .LogToDelegate(s =>
                         loggerFactory.CreateLogger("Avalonia").LogWarning("{Log}", s)
                     )
+                    .With(new SkiaOptions { MaxGpuResourceSizeBytes = (long)512.Megabytes().Bytes })
                     .AfterSetup(_ =>
                     {
                         if (appBuilder.Instance is not { } app)

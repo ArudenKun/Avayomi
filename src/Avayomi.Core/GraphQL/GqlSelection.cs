@@ -1,6 +1,8 @@
-﻿namespace Avayomi.Core.GraphQL;
+﻿using System.Text.Json.Nodes;
 
-internal class GqlSelection
+namespace Avayomi.Core.GraphQL;
+
+internal sealed class GqlSelection
 {
     public string Name { get; set; }
     public string? Alias { get; set; }
@@ -27,6 +29,15 @@ internal class GqlSelection
     {
         Name = attribute.Name;
         Alias = attribute.Alias;
+    }
+
+    public string ToJsonString(bool isMutation = false)
+    {
+        var jsonObject = new JsonObject
+        {
+            ["query"] = (isMutation ? "mutation" : string.Empty) + this,
+        };
+        return jsonObject.ToJsonString();
     }
 
     public override string ToString()
