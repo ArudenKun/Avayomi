@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Autofac;
 using Autofac.Core.Resolving.Pipeline;
 using Avalonia.Controls;
@@ -8,6 +10,7 @@ using Avalonia.Platform.Storage;
 using Avayomi.Core;
 using Avayomi.Core.Dependency;
 using Avayomi.Core.Extensions;
+using Avayomi.Core.GraphQL;
 using Avayomi.Messaging;
 using Avayomi.Navigation.Extensions;
 using Avayomi.Providers;
@@ -73,7 +76,17 @@ public sealed class AvayomiModule : AbpModule
         context
             .Services.AddFusionCache()
             .WithDefaultEntryOptions(options => options.SetFailSafe(true, 2.Hours(), 2.Minutes()))
-            .WithSystemTextJsonSerializer()
+            .WithSystemTextJsonSerializer(
+                new JsonSerializerOptions
+                {
+                    TypeInfoResolver = new GqlObjectTypeInfoResolver(),
+                    Converters =
+                    {
+                        new JsonStringEnumMemberConverter(),
+                        new JsonStringEnumConverter(),
+                    },
+                }
+            )
             .TryWithAutoSetup();
     }
 

@@ -70,7 +70,7 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
     #region Search
 
     /// <inheritdoc />
-    public async ValueTask<List<IAnimeInfo>> SearchAsync(
+    public async ValueTask<List<AnimeInfo>> SearchAsync(
         string query,
         CancellationToken cancellationToken = default
     )
@@ -81,9 +81,9 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         return ParseAnimeList(response);
     }
 
-    private List<IAnimeInfo> ParseAnimeList(string? response)
+    private List<AnimeInfo> ParseAnimeList(string? response)
     {
-        var list = new List<IAnimeInfo>();
+        var list = new List<AnimeInfo>();
         if (string.IsNullOrWhiteSpace(response))
             return list;
 
@@ -104,7 +104,7 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         return list;
     }
 
-    private IAnimeInfo? ParseAnimeCard(IElement node)
+    private AnimeInfo? ParseAnimeCard(IElement node)
     {
         // 1. Get the poster link
         var posterLink = node.QuerySelector("a.poster");
@@ -146,7 +146,7 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
     #region Anime Info
 
     /// <inheritdoc />
-    public async ValueTask<IAnimeInfo> GetAnimeInfoAsync(
+    public async ValueTask<AnimeInfo> GetAnimeInfoAsync(
         string animeId,
         CancellationToken cancellationToken = default
     )

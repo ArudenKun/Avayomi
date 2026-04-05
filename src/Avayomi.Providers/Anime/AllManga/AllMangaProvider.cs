@@ -35,7 +35,7 @@ internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
         }
     }
 
-    public async ValueTask<List<IAnimeInfo>> SearchAsync(
+    public async ValueTask<List<AnimeInfo>> SearchAsync(
         string query,
         CancellationToken cancellationToken = default
     )
@@ -69,26 +69,23 @@ internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
         var results = GqlParser.ParseFromJson<AllMangaAnimeInfo[]>(response["shows"]!["edges"]!);
         return results
                 ?.OrderByDescending(x => x.Score)
-                .Select(
-                    IAnimeInfo (x) =>
-                        new AnimeInfo(x.Id)
-                        {
-                            Image = x.Thumbnail,
-                            Status = x.Status,
-                            Summary = x.Description,
-                            Title = x.Name,
-                            Episodes = int.TryParse(x.EpisodeCount, out var count) ? count : 0,
-                            OtherNames = x.NativeName,
-                            Type = "Anime",
-                            Provider = Name,
-                            Metadata = { ["aniListId"] = x.AniListId },
-                        }
-                )
+                .Select(x => new AnimeInfo(x.Id)
+                {
+                    Image = x.Thumbnail,
+                    Status = x.Status,
+                    Summary = x.Description,
+                    Title = x.Name,
+                    Episodes = int.TryParse(x.EpisodeCount, out var count) ? count : 0,
+                    OtherNames = x.NativeName,
+                    Type = "Anime",
+                    Provider = Name,
+                    Metadata = { ["aniListId"] = x.AniListId },
+                })
                 .ToList()
             ?? [];
     }
 
-    public async ValueTask<IAnimeInfo> GetAnimeInfoAsync(
+    public async ValueTask<AnimeInfo> GetAnimeInfoAsync(
         string animeIdOrUrl,
         CancellationToken cancellationToken = default
     )

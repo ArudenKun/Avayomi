@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:asyncImageLoader="using:AsyncImageLoader"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
-    xmlns:core="using:Avayomi.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:suki="https://github.com/kikipoulet/SukiUI"
@@ -19,7 +18,7 @@
         IsSearchEnabled="False"
         ItemsSource="{Binding Pages}"
         SelectedItem="{Binding PageItem}"
-        SidebarToggleEnabled="True"
+        SidebarToggleEnabled="False"
         UseCustomContent="True">
         <!-- <suki:SukiSideMenu.ItemTemplate> -->
         <!--     <DataTemplate> -->
@@ -39,19 +38,19 @@
         <!-- </suki:SukiSideMenu.ItemTemplate> -->
         <suki:SukiSideMenu.HeaderContent>
             <StackPanel>
-                <TextBlock
-                    Margin="0,0,0,30"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="24"
-                    FontWeight="Bold"
-                    Text="{x:Static core:AvayomiCoreConsts.Name}" />
-                <!--  <Image  -->
-                <!--  Width="80"  -->
-                <!--  Height="80"  -->
-                <!--  Margin="30,30,30,30"  -->
-                <!--  Classes="AppIcon"  -->
-                <!--  Source="/Assets/logo.png" />  -->
+                <!--  <TextBlock  -->
+                <!--  Margin="0,0,0,30"  -->
+                <!--  HorizontalAlignment="Center"  -->
+                <!--  VerticalAlignment="Center"  -->
+                <!--  FontSize="24"  -->
+                <!--  FontWeight="Bold"  -->
+                <!--  Text="{x:Static core:AvayomiCoreConsts.Name}" />  -->
+                <Image
+                    Width="80"
+                    Height="80"
+                    Margin="30,30,30,30"
+                    Classes="AppIcon"
+                    Source="/Assets/logo.png" />
             </StackPanel>
         </suki:SukiSideMenu.HeaderContent>
         <suki:SukiSideMenu.FooterContent>
@@ -59,8 +58,11 @@
                 Padding="12,8"
                 VerticalAlignment="Center"
                 HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Center"
                 Classes="Basic">
+
                 <StackPanel
+                    HorizontalAlignment="Center"
                     Orientation="Horizontal"
                     Spacing="12">
                     <Border
@@ -69,7 +71,9 @@
                         ClipToBounds="True"
                         CornerRadius="18">
                         <Image
-                            asyncImageLoader:ImageLoader.Source="{Binding User.Avatar.MediumImageUrl}"
+                            asyncImageLoader:ImageLoader.Source="{Binding User.Avatar.MediumImageUrl,
+                                                                          Mode=OneWay,
+                                                                          FallbackValue='Icon'}"
                             Stretch="UniformToFill" />
                     </Border>
                     <TextBlock
@@ -77,8 +81,10 @@
                         FontSize="14"
                         FontWeight="SemiBold"
                         Text="{Binding User.Name,
-                                       TargetNullValue='User'}" />
+                                       Mode=OneWay,
+                                       FallbackValue='User'}" />
                 </StackPanel>
+
                 <Button.Flyout>
                     <MenuFlyout Placement="TopEdgeAlignedLeft">
                         <MenuItem Header="Profile" />

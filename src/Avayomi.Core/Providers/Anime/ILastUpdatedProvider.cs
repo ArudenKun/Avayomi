@@ -10,8 +10,8 @@ public interface ILastUpdatedProvider
     /// <summary>
     /// Search for anime.
     /// </summary>
-    /// <returns>A <see cref="List{T}"/> of <see cref="IAnimeInfo"/>s.</returns>
-    ValueTask<List<IAnimeInfo>> GetLastUpdatedAsync(
+    /// <returns>A <see cref="List{T}"/> of <see cref="AnimeInfo"/>s.</returns>
+    ValueTask<List<AnimeInfo>> GetLastUpdatedAsync(
         int page = 1,
         CancellationToken cancellationToken = default
     );

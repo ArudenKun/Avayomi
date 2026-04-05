@@ -51,15 +51,14 @@ public class AnimeService : IAnimeService, ISingletonDependency
         _logger.LogInformation("Setting provider {provider}", provider);
         _currentProvider = (IAnimeProvider)
             _serviceProvider.GetRequiredService(_animeProviders[provider]);
-        _fusionCache.RemoveByTag(GetProviderTags(provider));
     }
 
-    public async ValueTask<IReadOnlyList<IAnimeInfo>> SearchAsync(
+    public async ValueTask<IReadOnlyList<AnimeInfo>> SearchAsync(
         string query,
         CancellationToken cancellationToken = default
     ) =>
         await _fusionCache.GetOrSetAsync(
-            $"Search-{CurrentProvider}",
+            $"Search-{query}-{CurrentProvider}",
             async ct => await _currentProvider.SearchAsync(query, ct),
             _ => { },
             [.. GetProviderTags(CurrentProvider)],

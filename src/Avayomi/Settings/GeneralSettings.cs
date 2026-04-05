@@ -12,4 +12,7 @@ public sealed partial class GeneralSettings : ObservableObject
 
     [ObservableProperty]
     public partial bool IsSetup { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string Provider { get; set; } = string.Empty;
 }

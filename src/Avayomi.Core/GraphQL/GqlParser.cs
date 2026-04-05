@@ -10,7 +10,7 @@ namespace Avayomi.Core.GraphQL;
 
 internal static class GqlParser
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    public static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         TypeInfoResolver = new GqlObjectTypeInfoResolver(),
         Converters = { new JsonStringEnumMemberConverter(), new JsonStringEnumConverter() },

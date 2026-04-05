@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Antelcat.AutoGen.ComponentModel.Diagnostic;
-using AsyncAwaitBestPractices;
 using Avayomi.Core.AniList;
 using Avayomi.Core.AniList.Models.User;
-using Avayomi.Core.Dependency;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
@@ -13,14 +12,12 @@ namespace Avayomi.Services;
 
 [AutoExtractInterface]
 [ExposeServices(typeof(IAniListService))]
-public class AniListService : IAniListService, IInitializer, ISingletonDependency
+public class AniListService : IAniListService, ISingletonDependency
 {
     private readonly ILogger<AniListService> _logger;
     private readonly IAniListClient _aniListClient;
     private readonly ITokenService _tokenService;
     private readonly IFusionCache _fusionCache;
-
-    private bool _isInitialized;
 
     private const string TagPrefix = "AniList.";
     private const string UserTag = TagPrefix + "User";
@@ -40,28 +37,26 @@ public class AniListService : IAniListService, IInitializer, ISingletonDependenc
 
     public bool IsAuthenticated { get; private set; }
 
-    public void Initialize()
+    public async Task CheckAuthenticationCacheAsync()
     {
-        InitializeAsync().SafeFireAndForget();
-    }
-
-    private async Task InitializeAsync()
-    {
-        if (_isInitialized)
-            return;
-
         var accessToken = await _tokenService.GetAsync();
         if (string.IsNullOrEmpty(accessToken))
+        {
+            IsAuthenticated = false;
             return;
+        }
 
         IsAuthenticated = await _aniListClient.TryAuthenticateAsync(accessToken);
         if (!IsAuthenticated)
         {
             _logger.LogWarning("Failed to authenticate");
-            return;
         }
-
-        _isInitialized = true;
+        else
+        {
+            var user = await _aniListClient.GetAuthenticatedUserAsync();
+            _logger.LogInformation("User: {Name}", user.Name);
+            _logger.LogInformation("Using Cached AniList Login");
+        }
     }
 
     public async Task AuthenticateAsync(string accessToken)
@@ -87,7 +82,7 @@ public class AniListService : IAniListService, IInitializer, ISingletonDependenc
         var user = await _fusionCache.GetOrSetAsync(
             "Authenticated-AniListUser",
             async ct => await _aniListClient.GetAuthenticatedUserAsync(ct),
-            _ => { },
+            options => options.SetDuration(30.Minutes()),
             [UserTag],
             cancellationToken
         );
@@ -103,7 +98,7 @@ public class AniListService : IAniListService, IInitializer, ISingletonDependenc
             $"AniListUser-{userId}",
             async ct => await _aniListClient.GetUserAsync(userId, ct),
             _ => { },
-            [UserTag],
+            [UserTag, $"{userId}"],
             cancellationToken
         );
         return user;

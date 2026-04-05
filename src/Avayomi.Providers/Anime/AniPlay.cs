@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Avayomi.Core.AniList;
+using Avayomi.Core.AniList.Models.Media;
 using Avayomi.Core.Anime;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.Providers.Anime;
@@ -42,36 +43,39 @@ public class AniPlay : IAnimeProvider, ITransientDependency
 
     public string BaseUrl => "https://aniplaynow.live";
 
-    public async ValueTask<List<IAnimeInfo>> SearchAsync(
+    public async ValueTask<List<AnimeInfo>> SearchAsync(
         string query,
         CancellationToken cancellationToken = default
     )
     {
         var result = await _aniListClient.SearchMediaAsync(
-            query,
-            cancellationToken: cancellationToken
+            filter =>
+            {
+                filter.Query = query;
+                filter.Type = MediaType.Anime;
+                filter.IsAdult = false;
+            },
+            new AniListPaginationFilter(1, 20),
+            cancellationToken
         );
         return result
-            .Data.Select(
-                IAnimeInfo (x) =>
-                    new AnimeInfo(x.Id.ToString())
-                    {
-                        Link = x.Url.AbsoluteUri,
-                        Image = x.BannerImageUrl?.AbsoluteUri,
-                        Status = x.Status.ToString(),
-                        Title = x.Title.RomajiTitle,
-                        Episodes = x.Episodes ?? 0,
-                        Id = $"{x.Id}",
-                        OtherNames = x.Title.EnglishTitle,
-                        Summary = x.Description,
-                        Type = x.Type.ToString(),
-                        Genres = x.Genres.Select(g => new Genre(g)).ToList(),
-                    }
-            )
+            .Data.Select(x => new AnimeInfo(x.Id.ToString())
+            {
+                Link = x.Url.AbsoluteUri,
+                Image = x.Cover.MediumImageUrl.AbsoluteUri,
+                Status = x.Status.ToString(),
+                Title = x.Title.RomajiTitle,
+                Episodes = x.Episodes ?? 0,
+                Id = $"{x.Id}",
+                OtherNames = x.Title.EnglishTitle,
+                Summary = x.Description,
+                Type = x.Type.ToString(),
+                Genres = x.Genres.Select(g => new Genre(g)).ToList(),
+            })
             .ToList();
     }
 
-    public async ValueTask<IAnimeInfo> GetAnimeInfoAsync(
+    public async ValueTask<AnimeInfo> GetAnimeInfoAsync(
         string animeId,
         CancellationToken cancellationToken = default
     )
@@ -176,6 +180,7 @@ public class AniPlay : IAnimeProvider, ITransientDependency
                     bracketCount--;
                     break;
             }
+
             endIndex++;
         }
 

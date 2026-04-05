@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using Lucide.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Volo.Abp.DependencyInjection;
-using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi.ViewModels.Pages;
 
@@ -28,17 +26,17 @@ public sealed partial class AnimePageViewModel : PageViewModel
     {
         _animeService = animeService;
 
-        Animes = new AvaloniaList<IAnimeInfo>();
+        Animes = new AvaloniaList<AnimeInfo>();
     }
 
     public override int Index => 1;
 
     public override LucideIconKind IconKind => LucideIconKind.Tv;
 
-    public IAvaloniaList<IAnimeInfo> Animes { get; }
+    public IAvaloniaList<AnimeInfo> Animes { get; }
 
     [ObservableProperty]
-    public partial string AnimeProvider { get; set; }
+    public partial string AnimeProvider { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
@@ -59,6 +57,10 @@ public sealed partial class AnimePageViewModel : PageViewModel
         StartAsync().SafeFireAndForget();
 
         AnimeProviders.AddRange(_animeService.GetProviders());
+        if (!GeneralSettings.Provider.IsNullOrEmpty())
+        {
+            _animeService.SetProvider(GeneralSettings.Provider);
+        }
         AnimeProvider = _animeService.CurrentProvider;
     }
 
@@ -79,19 +81,13 @@ public sealed partial class AnimePageViewModel : PageViewModel
                 {
                     Logger.LogInformation("{Provider} Searching: {Search}", AnimeProvider, Search);
                     Animes.Clear();
-                    var result = await FusionCache.GetOrSetAsync(
-                        $"{Search.Trim()}-{AnimeProvider}",
-                        async ct => await _animeService.SearchAsync(Search, ct),
-                        _ => { },
-                        [$"Search-{AnimeProvider}"],
-                        cancellationToken
-                    );
-                    if (result.Count is 0)
+                    var animes = await _animeService.SearchAsync(Search, cancellationToken);
+                    if (animes.Count is 0)
                     {
                         Logger.LogInformation("No results found");
                         return;
                     }
-                    Animes.AddRange(result);
+                    Animes.AddRange(animes);
                 }
                 catch (TaskCanceledException)
                 {
@@ -129,7 +125,12 @@ public sealed partial class AnimePageViewModel : PageViewModel
     {
         if (!newValue.IsNullOrEmpty())
         {
+            GeneralSettings.Provider = newValue;
             _animeService.SetProvider(newValue);
+            if (CanSubmit())
+            {
+                SubmitCommand.Execute(null);
+            }
         }
         Logger.LogInformation("Provider: {OldValue} => {NewValue}", oldValue, newValue);
     }

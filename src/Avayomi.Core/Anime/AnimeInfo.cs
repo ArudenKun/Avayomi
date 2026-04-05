@@ -1,16 +1,21 @@
-﻿namespace Avayomi.Core.Anime;
+﻿using System.Text.Json.Serialization;
+
+namespace Avayomi.Core.Anime;
 
 /// <summary>
 /// The Class which contains all the information about an Anime
 /// </summary>
-public class AnimeInfo : IAnimeInfo
+public class AnimeInfo
 {
+    [JsonConstructor]
+    public AnimeInfo() { }
+
     public AnimeInfo(string id)
     {
         Id = id;
     }
 
-    public string Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     public string AniListId { get; set; } = string.Empty;
 

@@ -18,8 +18,8 @@ public interface IAnimeProvider : ISourceProvider, IVideoExtractorProvider, IKey
     /// </summary>
     /// <param name="query">The search query.</param>
     /// <param name="cancellationToken"></param>
-    /// <returns>A <see cref="List{T}"/> of <see cref="IAnimeInfo"/>s.</returns>
-    ValueTask<List<IAnimeInfo>> SearchAsync(
+    /// <returns>A <see cref="List{T}"/> of <see cref="AnimeInfo"/>s.</returns>
+    ValueTask<List<AnimeInfo>> SearchAsync(
         string query,
         CancellationToken cancellationToken = default
     );
@@ -29,8 +29,8 @@ public interface IAnimeProvider : ISourceProvider, IVideoExtractorProvider, IKey
     /// </summary>
     /// <param name="animeId">The anime Id.</param>
     /// <param name="cancellationToken"></param>
-    /// <returns>An instance of <see cref="IAnimeInfo"/> for the provider.</returns>
-    ValueTask<IAnimeInfo> GetAnimeInfoAsync(
+    /// <returns>An instance of <see cref="AnimeInfo"/> for the provider.</returns>
+    ValueTask<AnimeInfo> GetAnimeInfoAsync(
         string animeId,
         CancellationToken cancellationToken = default
     );

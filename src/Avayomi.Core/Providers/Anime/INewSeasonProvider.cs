@@ -10,8 +10,8 @@ public interface INewSeasonProvider
     /// <summary>
     /// Search for anime.
     /// </summary>
-    /// <returns>A <see cref="List{T}"/> of <see cref="IAnimeInfo"/>s.</returns>
-    ValueTask<List<IAnimeInfo>> GetNewSeasonAsync(
+    /// <returns>A <see cref="List{T}"/> of <see cref="AnimeInfo"/>s.</returns>
+    ValueTask<List<AnimeInfo>> GetNewSeasonAsync(
         int page = 1,
         CancellationToken cancellationToken = default
     );

@@ -12,11 +12,11 @@ namespace Avayomi.ViewModels;
 [Dependency(ServiceLifetime.Singleton)]
 public sealed partial class SplashViewModel : ViewModel, INavigationAware
 {
-    private readonly ITokenService _tokenService;
+    private readonly IAniListService _aniListService;
 
-    public SplashViewModel(ITokenService tokenService)
+    public SplashViewModel(IAniListService aniListService)
     {
-        _tokenService = tokenService;
+        _aniListService = aniListService;
     }
 
     [ObservableProperty]
@@ -29,11 +29,15 @@ public sealed partial class SplashViewModel : ViewModel, INavigationAware
 
     private async Task StartAsync()
     {
-        await Task.Delay(500);
-        StatusText = "Checking authentication state";
-        if (_tokenService.IsAuthenticated)
+        await Task.Delay(1000);
+        StatusText = "Checking login cache";
+        await _aniListService.CheckAuthenticationCacheAsync();
+        if (_aniListService.IsAuthenticated)
         {
-            await NavigationHostManager.NavigateAsync<MainView>(HostNames.Main);
+            await NavigationHostManager.NavigateAsync<MainView>(
+                HostNames.Main,
+                await _aniListService.GetAuthenticatedUserAsync()
+            );
             return;
         }
 

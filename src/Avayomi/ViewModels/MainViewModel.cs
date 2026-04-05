@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
 using Avalonia.Collections;
 using Avalonia.Controls.Notifications;
 using Avayomi.Core.AniList.Models.User;
 using Avayomi.Messaging.Messages;
+using Avayomi.Navigation;
 using Avayomi.Services;
 using Avayomi.ViewModels.Pages;
 using Avayomi.Views;
@@ -21,7 +21,10 @@ using ZLinq;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMessage>
+public sealed partial class MainViewModel
+    : ViewModel,
+        INavigationAware,
+        IRecipient<ChangePageMessage>
 {
     private readonly IAniListService _aniListService;
     private readonly HashSet<Type> _pageTypes;
@@ -76,13 +79,6 @@ public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMess
         // Assigning PageItem instead of calling ChangePage directly.
         // This keeps the UI selection visually in sync with the current page.
         PageItem = Pages.FirstOrDefault(x => x.IsVisible);
-
-        LoadAsync().SafeFireAndForget();
-    }
-
-    private async Task LoadAsync()
-    {
-        User = await _aniListService.GetAuthenticatedUserAsync();
     }
 
     [RelayCommand]
@@ -161,4 +157,21 @@ public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMess
             }
         }
     }
+
+    public bool CanNavigateTo(object? parameter)
+    {
+        return true;
+    }
+
+    public void OnNavigatedTo(object? parameter)
+    {
+        User = parameter as User;
+    }
+
+    public bool CanNavigateFrom()
+    {
+        return true;
+    }
+
+    public void OnNavigatedFrom() { }
 }

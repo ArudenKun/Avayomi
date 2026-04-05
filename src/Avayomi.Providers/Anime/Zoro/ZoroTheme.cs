@@ -106,7 +106,7 @@ public abstract class ZoroTheme
     #region Popular Anime
 
     /// <inheritdoc />
-    public virtual async ValueTask<List<IAnimeInfo>> GetPopularAsync(
+    public virtual async ValueTask<List<AnimeInfo>> GetPopularAsync(
         int page = 1,
         CancellationToken cancellationToken = default
     )
@@ -121,7 +121,7 @@ public abstract class ZoroTheme
     #region Latest Updates
 
     /// <inheritdoc />
-    public virtual async ValueTask<List<IAnimeInfo>> GetLastUpdatedAsync(
+    public virtual async ValueTask<List<AnimeInfo>> GetLastUpdatedAsync(
         int page = 1,
         CancellationToken cancellationToken = default
     )
@@ -136,7 +136,7 @@ public abstract class ZoroTheme
     #region Search
 
     /// <inheritdoc />
-    public virtual async ValueTask<List<IAnimeInfo>> SearchAsync(
+    public virtual async ValueTask<List<AnimeInfo>> SearchAsync(
         string query,
         CancellationToken cancellationToken = default
     )
@@ -147,7 +147,7 @@ public abstract class ZoroTheme
     /// <summary>
     /// Searches for anime with advanced filter parameters.
     /// </summary>
-    public virtual async ValueTask<List<IAnimeInfo>> SearchAsync(
+    public virtual async ValueTask<List<AnimeInfo>> SearchAsync(
         string query,
         ZoroThemeSearchParameters parameters,
         CancellationToken cancellationToken = default
@@ -195,9 +195,9 @@ public abstract class ZoroTheme
 
     #region Anime Parsing
 
-    private List<IAnimeInfo> ParseAnimeList(string? response)
+    private List<AnimeInfo> ParseAnimeList(string? response)
     {
-        var list = new List<IAnimeInfo>();
+        var list = new List<AnimeInfo>();
 
         if (string.IsNullOrWhiteSpace(response))
             return list;
@@ -219,7 +219,7 @@ public abstract class ZoroTheme
         return list;
     }
 
-    private IAnimeInfo? ParseAnimeFromElement(IElement node)
+    private AnimeInfo? ParseAnimeFromElement(IElement node)
     {
         // 1. Get the link/title node using CSS breadcrumbs
         // HAP: .//div[contains(@class, 'film-detail')]//a
@@ -254,7 +254,7 @@ public abstract class ZoroTheme
     #region Anime Details
 
     /// <inheritdoc />
-    public virtual async ValueTask<IAnimeInfo> GetAnimeInfoAsync(
+    public virtual async ValueTask<AnimeInfo> GetAnimeInfoAsync(
         string id,
         CancellationToken cancellationToken = default
     )

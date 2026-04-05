@@ -60,7 +60,10 @@ public sealed partial class LoginViewModel : ViewModel, INavigationAware
                 await _aniListService.AuthenticateAsync(accessToken);
                 if (_aniListService.IsAuthenticated)
                 {
-                    await NavigationHostManager.NavigateAsync<MainView>(HostNames.Main);
+                    await NavigationHostManager.NavigateAsync<MainView>(
+                        HostNames.Main,
+                        await _aniListService.GetAuthenticatedUserAsync()
+                    );
                 }
 
                 return;

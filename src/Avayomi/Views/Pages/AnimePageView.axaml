@@ -63,7 +63,7 @@
                 </DataGrid.Styles>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Thumbnail">
-                        <DataTemplate DataType="anime:IAnimeInfo">
+                        <DataTemplate DataType="anime:AnimeInfo">
                             <Image
                                 MaxWidth="100"
                                 MaxHeight="100"

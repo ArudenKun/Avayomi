@@ -12,8 +12,8 @@ public interface IPopularProvider
     /// </summary>
     /// <param name="page"></param>
     /// <param name="cancellationToken"></param>
-    /// <returns>A <see cref="List{T}"/> of <see cref="IAnimeInfo"/>s.</returns>
-    ValueTask<List<IAnimeInfo>> GetPopularAsync(
+    /// <returns>A <see cref="List{T}"/> of <see cref="AnimeInfo"/>s.</returns>
+    ValueTask<List<AnimeInfo>> GetPopularAsync(
         int page = 1,
         CancellationToken cancellationToken = default
     );
