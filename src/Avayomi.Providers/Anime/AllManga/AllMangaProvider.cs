@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 using System.Web;
 using Avayomi.Core;
 using Avayomi.Core.AniList;
-using Avayomi.Core.Anime;
+using Avayomi.Core.Animes;
 using Avayomi.Core.GraphQL;
 using Avayomi.Core.Providers.Anime;
 using Avayomi.Core.Videos;
@@ -69,18 +69,22 @@ internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
         var results = GqlParser.ParseFromJson<AllMangaAnimeInfo[]>(response["shows"]!["edges"]!);
         return results
                 ?.OrderByDescending(x => x.Score)
-                .Select(x => new AnimeInfo(x.Id)
-                {
-                    Image = x.Thumbnail,
-                    Status = x.Status,
-                    Summary = x.Description,
-                    Title = x.Name,
-                    Episodes = int.TryParse(x.EpisodeCount, out var count) ? count : 0,
-                    OtherNames = x.EnglishName,
-                    Type = "Anime",
-                    Provider = Name,
-                    Metadata = { ["aniListId"] = x.AniListId },
-                })
+                .Select(x => new AnimeInfo(
+                    x.Id,
+                    x.Name,
+                    x.AltNames,
+                    x.Description,
+                    new AnimeImages(x.Thumbnail, x.Thumbnail, x.Thumbnail),
+                    AnimeStatus.All,
+                    new AnimeUserStatus(AnimeStatus.All, 0, 0),
+                    int.TryParse(x.EpisodeCount, out var episodes) ? episodes : 0,
+                    0,
+                    new List<string>(),
+                    DateOnly.FromDateTime(DateTime.Now),
+                    DateOnly.FromDateTime(DateTime.Now),
+                    x.Genres,
+                    string.Empty
+                ))
                 .ToList()
             ?? [];
     }
@@ -112,37 +116,34 @@ internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
 
         string response = await HttpClient.GetStringAsync(requestUrl);
         JsonDocument jsonDoc = JsonDocument.Parse(response);
+        //
+        // if (
+        //     jsonDoc.RootElement.TryGetProperty("data", out JsonElement data)
+        //     && data.TryGetProperty("show", out JsonElement show)
+        // )
+        // {
+        //     var details = show.GetProperty("_id").GetString() ?? string.Empty;
+        //
+        //     if (show.TryGetProperty("description", out JsonElement descProp))
+        //     {
+        //         details.Summary = descProp.GetString();
+        //     }
+        //
+        //     if (show.TryGetProperty("thumbnail", out JsonElement thumbProp))
+        //     {
+        //         details.Image = thumbProp.GetString();
+        //     }
+        //
+        //     details.Metadata["aniListId"] =
+        //         show.GetProperty("aniListId").GetString() ?? string.Empty;
+        //
+        //     return details;
+        // }
 
-        if (
-            jsonDoc.RootElement.TryGetProperty("data", out JsonElement data)
-            && data.TryGetProperty("show", out JsonElement show)
-        )
-        {
-            AnimeInfo details = new(show.GetProperty("_id").GetString() ?? string.Empty)
-            {
-                Title = show.GetProperty("name").GetString() ?? string.Empty,
-            };
-
-            if (show.TryGetProperty("description", out JsonElement descProp))
-            {
-                details.Summary = descProp.GetString();
-            }
-
-            if (show.TryGetProperty("thumbnail", out JsonElement thumbProp))
-            {
-                details.Image = thumbProp.GetString();
-            }
-
-            details.Metadata["aniListId"] =
-                show.GetProperty("aniListId").GetString() ?? string.Empty;
-
-            return details;
-        }
-
-        return new AnimeInfo(string.Empty);
+        return AnimeInfo.Empty;
     }
 
-    public async ValueTask<List<Episode>> GetEpisodesAsync(
+    public async ValueTask<List<AnimeEpisode>> GetEpisodesAsync(
         string animeIdOrUrl,
         CancellationToken cancellationToken = default
     )
@@ -165,7 +166,7 @@ internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
         string response = await HttpClient.GetStringAsync(requestUrl);
         JsonDocument jsonDoc = JsonDocument.Parse(response);
 
-        List<Episode> episodes = new();
+        List<AnimeEpisode> episodes = new();
 
         if (
             jsonDoc.RootElement.TryGetProperty("data", out JsonElement data)
@@ -180,7 +181,7 @@ internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
                 if (float.TryParse(epString, out float epNum))
                 {
                     episodes.Add(
-                        new Episode
+                        new AnimeEpisode
                         {
                             Id = $"{showId}-{epString}",
                             Number = (int)epNum,

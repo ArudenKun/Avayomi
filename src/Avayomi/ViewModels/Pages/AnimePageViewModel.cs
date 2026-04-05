@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Collections;
@@ -13,7 +14,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lucide.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NinjaNye.SearchExtensions.Levenshtein;
+using Raffinert.FuzzySharp;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.ViewModels.Pages;
@@ -90,10 +91,49 @@ public sealed partial class AnimePageViewModel : PageViewModel
                     }
 
                     var animes = animeResults
-                        .LevenshteinDistanceOf(x => x.Title, x => x.OtherNames)
-                        .ComparedTo(Search)
-                        .OrderBy(x => x.Distance)
-                        .Select(x => x.Item);
+                        .Select(anime =>
+                        {
+                            if (
+                                anime
+                                    .Title.ToLowerInvariant()
+                                    .Equals(Search, StringComparison.OrdinalIgnoreCase)
+                                || anime.AlternativeTitles.Any(alt =>
+                                    alt.ToLowerInvariant()
+                                        .Equals(Search, StringComparison.OrdinalIgnoreCase)
+                                )
+                            )
+                            {
+                                return new { Anime = anime, Score = 1000 };
+                            }
+
+                            var titleScore = Fuzz.WeightedRatio(
+                                Search.ToLowerInvariant(),
+                                anime.Title.ToLowerInvariant()
+                            );
+                            var altScore = anime
+                                .AlternativeTitles.Select(alt =>
+                                    Fuzz.WeightedRatio(
+                                        Search.ToLowerInvariant(),
+                                        alt.ToLowerInvariant()
+                                    )
+                                )
+                                .DefaultIfEmpty(0)
+                                .Max();
+
+                            var score = Math.Max(titleScore, altScore);
+
+                            if (anime.Title.StartsWith(Search, StringComparison.OrdinalIgnoreCase))
+                            {
+                                score += 50;
+                            }
+
+                            return new { Anime = anime, Score = score };
+                        })
+                        .OrderByDescending(x => x.Score)
+                        .Select(x => x.Anime)
+                        .ToList();
+
+                    Logger.LogInformation("Animes Score: {Json}", JsonSerializer.Serialize(animes));
 
                     Animes.AddRange(
                         animes.Select(x =>
@@ -101,7 +141,7 @@ public sealed partial class AnimePageViewModel : PageViewModel
                             var vm = ServiceProvider.GetRequiredService<AnimeCardViewModel>();
                             vm.Id = x.Id;
                             vm.Title = x.Title;
-                            vm.CoverUrl = x.Image ?? string.Empty;
+                            vm.CoverUrl = x.Images.Medium;
                             return vm;
                         })
                     );

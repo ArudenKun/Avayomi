@@ -29,9 +29,9 @@ public class UserOptions
     [GqlSelection("profileColor")]
     public string ProfileColor { get; private set; }
 
-    /// <summary>
-    /// The language the user wants to see staff and character names in.
-    /// </summary>
+    // /// <summary>
+    // /// The language the user wants to see staff and character names in.
+    // /// </summary>
     [GqlSelection("staffNameLanguage")]
     public UserStaffNameLanguage StaffNameLanguage { get; private set; }
 

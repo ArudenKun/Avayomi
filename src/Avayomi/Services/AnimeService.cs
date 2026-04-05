@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Antelcat.AutoGen.ComponentModel.Diagnostic;
-using Avayomi.Core.Anime;
+using Avayomi.Core.Animes;
 using Avayomi.Core.Providers.Anime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,4 @@
-﻿using Avayomi.Core.Anime;
+﻿using Avayomi.Core.Animes;
 
 namespace Avayomi.Core.Providers.Anime;
 

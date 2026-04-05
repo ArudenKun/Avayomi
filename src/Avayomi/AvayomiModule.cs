@@ -8,7 +8,6 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using Avayomi.Core;
-using Avayomi.Core.Dependency;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.GraphQL;
 using Avayomi.Messaging;
@@ -82,8 +81,8 @@ public sealed class AvayomiModule : AbpModule
                     TypeInfoResolver = new GqlObjectTypeInfoResolver(),
                     Converters =
                     {
-                        new JsonStringEnumMemberConverter(),
                         new JsonStringEnumConverter(),
+                        new JsonStringEnumMemberConverter(),
                     },
                 }
             )
@@ -110,11 +109,6 @@ public sealed class AvayomiModule : AbpModule
                             var instance = context.Instance;
                             if (instance is null)
                                 return;
-
-                            if (
-                                context.NewInstanceActivated && instance is IInitializer initializer
-                            )
-                                initializer.Initialize();
 
                             var messenger = WeakReferenceMessenger.Default;
                             messenger.RegisterAll(instance);

@@ -1,4 +1,4 @@
-﻿using Avayomi.Core.Anime;
+﻿using Avayomi.Core.Animes;
 using Avayomi.Core.Videos;
 
 namespace Avayomi.Core.Providers.Anime;
@@ -40,8 +40,8 @@ public interface IAnimeProvider : ISourceProvider, IVideoExtractorProvider, IKey
     /// </summary>
     /// <param name="animeId">The anime Id.</param>
     /// <param name="cancellationToken"></param>
-    /// <returns>A <see cref="List{T}"/> of <see cref="Episode"/>s.</returns>
-    ValueTask<List<Episode>> GetEpisodesAsync(
+    /// <returns>A <see cref="List{T}"/> of <see cref="AnimeEpisode"/>s.</returns>
+    ValueTask<List<AnimeEpisode>> GetEpisodesAsync(
         string animeId,
         CancellationToken cancellationToken = default
     );

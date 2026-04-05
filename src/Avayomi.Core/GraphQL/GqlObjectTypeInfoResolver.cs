@@ -5,7 +5,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Avayomi.Core.GraphQL;
 
 // Note: Ensure you are targeting .NET 7 or higher.
-public class GqlObjectTypeInfoResolver : DefaultJsonTypeInfoResolver
+public sealed class GqlObjectTypeInfoResolver : DefaultJsonTypeInfoResolver
 {
     public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
     {
