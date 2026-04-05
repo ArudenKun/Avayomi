@@ -33,9 +33,9 @@ public partial class AWishExtractor : VideoExtractorBase
         var document = HtmlHelper.Parse(response);
 
         var script = document
-            .DocumentNode.Descendants()
-            .FirstOrDefault(x => x.Name == "script" && x.InnerText.Contains("m3u8"))
-            ?.InnerText;
+            .QuerySelectorAll("script")
+            .FirstOrDefault(x => x.InnerHtml.Contains("m3u8"))
+            ?.InnerHtml;
 
         // Sometimes the script body is packed, sometimes it isn't
         var scriptBody = JavaScriptUnpacker.IsPacked(script)

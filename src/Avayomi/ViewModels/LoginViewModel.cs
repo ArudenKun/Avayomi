@@ -1,0 +1,99 @@
+﻿using System;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
+using Avayomi.Navigation;
+using Avayomi.Services;
+using Avayomi.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Logging;
+
+namespace Avayomi.ViewModels;
+
+public sealed partial class LoginViewModel : ViewModel, INavigationAware
+{
+    private readonly TopLevel _topLevel;
+    private readonly IAniListService _aniListService;
+
+    private const string RedirectUrl = "http://127.0.0.1/avayomi";
+    private const string ClientId = "38430";
+    private const string ResponseType = "token";
+
+    public LoginViewModel(TopLevel topLevel, IAniListService aniListService)
+    {
+        _topLevel = topLevel;
+        _aniListService = aniListService;
+    }
+
+    [ObservableProperty]
+    public partial bool RememberMe { get; set; }
+
+    public override void OnLoaded()
+    {
+        base.OnLoaded();
+
+        var authenticated = _aniListService.IsAuthenticated;
+        if (authenticated)
+        {
+            NavigationHostManager.Navigate<MainView>(HostNames.Main);
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoginAsync()
+    {
+        try
+        {
+            var requestUrl = new RequestUrl("https://anilist.co/api/v2/oauth/authorize");
+            var startUrl = requestUrl.CreateAuthorizeUrl(ClientId, ResponseType);
+            var result = await WebAuthenticationBroker.AuthenticateAsync(
+                _topLevel,
+                new WebAuthenticatorOptions(new Uri(startUrl), new Uri(RedirectUrl))
+            );
+            var authorizeResponse = new AuthorizeResponse(result.CallbackUri.AbsoluteUri);
+            var accessToken = authorizeResponse.AccessToken;
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                await _aniListService.AuthenticateAsync(accessToken);
+                if (_aniListService.IsAuthenticated)
+                {
+                    await NavigationHostManager.NavigateAsync<MainView>(HostNames.Main);
+                }
+
+                return;
+            }
+
+            await _aniListService.LogoutAsync();
+            ToastService.ShowToast(
+                NotificationType.Warning,
+                "Login Failed",
+                "Login was cancelled or an error occured while logging in"
+            );
+        }
+        catch (TaskCanceledException)
+        {
+            Logger.LogInformation("Login was cancelled by the user.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "An unexpected error occurred during login.");
+        }
+    }
+
+    public bool CanNavigateTo(object? parameter)
+    {
+        return true;
+    }
+
+    public void OnNavigatedTo(object? parameter) { }
+
+    public bool CanNavigateFrom()
+    {
+        return true;
+    }
+
+    public void OnNavigatedFrom() { }
+}

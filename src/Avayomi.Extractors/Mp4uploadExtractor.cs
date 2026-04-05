@@ -25,14 +25,16 @@ public class Mp4UploadExtractor : VideoExtractorBase
 
         var document = HtmlHelper.Parse(response);
 
-        var link = document
-            .DocumentNode.Descendants()
-            .Where(x => x.Name == "script")
-            .FirstOrDefault(x => x.InnerText.Contains("src: "))
-            ?.InnerText.SubstringAfter("src: \"")
-            .SubstringBefore("\"");
+        // 1. Find the script containing the 'src: ' link
+        var scriptElement = document
+            .QuerySelectorAll("script")
+            .FirstOrDefault(x => x.InnerHtml.Contains("src: "));
+
+        var link = scriptElement?.InnerHtml.SubstringAfter("src: \"").SubstringBefore("\"");
+
         if (!string.IsNullOrWhiteSpace(link))
         {
+            // Extracting host: link is "https://example.com/path" -> result "example.com"
             var host = link.SubstringAfter("https://").SubstringBefore("/");
             headers.Add("host", host);
 
@@ -48,9 +50,16 @@ public class Mp4UploadExtractor : VideoExtractorBase
             ];
         }
 
-        var packed = response
-            .SubstringAfter("eval(function(p,a,c,k,e,d)")
-            .Split(["</script>"], StringSplitOptions.None)[0];
+        // 2. If not found, look for the 'packed' eval script
+        // We target a script that contains the signature 'eval(function(p,a,c,k,e,d)'
+        var packedScript = document
+            .QuerySelectorAll("script")
+            .FirstOrDefault(x => x.InnerHtml.Contains("eval(function(p,a,c,k,e,d)"))
+            ?.InnerHtml;
+
+        // Since we have the node directly, we don't need to split by </script> anymore.
+        // We just need to ensure we grab the part starting from 'eval'
+        var packed = packedScript?.SubstringAfter("eval(function(p,a,c,k,e,d)");
 
         var unpacked = JavaScriptUnpacker.UnpackAndCombine($"eval(function(p,a,c,k,e,d){packed}");
 

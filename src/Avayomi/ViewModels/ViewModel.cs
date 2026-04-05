@@ -15,25 +15,14 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using R3;
-using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
-using Volo.Abp.EventBus.Local;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi.ViewModels;
 
 [PublicAPI]
-public abstract partial class ViewModel
-    : ObservableValidator,
-        IDisposable,
-        IHasExtraProperties,
-        ITransientDependency
+public abstract partial class ViewModel : ObservableValidator, IDisposable, ITransientDependency
 {
-    protected ViewModel()
-    {
-        ExtraProperties = new ExtraPropertyDictionary();
-        this.SetDefaultsForExtraProperties();
-    }
-
     public required IServiceProvider ServiceProvider { protected get; init; }
     public required ITransientCachedServiceProvider CachedServiceProvider { protected get; init; }
 
@@ -44,9 +33,6 @@ public abstract partial class ViewModel
         CachedServiceProvider.GetService(LoggerFactory.CreateLogger(GetType().FullName!));
 
     protected IMessenger Messenger => CachedServiceProvider.GetRequiredService<IMessenger>();
-
-    protected ILocalEventBus LocalEventBus =>
-        CachedServiceProvider.GetRequiredService<ILocalEventBus>();
 
     protected INavigationHostManager NavigationHostManager =>
         ServiceProvider.GetRequiredService<INavigationHostManager>();
@@ -71,8 +57,7 @@ public abstract partial class ViewModel
 
     public IClipboard Clipboard => ServiceProvider.GetRequiredService<IClipboard>();
     public ILauncher Launcher => ServiceProvider.GetRequiredService<ILauncher>();
-
-    public ExtraPropertyDictionary ExtraProperties { get; }
+    public IFusionCache FusionCache => ServiceProvider.GetRequiredService<IFusionCache>();
 
     [ObservableProperty]
     public virtual partial bool IsBusy { get; set; }
@@ -131,6 +116,8 @@ public abstract partial class ViewModel
 
     ~ViewModel() => Dispose(false);
 
+    public CompositeDisposable Disposables { get; } = new();
+
     public void Dispose()
     {
         Dispose(true);
@@ -145,8 +132,7 @@ public abstract partial class ViewModel
 
         if (disposing)
         {
-            var disposables = this.GetProperty("Disposables") as CompositeDisposable;
-            disposables?.Dispose();
+            Disposables.Dispose();
         }
 
         _disposed = true;

@@ -38,7 +38,7 @@ public class VidStreamExtractor : VideoExtractorBase
 
         var document = HtmlHelper.Parse(response);
 
-        var mediaUrl = document.DocumentNode.SelectSingleNode(".//iframe").Attributes["src"].Value;
+        var mediaUrl = document.QuerySelector("iframe")?.GetAttribute("src");
         if (string.IsNullOrWhiteSpace(mediaUrl))
             return [];
 

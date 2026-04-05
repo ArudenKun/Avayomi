@@ -6,25 +6,30 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using Avayomi.Core;
+using Avayomi.Core.Dependency;
+using Avayomi.Core.Extensions;
 using Avayomi.Messaging;
 using Avayomi.Navigation.Extensions;
 using Avayomi.Providers;
 using Avayomi.Services.Settings;
 using Avayomi.ViewModels;
 using CommunityToolkit.Mvvm.Messaging;
+using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
+using NeoSmart.Caching.Sqlite;
 using R3;
 using R3.ObservableEvents;
+using SQLitePCL;
 using SukiUI.Dialogs;
 using SukiUI.Toasts;
 using Volo.Abp;
-using Volo.Abp.Caching;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Modularity;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi;
 
-[DependsOn(typeof(AvayomiCoreModule), typeof(AbpCachingModule), typeof(AvayomiProvidersModule))]
+[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule))]
 public sealed class AvayomiModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
@@ -60,6 +65,16 @@ public sealed class AvayomiModule : AbpModule
 
         context.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         context.Services.AddHttpClient();
+
+        context.Services.AddSqliteCache(
+            AvayomiCoreConsts.Paths.CacheDir.Combine("cache.db"),
+            new SQLite3Provider_e_sqlite3()
+        );
+        context
+            .Services.AddFusionCache()
+            .WithDefaultEntryOptions(options => options.SetFailSafe(true, 2.Hours(), 2.Minutes()))
+            .WithSystemTextJsonSerializer()
+            .TryWithAutoSetup();
     }
 
     public override void OnApplicationShutdown(ApplicationShutdownContext context)
@@ -82,6 +97,11 @@ public sealed class AvayomiModule : AbpModule
                             var instance = context.Instance;
                             if (instance is null)
                                 return;
+
+                            if (
+                                context.NewInstanceActivated && instance is IInitializer initializer
+                            )
+                                initializer.Initialize();
 
                             var messenger = WeakReferenceMessenger.Default;
                             messenger.RegisterAll(instance);

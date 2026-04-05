@@ -47,11 +47,14 @@ public class AniPlay : IAnimeProvider, ITransientDependency
         CancellationToken cancellationToken = default
     )
     {
-        var result = await _aniListClient.SearchMediaAsync(query);
+        var result = await _aniListClient.SearchMediaAsync(
+            query,
+            cancellationToken: cancellationToken
+        );
         return result
             .Data.Select(
                 IAnimeInfo (x) =>
-                    new AnimeInfo
+                    new AnimeInfo(x.Id.ToString())
                     {
                         Link = x.Url.AbsoluteUri,
                         Image = x.BannerImageUrl?.AbsoluteUri,
@@ -68,12 +71,17 @@ public class AniPlay : IAnimeProvider, ITransientDependency
             .ToList();
     }
 
-    public ValueTask<IAnimeInfo> GetAnimeInfoAsync(
+    public async ValueTask<IAnimeInfo> GetAnimeInfoAsync(
         string animeId,
         CancellationToken cancellationToken = default
     )
     {
-        throw new NotImplementedException();
+        var media = await _aniListClient.GetMediaAsync(
+            int.TryParse(animeId, out var mediaId) ? mediaId : 0,
+            cancellationToken
+        );
+
+        return new AnimeInfo(animeId);
     }
 
     public async ValueTask<List<Episode>> GetEpisodesAsync(
@@ -107,16 +115,16 @@ public class AniPlay : IAnimeProvider, ITransientDependency
         var list = JsonSerializer.Deserialize<List<AniPlayProviderModel>>(episodesArrayString);
 
         return list?.SelectMany(x =>
-                    x.Episodes.Select(x => new Episode()
+                    x.Episodes.Select(episode => new Episode
                     {
-                        Id = x.Id,
-                        Number = x.Number,
-                        Name = x.Title,
-                        Image = x.Image,
-                        Description = x.Description,
+                        Id = episode.Id,
+                        Number = episode.Number,
+                        Name = episode.Title,
+                        Image = episode.Image,
+                        Description = episode.Description,
                     })
                 )
-                ?.ToList()
+                .ToList()
             ?? [];
     }
 

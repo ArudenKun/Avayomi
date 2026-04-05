@@ -24,10 +24,10 @@ public class FilemoonExtractor : VideoExtractorBase
         var document = HtmlHelper.Parse(response);
 
         var scriptNode = document
-            .DocumentNode.Descendants()
-            .FirstOrDefault(x => x.Name == "script" && x.InnerText.Contains("eval") == true);
+            .QuerySelectorAll("script")
+            .FirstOrDefault(x => x.InnerHtml.Contains("eval"));
 
-        var unpacked = JavaScriptUnpacker.UnpackAndCombine(scriptNode?.InnerText);
+        var unpacked = JavaScriptUnpacker.UnpackAndCombine(scriptNode?.TextContent);
 
         var masterUrl = unpacked.SubstringAfter("{file:\"").Split(["\"}"], StringSplitOptions.None)[
             0

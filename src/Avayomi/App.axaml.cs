@@ -20,9 +20,15 @@ public sealed class App : Application
 
     public static TopLevel TopLevel { get; internal set; } = null!;
 
+    public static new IClassicDesktopStyleApplicationLifetime ApplicationLifetime =>
+        (IClassicDesktopStyleApplicationLifetime?)Application.Current?.ApplicationLifetime
+        ?? throw new InvalidOperationException("Applications is not yet initialized.");
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+
+        // FFmpegInitializer.Initialize(autoInstall: false);
 
         var replicantImageLoader = new ReplicantImageLoader(
             AvayomiCoreConsts.Paths.CacheDir.Combine("Images")
@@ -33,9 +39,6 @@ public sealed class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime)
-            return;
-
         // Avoid duplicate validations from both Avalonia and the CommunityToolkit.
         // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
         DisableAvaloniaDataAnnotationValidation();

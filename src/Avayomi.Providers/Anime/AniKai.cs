@@ -1,13 +1,13 @@
-using System.Net;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using AngleSharp.Dom;
 using Avayomi.Core;
+using Avayomi.Core.AniList;
 using Avayomi.Core.Anime;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.Providers.Anime;
 using Avayomi.Core.Videos;
 using Avayomi.Extractors;
-using HtmlAgilityPack;
 
 namespace Avayomi.Providers.Anime;
 
@@ -28,8 +28,8 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
     /// <summary>
     /// Initializes an instance of <see cref="AniKai"/>.
     /// </summary>
-    public AniKai(IHttpClientFactory httpClientFactory)
-        : base(httpClientFactory)
+    public AniKai(IHttpClientFactory httpClientFactory, IAniListClient aniListClient)
+        : base(httpClientFactory, aniListClient)
     {
         _megaUp = new MegaUpExtractor(httpClientFactory);
     }
@@ -87,13 +87,15 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         if (string.IsNullOrWhiteSpace(response))
             return list;
 
-        var document = HtmlHelper.Parse(response!);
-        var nodes = document.DocumentNode.SelectNodes("//div[contains(@class, 'aitem')]");
-        if (nodes is null)
-            return list;
+        // Assuming your HtmlHelper.Parse returns an AngleSharp IHtmlDocument
+        var document = HtmlHelper.Parse(response);
+
+        // Use QuerySelectorAll with a CSS class selector
+        var nodes = document.QuerySelectorAll("div.aitem");
 
         foreach (var node in nodes)
         {
+            // AngleSharp nodes are IElement, ensure ParseAnimeCard is updated to accept it
             var anime = ParseAnimeCard(node);
             if (anime is not null)
                 list.Add(anime);
@@ -102,33 +104,35 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         return list;
     }
 
-    private IAnimeInfo? ParseAnimeCard(HtmlNode node)
+    private IAnimeInfo? ParseAnimeCard(IElement node)
     {
-        var posterLink = node.SelectSingleNode(".//a[contains(@class, 'poster')]");
+        // 1. Get the poster link
+        var posterLink = node.QuerySelector("a.poster");
         if (posterLink is null)
             return null;
 
-        var href = posterLink.GetAttributeValue("href", "");
+        var href = posterLink.GetAttribute("href");
         if (string.IsNullOrWhiteSpace(href))
             return null;
 
         var id = href.Replace("/watch/", "");
 
-        var titleNode = node.SelectSingleNode(".//a[contains(@class, 'title')]");
-        var title = titleNode?.GetAttributeValue("title", "") ?? titleNode?.InnerText?.Trim() ?? "";
-        var japaneseTitle = titleNode?.GetAttributeValue("data-jp", "");
+        // 2. Get Title and Japanese Title
+        var titleNode = node.QuerySelector("a.title");
+        var title = titleNode?.GetAttribute("title") ?? titleNode?.TextContent.Trim() ?? "";
+        var japaneseTitle = titleNode?.GetAttribute("data-jp");
 
-        var imgNode = node.SelectSingleNode(".//img");
-        var image =
-            imgNode?.GetAttributeValue("data-src", "") ?? imgNode?.GetAttributeValue("src", "");
+        // 3. Get Image (checks data-src first, then src)
+        var imgNode = node.QuerySelector("img");
+        var image = imgNode?.GetAttribute("data-src") ?? imgNode?.GetAttribute("src");
 
-        var infoNode = node.SelectSingleNode(".//div[contains(@class, 'info')]");
-        var type = infoNode?.SelectNodes(".//span/b")?.LastOrDefault()?.InnerText?.Trim();
+        // 4. Get Type (e.g., Movie, TV)
+        // HAP: .//div[contains(@class, 'info')]//span/b -> Last
+        // AngleSharp: Targeted CSS selector
+        var type = node.QuerySelector("div.info span b:last-of-type")?.TextContent.Trim();
 
-        return new AnimeInfo
+        return new AnimeInfo(id)
         {
-            Id = id,
-            Site = AnimeSites.AniKai,
             Title = title,
             OtherNames = japaneseTitle,
             Image = image,
@@ -152,70 +156,44 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         var response = await HttpClient.ExecuteAsync(url, GetHeaders(), cancellationToken);
         var document = HtmlHelper.Parse(response);
 
-        var anime = new AnimeInfo
+        var anime = new AnimeInfo(slug) { Link = url };
+
+        // 1. Title and Japanese Title
+        var titleNode = document.QuerySelector("div.entity-scroll h1.title");
+        anime.Title = titleNode?.TextContent.Trim() ?? "";
+        anime.OtherNames = titleNode?.GetAttribute("data-jp");
+
+        // 2. Image
+        anime.Image = document.QuerySelector("div.poster img")?.GetAttribute("src");
+
+        // 3. Description
+        anime.Summary = document.QuerySelector("div.entity-scroll div.desc")?.TextContent.Trim();
+
+        // 4. Type (Targeting the last <b> inside info spans)
+        anime.Type = document
+            .QuerySelector("div.entity-scroll div.info span b:last-of-type")
+            ?.TextContent.Trim();
+
+        // 5. Detail Section
+        // Instead of looping every div, we can target specific labels directly if needed,
+        // but a loop is safer if the order changes.
+        var detailNodes = document.QuerySelectorAll("div.detail > div > div");
+        foreach (var div in detailNodes)
         {
-            Id = slug,
-            Site = AnimeSites.AniKai,
-            Link = url,
-        };
+            var text = div.TextContent.Trim();
+            var value = div.QuerySelector("span")?.TextContent.Trim() ?? "";
 
-        // Title
-        var titleNode = document.DocumentNode.SelectSingleNode(
-            "//div[contains(@class, 'entity-scroll')]//h1[contains(@class, 'title')]"
-        );
-        anime.Title = titleNode?.InnerText?.Trim() ?? "";
-        anime.OtherNames = titleNode?.GetAttributeValue("data-jp", "");
-
-        // Image
-        var imgNode = document.DocumentNode.SelectSingleNode(
-            "//div[contains(@class, 'poster')]//img"
-        );
-        anime.Image = imgNode?.GetAttributeValue("src", "");
-
-        // Description
-        var descNode = document.DocumentNode.SelectSingleNode(
-            "//div[contains(@class, 'entity-scroll')]//div[contains(@class, 'desc')]"
-        );
-        anime.Summary = descNode?.InnerText?.Trim();
-
-        // Type from info section
-        var infoNode = document.DocumentNode.SelectSingleNode(
-            "//div[contains(@class, 'entity-scroll')]//div[contains(@class, 'info')]"
-        );
-        if (infoNode is not null)
-        {
-            var lastBold = infoNode.SelectNodes(".//span/b")?.LastOrDefault();
-            anime.Type = lastBold?.InnerText?.Trim();
-        }
-
-        // Detail section - parse label:value pairs
-        var detailDivs = document.DocumentNode.SelectNodes(
-            "//div[contains(@class, 'detail')]//div/div"
-        );
-        if (detailDivs is not null)
-        {
-            foreach (var div in detailDivs)
+            if (text.StartsWith("Status:"))
+                anime.Status = value;
+            else if (text.StartsWith("Date aired:"))
+                anime.Released = value;
+            else if (text.StartsWith("Studios:"))
+                anime.Category = value;
+            else if (text.StartsWith("Genres:"))
             {
-                var text = div.InnerText?.Trim() ?? "";
-                var spanNode = div.SelectSingleNode(".//span");
-                var value = spanNode?.InnerText?.Trim() ?? "";
-
-                if (text.StartsWith("Status:"))
-                    anime.Status = value;
-                else if (text.StartsWith("Date aired:"))
-                    anime.Released = value;
-                else if (text.StartsWith("Studios:"))
-                    anime.Category = value;
-                else if (text.StartsWith("Genres:"))
-                {
-                    var genreLinks = div.SelectNodes(".//a");
-                    if (genreLinks is not null)
-                    {
-                        anime.Genres = genreLinks
-                            .Select(g => new Genre(g.InnerText.Trim()))
-                            .ToList();
-                    }
-                }
+                anime.Genres = div.QuerySelectorAll("a")
+                    .Select(g => new Genre(g.TextContent.Trim()))
+                    .ToList();
             }
         }
 
@@ -235,21 +213,25 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         var slug = animeId.Split('$')[0];
         var pageUrl = $"{BaseUrl}/watch/{slug}";
 
-        // Fetch the watch page to get the anime rating data-id (ani_id)
+        // 1. Fetch initial page
         var pageResponse = await HttpClient.ExecuteAsync(pageUrl, GetHeaders(), cancellationToken);
         if (string.IsNullOrWhiteSpace(pageResponse))
             return [];
 
         var document = HtmlHelper.Parse(pageResponse);
 
-        // Extract ani_id from the rate-box element
-        var rateBox = document.DocumentNode.SelectSingleNode("//*[@id='anime-rating'][@data-id]");
-        var aniId = rateBox?.GetAttributeValue("data-id", "");
+        // 2. Extract ani_id (CSS selector for ID and Attribute)
+        var aniId = document.QuerySelector("#anime-rating[data-id]")?.GetAttribute("data-id");
 
-        // Fallback: try to extract from the JSON data block in the page
+        // Fallback: Regex remains the same
         if (string.IsNullOrWhiteSpace(aniId))
         {
-            var match = Regex.Match(pageResponse, @"""anime_id""\s*:\s*""([^""]+)""");
+            var match = Regex.Match(
+                pageResponse,
+                """
+                "anime_id"\s*:\s*"([^"]+)"
+                """
+            );
             if (match.Success)
                 aniId = match.Groups[1].Value;
         }
@@ -257,8 +239,8 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         if (string.IsNullOrWhiteSpace(aniId))
             return [];
 
-        // Generate token and fetch episode list
-        var token = await _megaUp.GenerateTokenAsync(aniId!, cancellationToken);
+        // 3. Generate token and fetch AJAX response
+        var token = await _megaUp.GenerateTokenAsync(aniId, cancellationToken);
         var ajaxUrl = $"{BaseUrl}/ajax/episodes/list?ani_id={aniId}&_={token}";
         var ajaxResponse = await HttpClient.ExecuteAsync(
             ajaxUrl,
@@ -270,21 +252,21 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         if (string.IsNullOrWhiteSpace(html))
             return [];
 
+        // 4. Parse the AJAX HTML fragment
         var epDocument = HtmlHelper.Parse(html);
-        var epNodes = epDocument.DocumentNode.SelectNodes("//div[contains(@class, 'eplist')]//a");
-        if (epNodes is null)
-            return [];
+        var epNodes = epDocument.QuerySelectorAll("div.eplist a");
 
         var episodes = new List<Episode>();
         foreach (var epNode in epNodes)
         {
-            var num = epNode.GetAttributeValue("num", "1");
-            var epToken = epNode.GetAttributeValue("token", "");
-            var epTitle = epNode.SelectSingleNode(".//span")?.InnerText?.Trim() ?? "";
-            var isFiller = epNode.GetAttributeValue("class", "").Contains("filler");
+            var num = epNode.GetAttribute("num") ?? "1";
+            var epToken = epNode.GetAttribute("token") ?? "";
+            var epTitle = epNode.QuerySelector("span")?.TextContent.Trim() ?? "";
+
+            // Checking for a class is easier with ClassList
+            var isFiller = epNode.ClassList.Contains("filler");
 
             var episodeNumber = float.TryParse(num, out var n) ? n : 1f;
-
             var episodeId = $"{slug}$ep={num}$token={epToken}";
 
             var episode = new Episode
@@ -316,19 +298,18 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         CancellationToken cancellationToken = default
     )
     {
-        // Episode ID format: "slug$ep=1$token=xyz"
-        var epToken = "";
-        var parts = episodeId.Split(new[] { "$token=" }, StringSplitOptions.None);
-        if (parts.Length >= 2)
-            epToken = parts[1];
+        // 1. Extract token from ID
+        var parts = episodeId.Split(["$token="], StringSplitOptions.None);
+        var epToken = parts.Length >= 2 ? parts[1] : "";
 
         if (string.IsNullOrWhiteSpace(epToken))
             return [];
 
-        // Fetch server list
+        // 2. Fetch server list via AJAX
         var token = await _megaUp.GenerateTokenAsync(epToken, cancellationToken);
         var ajaxUrl = $"{BaseUrl}/ajax/links/list?token={epToken}&_={token}";
         var referer = $"{BaseUrl}/watch/{episodeId.Split('$')[0]}";
+
         var response = await HttpClient.ExecuteAsync(
             ajaxUrl,
             GetAjaxHeaders(referer),
@@ -342,29 +323,26 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
         var document = HtmlHelper.Parse(html);
         var servers = new List<VideoServer>();
 
-        // Parse server groups: softsub, dub, raw
-        var serverGroups = document.DocumentNode.SelectNodes(
-            "//div[contains(@class, 'server-items')]"
-        );
-        if (serverGroups is null)
-            return [];
+        // 3. Parse server groups (softsub, dub, raw)
+        // HAP: //div[contains(@class, 'server-items')]
+        var serverGroups = document.QuerySelectorAll("div.server-items");
 
         foreach (var group in serverGroups)
         {
-            var groupType = group.GetAttributeValue("data-id", "softsub").ToUpperInvariant();
-            var serverNodes = group.SelectNodes(".//span[contains(@class, 'server')]");
-            if (serverNodes is null)
-                continue;
+            var groupType = (group.GetAttribute("data-id") ?? "softsub").ToUpperInvariant();
+
+            // HAP: .//span[contains(@class, 'server')]
+            var serverNodes = group.QuerySelectorAll("span.server");
 
             foreach (var serverNode in serverNodes)
             {
-                var linkId = serverNode.GetAttributeValue("data-lid", "");
-                var serverName = serverNode.InnerText.Trim();
+                var linkId = serverNode.GetAttribute("data-lid");
+                var serverName = serverNode.TextContent.Trim();
 
                 if (string.IsNullOrWhiteSpace(linkId))
                     continue;
 
-                // Fetch the actual embed URL for this server
+                // 4. Fetch the actual embed URL for this server
                 var linkToken = await _megaUp.GenerateTokenAsync(linkId, cancellationToken);
                 var linkUrl = $"{BaseUrl}/ajax/links/view?id={linkId}&_={linkToken}";
                 var linkResponse = await HttpClient.ExecuteAsync(
@@ -377,9 +355,9 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
                 if (string.IsNullOrWhiteSpace(linkResult))
                     continue;
 
-                // Decode the iframe data to get the video URL
+                // 5. Decode the iframe data
                 var (videoUrl, _, _) = await _megaUp.DecodeIframeDataAsync(
-                    linkResult!,
+                    linkResult,
                     cancellationToken
                 );
 
@@ -424,22 +402,26 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
 
         try
         {
-            // Try parsing as JSON first
+            // 1. Try parsing as raw JSON first
             var json = JsonNode.Parse(response);
             return json?["result"]?.ToString();
         }
         catch
         {
-            // If it starts with HTML, try extracting JSON from <pre> tag
-            if (response!.TrimStart().StartsWith("<"))
+            // 2. If it's HTML, look for JSON inside a <pre> tag
+            var trimmed = response.TrimStart();
+            if (trimmed.StartsWith("<"))
             {
+                // Parse the HTML fragment
                 var doc = HtmlHelper.Parse(response);
-                var pre = doc.DocumentNode.SelectSingleNode("//pre");
+                var pre = doc.QuerySelector("pre");
+
                 if (pre is not null)
                 {
                     try
                     {
-                        var json = JsonNode.Parse(pre.InnerText);
+                        // Use TextContent to get the raw string inside the <pre> tag
+                        var json = JsonNode.Parse(pre.TextContent);
                         return json?["result"]?.ToString();
                     }
                     catch
@@ -462,20 +444,27 @@ public class AniKai : AnimeBaseProvider, IAnimeProvider
 
         try
         {
+            // 1. Attempt to parse raw JSON
             var json = JsonNode.Parse(response);
             return json?["result"]?.ToString();
         }
         catch
         {
-            if (response!.TrimStart().StartsWith("<"))
+            // 2. Check if the response is an HTML wrapper (starts with '<')
+            var trimmed = response.TrimStart();
+            if (trimmed.StartsWith("<"))
             {
                 var doc = HtmlHelper.Parse(response);
-                var pre = doc.DocumentNode.SelectSingleNode("//pre");
+
+                // CSS selector 'pre' instead of XPath '//pre'
+                var pre = doc.QuerySelector("pre");
+
                 if (pre is not null)
                 {
                     try
                     {
-                        var json = JsonNode.Parse(pre.InnerText);
+                        // Use TextContent to extract the string inside the <pre> tag
+                        var json = JsonNode.Parse(pre.TextContent);
                         return json?["result"]?.ToString();
                     }
                     catch

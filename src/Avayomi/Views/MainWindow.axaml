@@ -12,6 +12,8 @@
     x:DataType="avayomi:MainWindowViewModel"
     Icon="/Assets/logo.ico"
     WindowStartupLocation="CenterScreen"
+    WindowState="{Binding AppearanceSettings.LastWindowState,
+                          Mode=TwoWay}"
     mc:Ignorable="d">
     <suki:SukiWindow.Hosts>
         <suki:SukiDialogHost Manager="{Binding DialogManager}" />
@@ -30,7 +32,8 @@
             Classes="WindowControlsButton"
             Command="{Binding ChangePageCommand}"
             CommandParameter="{x:Type avayomi:SettingsPageViewModel}"
-            Content="{LucideIconContent Settings}" />
+            Content="{LucideIconContent Settings}"
+            IsVisible="{Binding IsMainView}" />
     </suki:SukiWindow.RightWindowTitleBarControls>
     <avayomi:NavigationHost avayomi:NavigationHostManager.HostName="{x:Static avayomi:HostNames.Main}" />
 </suki:SukiWindow>

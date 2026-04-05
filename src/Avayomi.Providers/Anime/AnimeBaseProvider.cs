@@ -1,4 +1,5 @@
-﻿using Avayomi.Core.Extensions;
+﻿using Avayomi.Core.AniList;
+using Avayomi.Core.Extensions;
 using Avayomi.Core.Providers;
 using Avayomi.Core.Videos;
 using Avayomi.Extractors;
@@ -8,14 +9,17 @@ namespace Avayomi.Providers.Anime;
 
 public abstract class AnimeBaseProvider : IVideoExtractorProvider, ITransientDependency
 {
-    public AnimeBaseProvider(IHttpClientFactory httpClientFactory)
+    public AnimeBaseProvider(IHttpClientFactory httpClientFactory, IAniListClient aniListClient)
     {
         HttpClientFactory = httpClientFactory;
+        AniListClient = aniListClient;
     }
 
     protected IHttpClientFactory HttpClientFactory { get; }
 
     protected virtual HttpClient HttpClient => HttpClientFactory.CreateProviderHttpClient();
+
+    protected IAniListClient AniListClient { get; }
 
     public virtual IVideoExtractor? GetVideoExtractor(VideoServer server)
     {

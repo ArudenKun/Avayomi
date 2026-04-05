@@ -33,11 +33,9 @@ public class GogoCdnExtractor : VideoExtractorBase
         var document = HtmlHelper.Parse(response);
 
         var dataValue = document
-            .DocumentNode.Descendants()
-            .Where(x => x.Name == "script")
-            .FirstOrDefault(x => x.Attributes["data-name"].Value == "episode")
-            ?.Attributes["data-value"]
-            .Value;
+            .QuerySelector("script[data-name='episode']")
+            ?.GetAttribute("data-value");
+
         if (string.IsNullOrWhiteSpace(dataValue))
             return list;
 

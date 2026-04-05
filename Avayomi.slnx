@@ -3,6 +3,7 @@
     <Project Path="src/Avayomi.Core/Avayomi.Core.csproj" />
     <Project Path="src/Avayomi.Extractors/Avayomi.Extractors.csproj" />
     <Project Path="src/Avayomi.Hosting/Avayomi.Hosting.csproj" />
+    <Project Path="src/Avayomi.Mpv/Avayomi.Mpv.csproj" />
     <Project Path="src/Avayomi.Providers/Avayomi.Providers.csproj" />
     <Project Path="src/Avayomi/Avayomi.csproj" />
   </Folder>

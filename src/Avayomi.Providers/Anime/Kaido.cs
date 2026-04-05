@@ -1,4 +1,5 @@
-﻿using Avayomi.Core.Anime;
+﻿using Avayomi.Core.AniList;
+using Avayomi.Core.Anime;
 using Avayomi.Core.Videos;
 using Avayomi.Extractors;
 using Avayomi.Providers.Anime.Zoro;
@@ -10,8 +11,8 @@ namespace Avayomi.Providers.Anime;
 /// </summary>
 public class Kaido : ZoroTheme
 {
-    public Kaido(IHttpClientFactory httpClientFactory)
-        : base(httpClientFactory) { }
+    public Kaido(IHttpClientFactory httpClientFactory, IAniListClient aniListClient)
+        : base(httpClientFactory, aniListClient) { }
 
     public override string Key => Name;
     public override string Name => "Kaido";
@@ -19,8 +20,6 @@ public class Kaido : ZoroTheme
     public override string BaseUrl => "https://kaido.to";
 
     protected override List<string> HosterNames => ["Vidstreaming", "VidCloud", "StreamTape"];
-
-    protected override AnimeSites GetAnimeSite() => AnimeSites.Kaido;
 
     public override IVideoExtractor? GetVideoExtractor(VideoServer server)
     {

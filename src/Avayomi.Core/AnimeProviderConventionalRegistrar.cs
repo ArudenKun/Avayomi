@@ -2,9 +2,9 @@
 using Volo.Abp.DependencyInjection;
 using ZLinq;
 
-namespace Avayomi.Providers;
+namespace Avayomi.Core;
 
-public sealed class AnimeProviderConventionalRegistrar : DefaultConventionalRegistrar
+internal sealed class AnimeProviderConventionalRegistrar : DefaultConventionalRegistrar
 {
     protected override bool IsConventionalRegistrationDisabled(Type type) =>
         !type.IsAssignableTo<IAnimeProvider>() || base.IsConventionalRegistrationDisabled(type);

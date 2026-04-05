@@ -1,23 +1,22 @@
-﻿using Volo.Abp.Data;
-
-namespace Avayomi.Core.Anime;
+﻿namespace Avayomi.Core.Anime;
 
 /// <summary>
 /// The Class which contains all the information about an Anime
 /// </summary>
 public class AnimeInfo : IAnimeInfo
 {
-    public AnimeInfo()
+    public AnimeInfo(string id)
     {
-        ExtraProperties = [];
-        this.SetDefaultsForExtraProperties();
+        Id = id;
     }
 
-    public string Id { get; set; } = default!;
+    public string Id { get; set; }
 
-    public AnimeSites Site { get; set; }
+    public string AniListId { get; set; } = string.Empty;
 
-    public string Title { get; set; } = default!;
+    public string Provider { get; set; } = string.Empty;
+
+    public string Title { get; set; } = string.Empty;
 
     public int Episodes { get; set; }
 
@@ -39,7 +38,7 @@ public class AnimeInfo : IAnimeInfo
 
     public List<Genre> Genres { get; set; } = [];
 
-    public override string ToString() => $"{Title}";
+    public Dictionary<string, object> Metadata { get; set; } = [];
 
-    public ExtraPropertyDictionary ExtraProperties { get; }
+    public override string ToString() => $"{Title}";
 }

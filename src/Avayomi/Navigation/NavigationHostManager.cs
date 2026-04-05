@@ -30,6 +30,8 @@ public class NavigationHostManager : INavigationHostManager
             "HostManager"
         );
 
+    public event EventHandler<NavigationHostChangedEventArgs>? HostChanged;
+
     private readonly INavigationHostRegistry _navigationHostRegistry;
     private readonly IViewModelConventionResolver _conventionResolver;
     private readonly NavigationInstanceFactory _navigationInstanceFactory;
@@ -170,6 +172,7 @@ public class NavigationHostManager : INavigationHostManager
         }
 
         host.Navigate(controlContent);
+        HostChanged?.Invoke(this, new NavigationHostChangedEventArgs(controlContent));
     }
 
     /// <summary>
@@ -267,6 +270,7 @@ public class NavigationHostManager : INavigationHostManager
         }
 
         host.Navigate(controlContent);
+        HostChanged?.Invoke(this, new NavigationHostChangedEventArgs(controlContent));
     }
 
     /// <summary>
@@ -408,7 +412,7 @@ public class NavigationHostManager : INavigationHostManager
                 // HostManager not yet available, register as pending
                 if (!string.IsNullOrWhiteSpace(newName))
                 {
-                    NavigationHostManagerLocator.RegisterPending(host, newName!);
+                    NavigationHostManagerLocator.RegisterPending(host, newName);
                 }
                 return;
             }
@@ -416,11 +420,11 @@ public class NavigationHostManager : INavigationHostManager
 
         // Unregister old name if it exists
         if (!string.IsNullOrWhiteSpace(oldName))
-            hostManager.UnregisterHost(oldName!);
+            hostManager.UnregisterHost(oldName);
 
         // Register new name if it exists
         if (!string.IsNullOrWhiteSpace(newName))
-            hostManager.RegisterHost(newName!, host);
+            hostManager.RegisterHost(newName, host);
     }
 
     private static void OnHostManagerChanged(Control control, AvaloniaPropertyChangedEventArgs e)
@@ -435,13 +439,13 @@ public class NavigationHostManager : INavigationHostManager
         // Unregister from old manager if exists
         if (oldManager != null && !string.IsNullOrWhiteSpace(hostName))
         {
-            oldManager.UnregisterHost(hostName!);
+            oldManager.UnregisterHost(hostName);
         }
 
         // Register with new manager if exists and HostName is set
         if (newManager != null && !string.IsNullOrWhiteSpace(hostName))
         {
-            newManager.RegisterHost(hostName!, host);
+            newManager.RegisterHost(hostName, host);
         }
     }
 
@@ -501,6 +505,7 @@ public class NavigationHostManager : INavigationHostManager
 
         view.DataContext = viewModel;
         navigationHost.Navigate(view);
+        HostChanged?.Invoke(this, new NavigationHostChangedEventArgs(view));
     }
 
     /// <summary>
@@ -589,5 +594,6 @@ public class NavigationHostManager : INavigationHostManager
 
         view.DataContext = viewModel;
         navigationHost.Navigate(view);
+        HostChanged?.Invoke(this, new NavigationHostChangedEventArgs(view));
     }
 }

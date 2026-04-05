@@ -1,5 +1,6 @@
 ﻿using System;
 using Avayomi.Messaging.Messages;
+using Avayomi.Navigation;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -18,8 +19,27 @@ public sealed partial class MainWindowViewModel : ViewModel
 
     public override void OnLoaded()
     {
-        NavigationHostManager.Navigate<MainView>(HostNames.Main);
+        base.OnLoaded();
+        NavigationHostManager.HostChanged += NavigationHostManagerOnHostChanged;
+        NavigationHostManager.Navigate<SplashView>(HostNames.Main);
     }
+
+    public override void OnUnloaded()
+    {
+        base.OnUnloaded();
+        NavigationHostManager.HostChanged -= NavigationHostManagerOnHostChanged;
+    }
+
+    private void NavigationHostManagerOnHostChanged(
+        object? sender,
+        NavigationHostChangedEventArgs e
+    )
+    {
+        OnPropertyChanged(nameof(IsMainView));
+    }
+
+    public bool IsMainView =>
+        NavigationHostManager.GetHost(HostNames.Main)?.CurrentContent is MainView;
 
     [RelayCommand]
     private void ChangePage(Type pageViewMoelType)

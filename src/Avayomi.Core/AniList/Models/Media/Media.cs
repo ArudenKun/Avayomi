@@ -190,7 +190,7 @@ public class Media
     /// The URL for the media page on the AniList website.
     /// </summary>
     [GqlSelection("siteUrl")]
-    public Uri Url { get; private set; } = new("_blank");
+    public Uri Url { get; private set; } = new("about:blank");
 
     /* below are properties only for the authenticated user */
 

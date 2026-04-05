@@ -1,8 +1,6 @@
-﻿using System.Runtime.Serialization;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using System.Web;
 using Avayomi.Core;
 using Avayomi.Core.AniList;
@@ -10,18 +8,17 @@ using Avayomi.Core.Anime;
 using Avayomi.Core.GraphQL;
 using Avayomi.Core.Providers.Anime;
 using Avayomi.Core.Videos;
-using Volo.Abp.Data;
 
-namespace Avayomi.Providers.Anime;
+namespace Avayomi.Providers.Anime.AllManga;
 
-public class AllManga : AnimeBaseProvider, IAnimeProvider
+internal class AllMangaProvider : AnimeBaseProvider, IAnimeProvider
 {
     private const string AllAnimeBase = "allanime.day";
     private const string AllAnimeApi = "https://api.allanime.day";
     private const string AllAnimeReferrer = "https://allmanga.to";
 
-    public AllManga(IHttpClientFactory httpClientFactory)
-        : base(httpClientFactory) { }
+    public AllMangaProvider(IHttpClientFactory httpClientFactory, IAniListClient aniListClient)
+        : base(httpClientFactory, aniListClient) { }
 
     public string Name => "AllManga";
     public string Language => "en";
@@ -33,8 +30,6 @@ public class AllManga : AnimeBaseProvider, IAnimeProvider
         get
         {
             var client = HttpClientFactory.CreateClient("AllManga");
-            client.DefaultRequestHeaders.Add("User-Agent", HttpHelper.ChromeUserAgent());
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Add("Referer", AllAnimeReferrer);
             return client;
         }
@@ -76,16 +71,17 @@ public class AllManga : AnimeBaseProvider, IAnimeProvider
                 ?.OrderByDescending(x => x.Score)
                 .Select(
                     IAnimeInfo (x) =>
-                        new AnimeInfo
+                        new AnimeInfo(x.Id)
                         {
                             Image = x.Thumbnail,
                             Status = x.Status,
                             Summary = x.Description,
-                            Id = x.Id,
                             Title = x.Name,
-                            Episodes = int.Parse(x.EpisodeCount),
+                            Episodes = int.TryParse(x.EpisodeCount, out var count) ? count : 0,
                             OtherNames = x.NativeName,
                             Type = "Anime",
+                            Provider = Name,
+                            Metadata = { ["aniListId"] = x.AniListId },
                         }
                 )
                 .ToList()
@@ -98,7 +94,6 @@ public class AllManga : AnimeBaseProvider, IAnimeProvider
     )
     {
         string showId = animeIdOrUrl.Contains("/") ? animeIdOrUrl.Split('/').Last() : animeIdOrUrl;
-
         const string detailsGql =
             @"query($showId: String!) { 
                 show(_id: $showId) { 
@@ -113,7 +108,7 @@ public class AllManga : AnimeBaseProvider, IAnimeProvider
                 }
             }";
 
-        var variables = new { showId = showId };
+        var variables = new { showId };
 
         string requestUrl =
             $"{AllAnimeApi}/api?variables={HttpUtility.UrlEncode(JsonSerializer.Serialize(variables))}&query={HttpUtility.UrlEncode(detailsGql)}";
@@ -126,27 +121,10 @@ public class AllManga : AnimeBaseProvider, IAnimeProvider
             && data.TryGetProperty("show", out JsonElement show)
         )
         {
-            AnimeInfo details = new()
+            AnimeInfo details = new(show.GetProperty("_id").GetString() ?? string.Empty)
             {
-                Id = show.GetProperty("_id").GetString() ?? string.Empty,
                 Title = show.GetProperty("name").GetString() ?? string.Empty,
             };
-
-            if (
-                show.TryGetProperty("malId", out JsonElement malIdProp)
-                && malIdProp.ValueKind == JsonValueKind.Number
-            )
-            {
-                details.SetProperty("MalId", malIdProp.GetInt32());
-            }
-
-            if (
-                show.TryGetProperty("aniListId", out JsonElement aniListIdProp)
-                && aniListIdProp.ValueKind == JsonValueKind.Number
-            )
-            {
-                details.SetProperty("AniListId", aniListIdProp.GetInt32());
-            }
 
             if (show.TryGetProperty("description", out JsonElement descProp))
             {
@@ -158,10 +136,13 @@ public class AllManga : AnimeBaseProvider, IAnimeProvider
                 details.Image = thumbProp.GetString();
             }
 
+            details.Metadata["aniListId"] =
+                show.GetProperty("aniListId").GetString() ?? string.Empty;
+
             return details;
         }
 
-        return new AnimeInfo();
+        return new AnimeInfo(string.Empty);
     }
 
     public async ValueTask<List<Episode>> GetEpisodesAsync(
@@ -477,181 +458,4 @@ public class AllManga : AnimeBaseProvider, IAnimeProvider
 
         return token;
     }
-}
-
-public enum TranslationType
-{
-    [EnumMember(Value = "raw")]
-    Raw,
-
-    [EnumMember(Value = "sub")]
-    Sub,
-
-    [EnumMember(Value = "dub")]
-    Dub,
-}
-
-public enum CountryOrigin
-{
-    [EnumMember(Value = "ALL")]
-    All,
-
-    [EnumMember(Value = "CN")]
-    China,
-
-    [EnumMember(Value = "JP")]
-    Japan,
-
-    [EnumMember(Value = "KR")]
-    Korea,
-
-    [EnumMember(Value = "OTHER")]
-    Other,
-}
-
-public class AiredEnd
-{
-    [JsonPropertyName("year")]
-    public int Year { get; private set; }
-
-    [JsonPropertyName("month")]
-    public int Month { get; private set; }
-
-    [JsonPropertyName("date")]
-    public int Date { get; private set; }
-}
-
-public class AiredStart
-{
-    [JsonPropertyName("year")]
-    public int Year { get; private set; }
-
-    [JsonPropertyName("month")]
-    public int Month { get; private set; }
-
-    [JsonPropertyName("date")]
-    public int Date { get; private set; }
-}
-
-public class AvailableEpisodes
-{
-    [JsonPropertyName("sub")]
-    public int Sub { get; private set; }
-
-    [JsonPropertyName("dub")]
-    public int Dub { get; private set; }
-
-    [JsonPropertyName("raw")]
-    public int Raw { get; private set; }
-}
-
-public class Character
-{
-    [GqlSelection("role")]
-    public string Role { get; private set; }
-
-    [GqlSelection("name")]
-    public Name Name { get; private set; }
-
-    [GqlSelection("image")]
-    public Image Image { get; private set; }
-
-    [GqlSelection("aniListId")]
-    public int AniListId { get; private set; }
-
-    [GqlSelection("voiceActors")]
-    public IReadOnlyList<VoiceActor> VoiceActors { get; private set; }
-}
-
-public class Image
-{
-    [GqlSelection("large")]
-    public string Large { get; private set; }
-
-    [GqlSelection("medium")]
-    public string Medium { get; private set; }
-}
-
-public class Name
-{
-    [GqlSelection("full")]
-    public string Full { get; private set; }
-
-    [GqlSelection("native")]
-    public string Native { get; private set; }
-}
-
-public class AllMangaAnimeInfo
-{
-    [GqlSelection("_id")]
-    public string Id { get; private set; }
-
-    [GqlSelection("malId")]
-    public string MalId { get; private set; }
-
-    [GqlSelection("aniListId")]
-    public string AniListId { get; private set; }
-
-    [GqlSelection("description")]
-    public string Description { get; private set; }
-
-    [GqlSelection("name")]
-    public string Name { get; private set; }
-
-    [GqlSelection("nativeName")]
-    public string NativeName { get; private set; }
-
-    [GqlSelection("altNames")]
-    public IReadOnlyList<string> AltNames { get; private set; }
-
-    [GqlSelection("englishName")]
-    public string EnglishName { get; private set; }
-
-    [GqlSelection("trustedAltNames")]
-    public IReadOnlyList<string> TrustedAltNames { get; private set; }
-
-    [GqlSelection("genres")]
-    public IReadOnlyList<string> Genres { get; private set; }
-
-    [GqlSelection("availableEpisodes")]
-    public AvailableEpisodes AvailableEpisodes { get; private set; }
-
-    [GqlSelection("score")]
-    public double? Score { get; private set; }
-
-    [GqlSelection("averageScore")]
-    public int? AverageScore { get; private set; }
-
-    [GqlSelection("banner")]
-    public string Banner { get; private set; }
-
-    [GqlSelection("thumbnail")]
-    public string Thumbnail { get; private set; }
-
-    [GqlSelection("episodeCount")]
-    public string EpisodeCount { get; private set; }
-
-    [GqlSelection("characters")]
-    public IReadOnlyList<Character> Characters { get; private set; }
-
-    [GqlSelection("characterCount")]
-    public string CharacterCount { get; private set; }
-
-    [GqlSelection("status")]
-    public string Status { get; private set; }
-
-    [GqlSelection("airedStart")]
-    public AiredStart AiredStart { get; private set; }
-
-    [GqlSelection("airedEnd")]
-    public AiredEnd AiredEnd { get; private set; }
-}
-
-public class VoiceActor
-{
-    [GqlSelection("language")]
-    public string Language { get; private set; }
-
-    [GqlSelection("aniListId")]
-    public int AniListId { get; private set; }
 }

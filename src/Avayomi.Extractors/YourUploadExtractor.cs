@@ -35,9 +35,9 @@ public class YourUploadExtractor : VideoExtractorBase
         var document = HtmlHelper.Parse(response);
 
         var baseData = document
-            .DocumentNode.Descendants()
-            .FirstOrDefault(x => x.Name == "script" && x.InnerText.Contains("jwplayerOptions"))
-            ?.InnerText;
+            .QuerySelectorAll("script")
+            .FirstOrDefault(x => x.InnerHtml.Contains("jwplayerOptions"))
+            ?.InnerHtml;
 
         if (string.IsNullOrEmpty(baseData))
             return [];

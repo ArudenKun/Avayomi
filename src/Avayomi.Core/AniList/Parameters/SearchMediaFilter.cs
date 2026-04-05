@@ -24,9 +24,10 @@ public class SearchMediaFilter
     {
         var parameters = new List<GqlParameter>();
         if (Season.HasValue)
-            parameters.AddRange(
-                new GqlParameter[] { new("season", Season), new("seasonYear", SeasonYear) }
-            );
+            parameters.AddRange([
+                new GqlParameter("season", Season),
+                new GqlParameter("seasonYear", SeasonYear),
+            ]);
         if (Type.HasValue)
             parameters.Add(new GqlParameter("type", Type));
         if (IsAdult.HasValue)

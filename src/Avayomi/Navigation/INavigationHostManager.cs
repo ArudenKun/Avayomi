@@ -11,6 +11,8 @@ namespace Avayomi.Navigation;
 /// </summary>
 public interface INavigationHostManager
 {
+    event EventHandler<NavigationHostChangedEventArgs>? HostChanged;
+
     /// <summary>
     ///     Registers a navigation host with the specified host name.
     /// </summary>

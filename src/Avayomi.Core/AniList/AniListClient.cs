@@ -48,7 +48,11 @@ internal partial class AniListClient : IAniListClient
         return IsAuthenticated;
     }
 
-    private async Task<JsonNode> PostRequestAsync(GqlSelection selection, bool isMutation = false)
+    private async Task<JsonNode> PostRequestAsync(
+        GqlSelection selection,
+        bool isMutation = false,
+        CancellationToken cancellationToken = default
+    )
     {
         // Build selection
         var bodyJson = new JsonObject
@@ -59,10 +63,10 @@ internal partial class AniListClient : IAniListClient
         var body = new StringContent(bodyJson.ToJsonString(), Encoding.UTF8, "application/json");
 
         // Send request
-        var response = await _httpClient.PostAsync(_options.Url, body);
+        var response = await _httpClient.PostAsync(_options.Url, body, cancellationToken);
 
         // Parse response
-        var responseText = await response.Content.ReadAsStringAsync();
+        var responseText = await response.Content.ReadAsStringAsync(cancellationToken);
         var responseJson = JsonNode.Parse(responseText);
 
         if (!response.IsSuccessStatusCode)
@@ -105,7 +109,10 @@ internal partial class AniListClient : IAniListClient
         return responseJson?["data"]!;
     }
 
-    private async Task<JsonNode> GetSingleDataAsync(params GqlSelection[] path)
+    private async Task<JsonNode> GetSingleDataAsync(
+        GqlSelection[] path,
+        CancellationToken cancellationToken
+    )
     {
         // Build path to selection
         var selection = path[^1];
@@ -118,7 +125,7 @@ internal partial class AniListClient : IAniListClient
         }
 
         // Send request
-        var token = await PostRequestAsync(selection);
+        var token = await PostRequestAsync(selection, cancellationToken: cancellationToken);
 
         // Get value from path
         token = path.Aggregate(token, (current, item) => current[item.Name]!);

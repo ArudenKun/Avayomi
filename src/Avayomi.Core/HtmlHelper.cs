@@ -1,13 +1,14 @@
-﻿using HtmlAgilityPack;
+﻿using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
 
 namespace Avayomi.Core;
 
 public static class HtmlHelper
 {
-    public static HtmlDocument Parse(string source)
+    public static IHtmlDocument Parse(string html)
     {
-        var document = new HtmlDocument();
-        document.LoadHtml(HtmlEntity.DeEntitize(source) ?? string.Empty);
-        return document;
+        var parser = new HtmlParser();
+        var htmlDocument = parser.ParseDocument(html);
+        return htmlDocument;
     }
 }

@@ -1,55 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using Avalonia.Collections;
 using Avalonia.Controls.Notifications;
-using Avayomi.Core.AniList;
 using Avayomi.Core.Anime;
-using Avayomi.Core.Providers.Anime;
 using Avayomi.Services;
 using Avayomi.Services.Toasts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lucide.Avalonia;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Riok.Mapperly.Abstractions;
-using Volo.Abp.Caching;
+using Volo.Abp.DependencyInjection;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi.ViewModels.Pages;
 
+[Dependency(ServiceLifetime.Singleton)]
 public sealed partial class AnimePageViewModel : PageViewModel
 {
-    private readonly IAniListClient _aniListClient;
-    private readonly IDistributedCache<ICollection<AnimeInfo>> _animeInfoCache;
-    private readonly ITokenService _tokenService;
+    private readonly IAnimeService _animeService;
 
-    public AnimePageViewModel(
-        IAniListClient aniListClient,
-        IDistributedCache<ICollection<AnimeInfo>> animeInfoCache,
-        ITokenService tokenService,
-        IEnumerable<IAnimeProvider> animeProviders
-    )
+    public AnimePageViewModel(IAnimeService animeService)
     {
-        _aniListClient = aniListClient;
-        _animeInfoCache = animeInfoCache;
-        _tokenService = tokenService;
-        AnimeProviders = animeProviders.ToDictionary(x => x.Name);
+        _animeService = animeService;
 
-        Animes = new AvaloniaList<AnimeInfo>();
+        Animes = new AvaloniaList<IAnimeInfo>();
     }
 
     public override int Index => 1;
 
     public override LucideIconKind IconKind => LucideIconKind.Tv;
 
-    public IAvaloniaList<AnimeInfo> Animes { get; }
+    public IAvaloniaList<IAnimeInfo> Animes { get; }
 
     [ObservableProperty]
-    public partial string ProviderName { get; set; } = string.Empty;
+    public partial string AnimeProvider { get; set; }
 
     [ObservableProperty]
     [NotifyDataErrorInfo]
@@ -63,31 +52,20 @@ public sealed partial class AnimePageViewModel : PageViewModel
 
     public bool NoResultsFound => !IsBusy && Animes.Count is 0;
 
-    public IReadOnlyDictionary<string, IAnimeProvider> AnimeProviders { get; }
+    public IAvaloniaList<string> AnimeProviders { get; } = new AvaloniaList<string>();
 
-    public override async void OnLoaded()
+    public override void OnLoaded()
     {
         StartAsync().SafeFireAndForget();
 
-        var cachedAccessToken = await _tokenService.GetAccessTokenAsync();
-        Logger.LogInformation("AccessToken: {AccessToken}", cachedAccessToken);
-
-        if (ProviderName.IsNullOrEmpty())
-        {
-            ProviderName = AnimeProviders.Keys.First();
-        }
+        AnimeProviders.AddRange(_animeService.GetProviders());
+        AnimeProvider = _animeService.CurrentProvider;
     }
 
-    [RelayCommand]
-    private async Task LoginAsync(CancellationToken cancellationToken)
+    public override void OnUnloaded()
     {
-        var result = await _tokenService.LoginAsync();
-        if (!result)
-        {
-            DialogService.ShowErrorMessageBox("AniList Login", "Login Failed");
-        }
-
-        Logger.LogInformation("Login: {Token}", await _tokenService.GetAccessTokenAsync());
+        base.OnUnloaded();
+        AnimeProviders.Clear();
     }
 
     private bool CanSubmit() => !string.IsNullOrEmpty(Search) && !string.IsNullOrWhiteSpace(Search);
@@ -99,31 +77,26 @@ public sealed partial class AnimePageViewModel : PageViewModel
             {
                 try
                 {
-                    var animeProvider = AnimeProviders[ProviderName];
-                    Logger.LogInformation(
-                        "{Provider} Searching: {Search}",
-                        animeProvider.Name,
-                        Search
-                    );
+                    Logger.LogInformation("{Provider} Searching: {Search}", AnimeProvider, Search);
                     Animes.Clear();
-                    var result = await _animeInfoCache.GetOrAddAsync(
-                        $"{Search.Trim()}-{ProviderName}",
-                        async () =>
-                            (await animeProvider.SearchAsync(Search, cancellationToken)).Map(),
-                        token: cancellationToken
+                    var result = await FusionCache.GetOrSetAsync(
+                        $"{Search.Trim()}-{AnimeProvider}",
+                        async ct => await _animeService.SearchAsync(Search, ct),
+                        _ => { },
+                        [$"Search-{AnimeProvider}"],
+                        cancellationToken
                     );
-                    if (result.IsNullOrEmpty())
+                    if (result.Count is 0)
                     {
                         Logger.LogInformation("No results found");
                         return;
                     }
-
-                    Animes.AddRange(result!);
+                    Animes.AddRange(result);
                 }
                 catch (TaskCanceledException)
                 {
                     var search = Search;
-                    var providerName = ProviderName;
+                    var providerName = AnimeProvider;
                     ToastService.ShowToast(
                         NotificationType.Warning,
                         "Search",
@@ -133,7 +106,7 @@ public sealed partial class AnimePageViewModel : PageViewModel
                             _ =>
                             {
                                 Search = search;
-                                ProviderName = providerName;
+                                AnimeProvider = providerName;
                                 SubmitCommand.Execute(null);
                             },
                             true
@@ -152,16 +125,12 @@ public sealed partial class AnimePageViewModel : PageViewModel
 
     private async Task StartAsync() { }
 
-    partial void OnProviderNameChanged(string oldValue, string newValue)
+    partial void OnAnimeProviderChanged(string oldValue, string newValue)
     {
+        if (!newValue.IsNullOrEmpty())
+        {
+            _animeService.SetProvider(newValue);
+        }
         Logger.LogInformation("Provider: {OldValue} => {NewValue}", oldValue, newValue);
     }
-}
-
-[Mapper]
-public static partial class AnimeInfoMapper
-{
-    public static partial AnimeInfo Map(this IAnimeInfo animeInfo);
-
-    public static partial ICollection<AnimeInfo> Map(this IEnumerable<IAnimeInfo> animeInfo);
 }

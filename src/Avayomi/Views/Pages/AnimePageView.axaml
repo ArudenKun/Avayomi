@@ -2,7 +2,6 @@
     x:Class="Avayomi.Views.Pages.AnimePageView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:aniList="using:Avayomi.Core.AniList.Models.Media"
     xmlns:anime="clr-namespace:Avayomi.Core.Anime;assembly=Avayomi.Core"
     xmlns:asyncImageLaoder="using:AsyncImageLoader"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
@@ -44,13 +43,10 @@
                 Command="{Binding SubmitCancelCommand}"
                 Content="Cancel"
                 IsEnabled="{Binding IsBusy}" />
-            <Button
-                Command="{Binding LoginCommand}"
-                Content="Login" />
             <ComboBox
-                ItemsSource="{Binding AnimeProviders.Keys}"
+                ItemsSource="{Binding AnimeProviders}"
                 PlaceholderText="Providers"
-                SelectedItem="{Binding ProviderName}" />
+                SelectedItem="{Binding AnimeProvider}" />
         </StackPanel>
         <suki:BusyArea
             Grid.Row="1"

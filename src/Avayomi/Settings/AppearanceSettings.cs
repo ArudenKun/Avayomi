@@ -37,7 +37,7 @@ public sealed partial class AppearanceSettings : ObservableObject
         SukiBackgroundStyle.GradientSoft;
 
     [ObservableProperty]
-    public partial WindowState LastWindowState { get; set; } = WindowState.Normal;
+    public partial WindowState LastWindowState { get; set; } = WindowState.FullScreen;
 
     [ObservableProperty]
     public partial TimeSpan ToastDuration { get; set; } = 5.Seconds();

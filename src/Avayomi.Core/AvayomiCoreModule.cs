@@ -1,20 +1,17 @@
 ﻿using Avayomi.Core.AniList;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Volo.Abp.Mapperly;
 using Volo.Abp.Modularity;
-using Volo.Abp.ObjectExtending;
-using Volo.Abp.ObjectMapping;
 
 namespace Avayomi.Core;
 
-[DependsOn(
-    typeof(AbpObjectExtendingModule),
-    typeof(AbpObjectMappingModule),
-    typeof(AbpMapperlyModule)
-)]
 public sealed class AvayomiCoreModule : AbpModule
 {
+    public override void PreConfigureServices(ServiceConfigurationContext context)
+    {
+        context.Services.AddConventionalRegistrar(new AnimeProviderConventionalRegistrar());
+    }
+
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         context

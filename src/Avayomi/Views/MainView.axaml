@@ -2,6 +2,7 @@
     x:Class="Avayomi.Views.MainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:asyncImageLoader="using:AsyncImageLoader"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:core="using:Avayomi.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,28 +14,29 @@
     mc:Ignorable="d">
     <suki:SukiSideMenu
         Name="SideMenu"
+        Content="{Binding Page}"
         IsMenuExpanded="True"
         IsSearchEnabled="False"
         ItemsSource="{Binding Pages}"
-        SelectedItem="{Binding Page}"
-        SidebarToggleEnabled="True">
-        <suki:SukiSideMenu.ItemTemplate>
-            <DataTemplate>
-                <!--  ReSharper disable once Xaml.StyleClassNotFound  -->
-                <suki:SukiSideMenuItem
-                    Classes="Compact"
-                    Header="{Binding DisplayName}"
-                    IsVisible="{Binding IsVisibleOnSideMenu}">
-                    <suki:SukiSideMenuItem.Icon>
-                        <LucideIcon
-                            Width="20"
-                            Height="20"
-                            Kind="{Binding IconKind}" />
-                    </suki:SukiSideMenuItem.Icon>
-                </suki:SukiSideMenuItem>
-            </DataTemplate>
-        </suki:SukiSideMenu.ItemTemplate>
-        <suki:SukiSideMenu.IsSelectedItemContentMovable />
+        SelectedItem="{Binding PageItem}"
+        SidebarToggleEnabled="True"
+        UseCustomContent="True">
+        <!-- <suki:SukiSideMenu.ItemTemplate> -->
+        <!--     <DataTemplate> -->
+        <!--  ~1~  ReSharper disable once Xaml.StyleClassNotFound  @1@  -->
+        <!--  <suki:SukiSideMenuItem  -->
+        <!--  Classes="Compact"  -->
+        <!--  Header="{Binding DisplayName}"  -->
+        <!--  IsVisible="{Binding IsVisibleOnSideMenu}">  -->
+        <!--             <suki:SukiSideMenuItem.Icon> -->
+        <!--  <LucideIcon  -->
+        <!--  Width="20"  -->
+        <!--  Height="20"  -->
+        <!--  Kind="{Binding IconKind}" />  -->
+        <!--             </suki:SukiSideMenuItem.Icon> -->
+        <!--         </suki:SukiSideMenuItem> -->
+        <!--     </DataTemplate> -->
+        <!-- </suki:SukiSideMenu.ItemTemplate> -->
         <suki:SukiSideMenu.HeaderContent>
             <StackPanel>
                 <TextBlock
@@ -52,5 +54,41 @@
                 <!--  Source="/Assets/logo.png" />  -->
             </StackPanel>
         </suki:SukiSideMenu.HeaderContent>
+        <suki:SukiSideMenu.FooterContent>
+            <Button
+                Padding="12,8"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Stretch"
+                Classes="Basic">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="12">
+                    <Border
+                        Width="36"
+                        Height="36"
+                        ClipToBounds="True"
+                        CornerRadius="18">
+                        <Image
+                            asyncImageLoader:ImageLoader.Source="{Binding User.Avatar.MediumImageUrl}"
+                            Stretch="UniformToFill" />
+                    </Border>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Text="{Binding User.Name,
+                                       TargetNullValue='User'}" />
+                </StackPanel>
+                <Button.Flyout>
+                    <MenuFlyout Placement="TopEdgeAlignedLeft">
+                        <MenuItem Header="Profile" />
+                        <Separator />
+                        <MenuItem
+                            Command="{Binding LogoutCommand}"
+                            Header="Logout" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </suki:SukiSideMenu.FooterContent>
     </suki:SukiSideMenu>
 </UserControl>

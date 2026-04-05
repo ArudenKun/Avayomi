@@ -1,12 +1,12 @@
-﻿using System.Net;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
+using AngleSharp.Dom;
 using Avayomi.Core;
+using Avayomi.Core.AniList;
 using Avayomi.Core.Anime;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.Providers.Anime;
 using Avayomi.Core.Videos;
 using Avayomi.Extractors;
-using HtmlAgilityPack;
 
 namespace Avayomi.Providers.Anime.Zoro;
 
@@ -19,8 +19,8 @@ public abstract class ZoroTheme
         IPopularProvider,
         ILastUpdatedProvider
 {
-    protected ZoroTheme(IHttpClientFactory httpClientFactory)
-        : base(httpClientFactory) { }
+    protected ZoroTheme(IHttpClientFactory httpClientFactory, IAniListClient aniListClient)
+        : base(httpClientFactory, aniListClient) { }
 
     public abstract string Key { get; }
     public abstract string Name { get; }
@@ -202,14 +202,15 @@ public abstract class ZoroTheme
         if (string.IsNullOrWhiteSpace(response))
             return list;
 
-        var document = HtmlHelper.Parse(response!);
-        var nodes = document.DocumentNode.SelectNodes("//div[contains(@class, 'flw-item')]");
+        // Assuming HtmlHelper.Parse returns an IHtmlDocument
+        var document = HtmlHelper.Parse(response);
 
-        if (nodes is null)
-            return list;
+        // CSS selector replaces the //div[contains(@class, 'flw-item')] XPath
+        var nodes = document.QuerySelectorAll("div.flw-item");
 
         foreach (var node in nodes)
         {
+            // Ensure ParseAnimeFromElement is updated to accept AngleSharp's IElement
             var anime = ParseAnimeFromElement(node);
             if (anime is not null)
                 list.Add(anime);
@@ -218,35 +219,35 @@ public abstract class ZoroTheme
         return list;
     }
 
-    private IAnimeInfo? ParseAnimeFromElement(HtmlNode node)
+    private IAnimeInfo? ParseAnimeFromElement(IElement node)
     {
-        var linkNode = node.SelectSingleNode(".//div[contains(@class, 'film-detail')]//a");
+        // 1. Get the link/title node using CSS breadcrumbs
+        // HAP: .//div[contains(@class, 'film-detail')]//a
+        var linkNode = node.QuerySelector("div.film-detail a");
         if (linkNode is null)
             return null;
 
-        var href = linkNode.GetAttributeValue("href", "");
+        var href = linkNode.GetAttribute("href") ?? "";
+
+        // 2. Extract Title based on your preference setting
+        // AngleSharp: GetAttribute("title") returns null if missing, making ?? logic clean
         var title =
-            UseEnglishTitles && linkNode.Attributes["title"] is not null
-                ? linkNode.GetAttributeValue("title", "")
-                : linkNode.GetAttributeValue("data-jname", "");
+            UseEnglishTitles && linkNode.HasAttribute("title")
+                ? linkNode.GetAttribute("title")
+                : linkNode.GetAttribute("data-jname");
 
-        var imgNode = node.SelectSingleNode(".//div[contains(@class, 'film-poster')]//img");
-        var image = imgNode?.GetAttributeValue("data-src", "");
+        // 3. Get the image from the poster div
+        // HAP: .//div[contains(@class, 'film-poster')]//img
+        var imgNode = node.QuerySelector("div.film-poster img");
+        var image = imgNode?.GetAttribute("data-src") ?? imgNode?.GetAttribute("src");
 
-        return new AnimeInfo
+        return new AnimeInfo(href)
         {
-            Id = href,
-            Site = GetAnimeSite(),
-            Title = title,
+            Title = title ?? "",
             Image = image,
             Link = $"{BaseUrl}{href}",
         };
     }
-
-    /// <summary>
-    /// Gets the AnimeSites enum value for this provider.
-    /// </summary>
-    protected abstract AnimeSites GetAnimeSite();
 
     #endregion
 
@@ -260,30 +261,25 @@ public abstract class ZoroTheme
     {
         var url = id.StartsWith("http") ? id : $"{BaseUrl}{id}";
         var response = await HttpClient.ExecuteAsync(url, GetDocHeaders(), cancellationToken);
-
         var document = HtmlHelper.Parse(response);
 
-        var anime = new AnimeInfo
-        {
-            Id = id,
-            Site = GetAnimeSite(),
-            Link = url,
-        };
+        var anime = new AnimeInfo(id) { Link = url };
 
-        // Thumbnail
-        var posterImg = document.DocumentNode.SelectSingleNode(
-            "//div[contains(@class, 'anisc-poster')]//img"
-        );
-        anime.Image = posterImg?.GetAttributeValue("src", "");
+        // 1. Thumbnail (Poster Image)
+        // CSS Selector: div.anisc-poster img
+        anime.Image = document.QuerySelector("div.anisc-poster img")?.GetAttribute("src");
 
-        // Info section
-        var infoNode = document.DocumentNode.SelectSingleNode(
-            "//div[contains(@class, 'anisc-info')]"
-        );
+        // 2. Info Section
+        var infoNode = document.QuerySelector("div.anisc-info");
         if (infoNode is not null)
         {
-            anime.Title = GetInfoText(infoNode, "h2") ?? GetInfoText(infoNode, "h1") ?? "";
+            // Title: Checking h2 then h1
+            anime.Title =
+                infoNode.QuerySelector("h2")?.TextContent?.Trim()
+                ?? infoNode.QuerySelector("h1")?.TextContent?.Trim()
+                ?? "";
 
+            // Metadata extraction
             anime.Summary = GetInfoValue(infoNode, "Overview:");
             anime.Status = GetInfoValue(infoNode, "Status:");
             anime.Released = GetInfoValue(infoNode, "Aired:");
@@ -291,40 +287,51 @@ public abstract class ZoroTheme
             anime.OtherNames =
                 GetInfoValue(infoNode, "Synonyms:") ?? GetInfoValue(infoNode, "Japanese:");
 
-            // Studios as Category
+            // Studios
             anime.Category = GetInfoValue(infoNode, "Studios:");
 
-            // Genres
-            var genreNodes = infoNode.SelectNodes(
-                ".//div[contains(@class, 'item-list')][contains(., 'Genres:')]//a"
-            );
-            if (genreNodes is not null)
+            // Genres: Targeting links within a div containing the text "Genres:"
+            // Note: AngleSharp doesn't have a CSS :contains selector, so we filter the elements
+            var genreContainer = infoNode
+                .QuerySelectorAll("div.item-list")
+                .FirstOrDefault(x => x.TextContent.Contains("Genres:"));
+
+            if (genreContainer != null)
             {
-                anime.Genres = genreNodes.Select(g => new Genre(g.InnerText.Trim())).ToList();
+                anime.Genres = genreContainer
+                    .QuerySelectorAll("a")
+                    .Select(g => new Genre(g.TextContent.Trim()))
+                    .ToList();
             }
         }
 
         return anime;
     }
 
-    private static string? GetInfoText(HtmlNode infoNode, string tag)
+    private static string? GetInfoText(IElement infoNode, string tag)
     {
-        return infoNode.SelectSingleNode($".//{tag}")?.InnerText?.Trim();
+        // HAP: .//{tag}
+        // AngleSharp: Targets the first occurrence of the tag within this node
+        return infoNode.QuerySelector(tag)?.TextContent.Trim();
     }
 
-    private static string? GetInfoValue(HtmlNode infoNode, string label)
+    private static string? GetInfoValue(IElement infoNode, string label)
     {
-        var itemNode = infoNode.SelectSingleNode(
-            $".//div[contains(@class, 'item-title')][contains(., '{label}')]"
-        );
+        // 1. Find the 'item' div that contains the specific label text
+        // HAP: .//div[contains(@class, 'item-title')][contains(., '{label}')]
+        var itemNode = infoNode
+            .QuerySelectorAll("div.item-title")
+            .FirstOrDefault(x => x.TextContent.Contains(label, StringComparison.OrdinalIgnoreCase));
 
         if (itemNode is null)
             return null;
 
-        var valueNode = itemNode.SelectSingleNode(
-            ".//*[contains(@class, 'name') or contains(@class, 'text')]"
-        );
-        return valueNode?.InnerText?.Trim();
+        // 2. Find the value node (class contains 'name' or 'text')
+        // HAP: .//*[contains(@class, 'name') or contains(@class, 'text')]
+        // AngleSharp: Use a comma in QuerySelector to act as an "OR" operator
+        var valueNode = itemNode.QuerySelector(".name, .text");
+
+        return valueNode?.TextContent?.Trim();
     }
 
     #endregion
@@ -337,7 +344,6 @@ public abstract class ZoroTheme
         CancellationToken cancellationToken = default
     )
     {
-        // First, we need to get the data-id from the anime page
         var animePageUrl = id.StartsWith("http") ? id : $"{BaseUrl}{id}";
         var animePageResponse = await HttpClient.ExecuteAsync(
             animePageUrl,
@@ -350,16 +356,15 @@ public abstract class ZoroTheme
 
         var animeDocument = HtmlHelper.Parse(animePageResponse);
 
-        // Extract data-id attribute from the page (similar to how Aniwave does it)
-        var dataIdNode = animeDocument.DocumentNode.SelectSingleNode("//*[@data-id]");
-        var dataId = dataIdNode?.GetAttributeValue("data-id", "");
+        // 1. Extract data-id using a CSS selector for any element with that attribute
+        var dataId = animeDocument.QuerySelector("[data-id]")?.GetAttribute("data-id");
 
         if (string.IsNullOrWhiteSpace(dataId))
         {
-            // Fallback: try to extract from the URL slug
             dataId = ExtractAnimeSlugFromUrl(id);
         }
 
+        // 2. Fetch the AJAX response
         var url = $"{BaseUrl}/ajax{AjaxRoute}/episode/list/{dataId}";
         var response = await HttpClient.ExecuteAsync(
             url,
@@ -371,26 +376,23 @@ public abstract class ZoroTheme
         if (string.IsNullOrWhiteSpace(html))
             return [];
 
+        // 3. Parse the AJAX HTML fragment
         var document = HtmlHelper.Parse(html);
-        var nodes = document.DocumentNode.SelectNodes("//a[contains(@class, 'ep-item')]");
-
-        if (nodes is null)
-            return [];
+        var nodes = document.QuerySelectorAll("a.ep-item");
 
         var episodes = new List<Episode>();
 
         foreach (var node in nodes)
         {
-            var episodeNumber = float.TryParse(
-                node.GetAttributeValue("data-number", "1"),
-                out var num
-            )
-                ? num
-                : 1f;
+            // Extracting data-attributes
+            var numStr = node.GetAttribute("data-number") ?? "1";
+            var episodeNumber = float.TryParse(numStr, out var n) ? n : 1f;
 
-            var episodeTitle = node.GetAttributeValue("title", "");
-            var episodeHref = node.GetAttributeValue("href", "");
-            var isFiller = node.GetAttributeValue("class", "").Contains("ssl-item-filler");
+            var episodeTitle = node.GetAttribute("title") ?? "";
+            var episodeHref = node.GetAttribute("href") ?? "";
+
+            // Use ClassList for cleaner boolean checks
+            var isFiller = node.ClassList.Contains("ssl-item-filler");
 
             var episode = new Episode
             {
@@ -408,7 +410,7 @@ public abstract class ZoroTheme
             episodes.Add(episode);
         }
 
-        // Return in ascending order (original is reversed)
+        // Return in ascending order
         episodes.Reverse();
         return episodes;
     }
@@ -450,13 +452,14 @@ public abstract class ZoroTheme
         CancellationToken cancellationToken = default
     )
     {
-        // Episode ID format is like "steinsgate-3?ep=213"
+        // 1. Extract the numeric ID from the URL or parameter
         var epId = episodeId.Contains("?ep=")
             ? episodeId.Split(new[] { "?ep=" }, StringSplitOptions.None).Last()
             : ExtractNumericIdFromUrl(episodeId);
 
         var referer = episodeId.StartsWith("http") ? episodeId : $"{BaseUrl}{episodeId}";
 
+        // 2. Fetch the server list via AJAX
         var url = $"{BaseUrl}/ajax{AjaxRoute}/episode/servers?episodeId={epId}";
         var response = await HttpClient.ExecuteAsync(
             url,
@@ -479,22 +482,20 @@ public abstract class ZoroTheme
                 continue;
 
             var typeLabel = serverType.Replace("servers-", "").ToUpperInvariant();
-            var serverNodes = document.DocumentNode.SelectNodes(
-                $"//div[contains(@class, '{serverType}')]//div[contains(@class, 'item')]"
-            );
 
-            if (serverNodes is null)
-                continue;
+            // HAP: //div[contains(@class, '{serverType}')]//div[contains(@class, 'item')]
+            // AngleSharp: Targeted CSS breadcrumbs
+            var serverNodes = document.QuerySelectorAll($"div.{serverType} div.item");
 
             foreach (var serverNode in serverNodes)
             {
-                var serverId = serverNode.GetAttributeValue("data-id", "");
-                var serverDataType = serverNode.GetAttributeValue("data-type", "");
-                var serverName = serverNode.InnerText.Trim();
+                var serverId = serverNode.GetAttribute("data-id");
+                var serverName = serverNode.TextContent.Trim();
 
-                if (!IsHosterEnabled(serverName))
+                if (string.IsNullOrWhiteSpace(serverId) || !IsHosterEnabled(serverName))
                     continue;
 
+                // 3. Fetch the actual embed URL
                 var embedUrl = await GetServerEmbedUrlAsync(serverId, referer, cancellationToken);
                 if (string.IsNullOrWhiteSpace(embedUrl))
                     continue;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Antelcat.AutoGen.ComponentModel.Diagnostic;
 using Microsoft.Extensions.Logging;
@@ -32,7 +33,13 @@ internal sealed class SettingsService : ISettingsService, IDisposable, ISingleto
     {
         _logger = logger;
         FilePath = settingsServiceOptions.Value.FilePath;
-        _jsonSerializerOptions = settingsServiceOptions.Value.JsonSerializerOptions;
+        _jsonSerializerOptions = new JsonSerializerOptions(
+            settingsServiceOptions.Value.JsonSerializerOptions
+        )
+        {
+            Converters = { new JsonStringEnumConverter() },
+            WriteIndented = true,
+        };
     }
 
     public string FilePath { get; }
