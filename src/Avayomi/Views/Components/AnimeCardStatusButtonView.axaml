@@ -2,7 +2,6 @@
     x:Class="Avayomi.Views.Components.AnimeCardStatusButtonView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:content="https://github.com/kikipoulet/SukiUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
@@ -12,7 +11,7 @@
         <Style Selector="Button.SmallButton">
             <Setter Property="Width" Value="25" />
             <Setter Property="Height" Value="25" />
-            <Setter Property="Background" Value="{DynamicResource SukiDialogBackground}" />
+            <Setter Property="Background" Value="{DynamicResource Background1}" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Padding" Value="0" />
@@ -30,7 +29,7 @@
         </Style>
         <Style Selector="Button.SmallButton:pointerover  /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="RenderTransform" Value="scale(1.2)" />
-            <Setter Property="Background" Value="{DynamicResource SukiDialogBackground}" />
+            <Setter Property="Background" Value="{DynamicResource Background1}" />
         </Style>
         <Style Selector="Button.SmallButton.visible">
             <Setter Property="RenderTransform" Value="scale(1)" />
@@ -53,14 +52,14 @@
 
         <Style Selector="Button#MainButton:pointerover">
             <Setter Property="RenderTransform" Value="scale(1.2)" />
-            <Setter Property="Background" Value="{DynamicResource SukiDialogBackground}" />
+            <Setter Property="Background" Value="{DynamicResource Background1}" />
         </Style>
 
         <Style Selector="Button#MainButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource SukiDialogBackground}" />
+            <Setter Property="Background" Value="{DynamicResource Background1}" />
         </Style>
     </UserControl.Styles>
-    <Grid
+    <Panel
         x:Name="Root"
         Background="#00000000">
         <StackPanel
@@ -76,14 +75,10 @@
                 CornerRadius="25"
                 Tag="plan_to_watch"
                 ToolTip.Tip="Add to Planned To Watch">
-                <PathIcon
+                <Image
                     Width="15"
                     Height="15"
-                    Data="{x:Static content:Icons.Pencil}" />
-                <!--  <Image  -->
-                <!--  Width="15"  -->
-                <!--  Height="15"  -->
-                <!--  Source="{SvgImage /Resources/Icons/calendarAdd_icon.svg}" />  -->
+                    Source="{SvgImage /Assets/calendar-plus.svg}" />
             </Button>
             <Button
                 x:Name="WatchingButton"
@@ -91,14 +86,10 @@
                 CornerRadius="25"
                 Tag="watching"
                 ToolTip.Tip="Add to Watching">
-                <PathIcon
+                <Image
                     Width="15"
                     Height="15"
-                    Data="{x:Static content:Icons.ChevronRight}" />
-                <!--  <Image  -->
-                <!--  Width="15"  -->
-                <!--  Height="15"  -->
-                <!--  Source="{SvgImage /Resources/Icons/play_icon.svg}" />  -->
+                    Source="{SvgImage /Assets/play.svg}" />
             </Button>
             <Button
                 x:Name="CompletedButton"
@@ -106,26 +97,22 @@
                 CornerRadius="25"
                 Tag="completed"
                 ToolTip.Tip="Add to Completed">
-                <PathIcon
+                <Image
                     Width="15"
                     Height="15"
-                    Data="{x:Static content:Icons.Check}" />
+                    Source="{SvgImage /Assets/check.svg}" />
+            </Button>
+            <Button
+                x:Name="RemoveButton"
+                Classes="SmallButton"
+                CornerRadius="25"
+                Tag="none"
+                ToolTip.Tip="Remove from the list">
                 <!--  <Image  -->
                 <!--  Width="15"  -->
                 <!--  Height="15"  -->
-                <!--  Source="{SvgImage /Resources/Icons/check_icon.svg}" />  -->
+                <!--  Source="{SvgImage /Assets/trash-2.svg}" />  -->
             </Button>
-            <!--  <Button  -->
-            <!--  x:Name="RemoveButton"  -->
-            <!--  Classes="SmallButton"  -->
-            <!--  CornerRadius="25"  -->
-            <!--  Tag="none"  -->
-            <!--  ToolTip.Tip="Remove from the list">  -->
-            <!--  <Image  -->
-            <!--  Width="15"  -->
-            <!--  Height="15"  -->
-            <!--  Source="{SvgImage /Resources/Icons/delete_icon.svg}" />  -->
-            <!-- </Button> -->
         </StackPanel>
         <Button
             x:Name="MainButton"
@@ -134,12 +121,14 @@
             Margin="10"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
-            Background="{DynamicResource SukiDialogBackground}"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+            Background="{StaticResource Background1}"
             CornerRadius="25">
-            <PathIcon
+            <Image
                 Width="15"
                 Height="15"
-                Data="{x:Static content:Icons.Plus}" />
+                Source="{SvgImage /Assets/plus.svg}" />
         </Button>
-    </Grid>
+    </Panel>
 </UserControl>

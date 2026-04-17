@@ -23,6 +23,7 @@
     <Styles.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="Colors.axaml" />
                 <ResourceInclude Source="/Controls/NumericTextBox.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

@@ -14,16 +14,6 @@ namespace Avayomi;
 
 public sealed class App : Application
 {
-    public static new App Current =>
-        (App?)Application.Current
-        ?? throw new InvalidOperationException("Applications is not yet initialized.");
-
-    public static TopLevel TopLevel { get; internal set; } = null!;
-
-    public static new IClassicDesktopStyleApplicationLifetime ApplicationLifetime =>
-        (IClassicDesktopStyleApplicationLifetime?)Application.Current?.ApplicationLifetime
-        ?? throw new InvalidOperationException("Applications is not yet initialized.");
-
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);

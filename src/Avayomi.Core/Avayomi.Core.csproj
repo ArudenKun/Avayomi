@@ -27,7 +27,7 @@
     <PackageReference Include="Raffinert.FuzzySharp" Version="4.0.0" />
     <PackageReference Include="Replicant" Version="3.2.0" />
     <PackageReference Include="Volo.Abp.Core" Version="10.2.0" />
-    <PackageReference Include="ZLinq.FileSystem" Version="1.5.5" />
+    <PackageReference Include="ZLinq.FileSystem" Version="1.5.6" />
   </ItemGroup>
 
   <ItemGroup>

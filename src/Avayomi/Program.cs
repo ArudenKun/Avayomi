@@ -78,7 +78,6 @@ public static class Program
                                     .Build(sp.GetRequiredService<MainWindowViewModel>())
                             ?? throw new InvalidOperationException("Could not find Main Window");
                         TopLevel topLevel = desktop.MainWindow = mainWindow;
-                        App.TopLevel = topLevel;
                         sp.GetRequiredService<ObjectAccessor<TopLevel>>().Value = topLevel;
                     });
             }

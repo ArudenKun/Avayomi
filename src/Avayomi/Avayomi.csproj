@@ -37,7 +37,7 @@
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="ServiceScan.SourceGenerator" Version="3.0.3">
+    <PackageReference Include="ServiceScan.SourceGenerator" Version="3.1.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -54,13 +54,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Avayomi.Hosting\Avayomi.Hosting.csproj" />
     <ProjectReference Include="..\Avayomi.Providers\Avayomi.Providers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Navigation\NavigationHost.axaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\Dialogs\" />
   </ItemGroup>
 </Project>

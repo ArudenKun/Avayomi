@@ -18,8 +18,7 @@
             Orientation="Horizontal">
             <TextBox
                 MinWidth="100"
-                Text="{Binding Search,
-                               Delay=300}" />
+                Text="{Binding Search}" />
             <Button
                 Command="{Binding SubmitCommand}"
                 Content="Submit"

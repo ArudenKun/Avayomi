@@ -21,10 +21,12 @@ public partial class AnimeCardStatusButtonView : UserControl<AnimeCardStatusButt
         PlannedToWatchButton.Classes.Add("visible");
         WatchingButton.Classes.Add("visible");
         CompletedButton.Classes.Add("visible");
+        RemoveButton.Classes.Add("visible");
 
         PlannedToWatchButton.IsVisible = true;
         WatchingButton.IsVisible = true;
         CompletedButton.IsVisible = true;
+        RemoveButton.IsVisible = true;
     }
 
     private void HideStatusButtons()
@@ -34,7 +36,7 @@ public partial class AnimeCardStatusButtonView : UserControl<AnimeCardStatusButt
             PlannedToWatchButton.Classes.Remove("visible");
             WatchingButton.Classes.Remove("visible");
             CompletedButton.Classes.Remove("visible");
-            // RemoveButton.Classes.Remove("visible");
+            RemoveButton.Classes.Remove("visible");
         }
     }
 
