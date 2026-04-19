@@ -3,7 +3,7 @@ using Avayomi.ViewModels.Pages;
 
 namespace Avayomi.Views.Pages;
 
-public partial class AnimePageView : UserControl<AnimePageViewModel>
+public partial class AnimePageView : UserControl<AnimePageViewModel>, IViewNameProvider
 {
     public AnimePageView()
     {
@@ -22,4 +22,6 @@ public partial class AnimePageView : UserControl<AnimePageViewModel>
             ViewModel.SubmitCommand.Execute(null);
         }
     }
+
+    public static string ViewName => nameof(AnimePageView);
 }

@@ -1,14 +1,13 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avayomi.ViewModels.Pages;
+﻿using Avayomi.ViewModels.Pages;
 
 namespace Avayomi.Views.Pages;
 
-public partial class SettingsPageView : UserControl<SettingsPageViewModel>
+public partial class SettingsPageView : UserControl<SettingsPageViewModel>, IViewNameProvider
 {
     public SettingsPageView()
     {
         InitializeComponent();
     }
+
+    public static string ViewName => nameof(SettingsPageView);
 }

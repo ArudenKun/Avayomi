@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
+using AsyncNavigation;
+using AsyncNavigation.Core;
 using Avayomi.Services;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,7 +10,6 @@ using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.ViewModels;
 
-[Dependency(ServiceLifetime.Singleton)]
 public sealed partial class SplashViewModel : ViewModel
 {
     private readonly IAniListService _aniListService;
@@ -21,9 +22,13 @@ public sealed partial class SplashViewModel : ViewModel
     [ObservableProperty]
     public partial string StatusText { get; set; } = "Initializing";
 
-    public override void OnLoaded()
+    public override void OnLoaded() { }
+
+    public override Task OnNavigatedToAsync(NavigationContext context)
     {
-        StartAsync().SafeFireAndForget();
+        // base.OnNavigatedToAsync(context);
+        // StartAsync().SafeFireAndForget();
+        return Task.CompletedTask;
     }
 
     private async Task StartAsync()
@@ -33,14 +38,18 @@ public sealed partial class SplashViewModel : ViewModel
         await _aniListService.CheckAuthenticationCacheAsync();
         if (_aniListService.IsAuthenticated)
         {
-            await NavigationHostManager.NavigateAsync<MainView>(
-                HostNames.Main,
-                await _aniListService.GetAuthenticatedUserAsync()
+            await RegionManager.RequestNavigateAsync(
+                Regions.Main,
+                Regions.Main,
+                new NavigationParameters
+                {
+                    { "Auth", await _aniListService.GetAuthenticatedUserAsync() },
+                }
             );
             return;
         }
 
-        await NavigationHostManager.NavigateAsync<LoginView>(HostNames.Main);
+        await RegionManager.RequestNavigateAsync(Regions.Main, Regions.Main);
 
         // if (GeneralOptions.ShowConsole)
         // {

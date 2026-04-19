@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AsyncAwaitBestPractices;
+using AsyncNavigation;
+using AsyncNavigation.Core;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avayomi.Services;
@@ -29,14 +32,14 @@ public sealed partial class LoginViewModel : ViewModel
     [ObservableProperty]
     public partial bool RememberMe { get; set; }
 
-    public override void OnLoaded()
+    public override async Task OnNavigatedToAsync(NavigationContext context)
     {
-        base.OnLoaded();
+        await base.OnNavigatedToAsync(context);
 
         var authenticated = _aniListService.IsAuthenticated;
         if (authenticated)
         {
-            NavigationHostManager.Navigate<MainView>(HostNames.Main);
+            RegionManager.RequestNavigateAsync(Regions.Main, MainView.ViewName).SafeFireAndForget();
         }
     }
 
@@ -59,9 +62,13 @@ public sealed partial class LoginViewModel : ViewModel
                     await _aniListService.AuthenticateAsync(accessToken, RememberMe);
                     if (_aniListService.IsAuthenticated)
                     {
-                        await NavigationHostManager.NavigateAsync<MainView>(
-                            HostNames.Main,
-                            await _aniListService.GetAuthenticatedUserAsync()
+                        await RegionManager.RequestNavigateAsync(
+                            Regions.Main,
+                            MainView.ViewName,
+                            new NavigationParameters
+                            {
+                                { "Auth", await _aniListService.GetAuthenticatedUserAsync() },
+                            }
                         );
                     }
                     return;

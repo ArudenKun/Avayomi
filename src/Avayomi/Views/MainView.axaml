@@ -2,6 +2,7 @@
     x:Class="Avayomi.Views.MainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:an="https://github.com/NeverMorewd/AsyncNavigation"
     xmlns:asyncImageLoader="using:AsyncImageLoader"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -21,7 +22,7 @@
         SidebarToggleEnabled="False"
         UseCustomContent="True">
         <suki:SukiSideMenu.Content>
-            <avayomi:NavigationHost avayomi:NavigationHostManager.HostName="{x:Static avayomi:HostNames.SideMenuMain}" />
+            <ContentControl an:RegionManager.RegionName="{x:Static avayomi:Regions.SideMenuMain}" />
         </suki:SukiSideMenu.Content>
         <suki:SukiSideMenu.HeaderContent>
             <StackPanel>

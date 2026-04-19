@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AsyncNavigation;
+using AsyncNavigation.Core;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
@@ -71,7 +73,11 @@ public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMess
     private async Task LogoutAsync()
     {
         await _aniListService.LogoutAsync();
-        await NavigationHostManager.NavigateAsync<LoginView>(HostNames.Main);
+        await RegionManager.RequestNavigateAsync(
+            Regions.Main,
+            LoginView.ViewName,
+            new NavigationParameters { { "IsLogout", true } }
+        );
     }
 
     public void Receive(ChangePageMessage message)
@@ -105,16 +111,24 @@ public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMess
             .FirstOrDefault(x => x.ViewModelType == viewModelType);
         if (itemDefinition is null)
             return;
-        NavigationHostManager.Navigate(HostNames.SideMenuMain, itemDefinition.ViewType);
+        RegionManager.RequestNavigateAsync(Regions.SideMenuMain, itemDefinition.ViewType.Name);
     }
 
-    public override async Task OnNavigatedToAsync(object? parameter)
+    public override async Task OnNavigatedToAsync(NavigationContext context)
     {
-        if (parameter is not User user)
+        await base.OnNavigatedToAsync(context);
+
+        User? user = null;
+
+        if (
+            context.Parameters is { } parameters
+            && parameters.TryGetValue<User>("Auth", out var navUser)
+        )
         {
-            user = await _aniListService.GetAuthenticatedUserAsync();
+            user = navUser;
         }
 
+        user ??= await _aniListService.GetAuthenticatedUserAsync();
         User = user;
     }
 

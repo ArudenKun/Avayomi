@@ -2,7 +2,9 @@
 
 namespace Avayomi.Views.Components;
 
-public partial class AnimeCardStatusButtonView : UserControl<AnimeCardStatusButtonViewModel>
+public partial class AnimeCardStatusButtonView
+    : UserControl<AnimeCardStatusButtonViewModel>,
+        IViewNameProvider
 {
     private bool _mouseOverRoot;
 
@@ -50,4 +52,6 @@ public partial class AnimeCardStatusButtonView : UserControl<AnimeCardStatusButt
         _mouseOverRoot = false;
         HideStatusButtons();
     }
+
+    public static string ViewName => nameof(AnimeCardStatusButtonView);
 }

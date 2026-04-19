@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using AsyncNavigation;
+using AsyncNavigation.Abstractions;
+using AsyncNavigation.Core;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
-using Avayomi.Navigation;
 using Avayomi.Services;
-using Avayomi.Services.Dialogs;
 using Avayomi.Services.Settings;
 using Avayomi.Services.Toasts;
 using Avayomi.Settings;
@@ -16,16 +18,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using R3;
 using Volo.Abp.DependencyInjection;
+using IDialogService = Avayomi.Services.Dialogs.IDialogService;
 
 namespace Avayomi.ViewModels;
 
 [PublicAPI]
-public abstract partial class ViewModel
-    : ObservableValidator,
-        INavigationAware,
-        IAsyncNavigationAware,
-        IDisposable,
-        ITransientDependency
+public abstract partial class ViewModel : ObservableValidator, INavigationAware, IDisposable
 {
     public required IServiceProvider ServiceProvider { protected get; init; }
     public required ITransientCachedServiceProvider CachedServiceProvider { protected get; init; }
@@ -38,8 +36,8 @@ public abstract partial class ViewModel
 
     protected IMessenger Messenger => CachedServiceProvider.GetRequiredService<IMessenger>();
 
-    protected INavigationHostManager NavigationHostManager =>
-        ServiceProvider.GetRequiredService<INavigationHostManager>();
+    protected IRegionManager RegionManager =>
+        CachedServiceProvider.GetRequiredService<IRegionManager>();
 
     protected ISettingsService SettingsService =>
         ServiceProvider.GetRequiredService<ISettingsService>();
@@ -115,37 +113,46 @@ public abstract partial class ViewModel
 
     #region Navigation
 
-    public virtual bool CanNavigateTo(object? parameter)
+    /// <inheritdoc/>
+    /// <remarks>Called only the first time a view is created and shown. Default implementation does nothing.</remarks>
+    public virtual Task InitializeAsync(NavigationContext context) => Task.CompletedTask;
+
+    /// <inheritdoc/>
+    /// <remarks>Called every time the view becomes the active view. Default implementation does nothing.</remarks>
+    public virtual Task OnNavigatedToAsync(NavigationContext context) => Task.CompletedTask;
+
+    /// <inheritdoc/>
+    /// <remarks>Called when navigating away from this view. Default implementation does nothing.</remarks>
+    public virtual Task OnNavigatedFromAsync(NavigationContext context) => Task.CompletedTask;
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Controls whether a cached view instance can be reused for the incoming navigation request.
+    /// Default returns <see langword="true"/>, meaning the cached instance is always reused.
+    /// Override and return <see langword="false"/> to force creation of a new instance.
+    /// </remarks>
+    public virtual Task<bool> IsNavigationTargetAsync(NavigationContext context) =>
+        Task.FromResult(true);
+
+    /// <inheritdoc/>
+    /// <remarks>Called when the view is being removed from the region cache. Default implementation does nothing.</remarks>
+    public virtual Task OnUnloadAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Raise this event to request that the framework proactively removes this view from the region.
+    /// Use <see cref="RequestUnloadAsync"/> as a convenient helper to raise it.
+    /// </remarks>
+    public event AsyncEventHandler<AsyncEventArgs>? AsyncRequestUnloadEvent;
+
+    /// <summary>
+    /// Raises <see cref="AsyncRequestUnloadEvent"/> to request that the framework remove this view.
+    /// </summary>
+    protected Task RequestUnloadAsync(CancellationToken cancellationToken = default)
     {
-        return true;
-    }
-
-    public virtual void OnNavigatedTo(object? parameter) { }
-
-    public virtual bool CanNavigateFrom()
-    {
-        return true;
-    }
-
-    public virtual void OnNavigatedFrom() { }
-
-    public virtual Task<bool> CanNavigateToAsync(object? parameter)
-    {
-        return Task.FromResult(true);
-    }
-
-    public virtual Task OnNavigatedToAsync(object? parameter)
-    {
-        return Task.CompletedTask;
-    }
-
-    public virtual Task<bool> CanNavigateFromAsync()
-    {
-        return Task.FromResult(true);
-    }
-
-    public virtual Task OnNavigatedFromAsync()
-    {
+        var handler = AsyncRequestUnloadEvent;
+        if (handler is not null)
+            return handler(this, new AsyncEventArgs(cancellationToken));
         return Task.CompletedTask;
     }
 

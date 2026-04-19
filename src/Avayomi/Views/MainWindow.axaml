@@ -2,6 +2,7 @@
     x:Class="Avayomi.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:an="https://github.com/NeverMorewd/AsyncNavigation"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -35,5 +36,5 @@
             Content="{LucideIconContent Settings}"
             IsVisible="{Binding IsMainView}" />
     </suki:SukiWindow.RightWindowTitleBarControls>
-    <avayomi:NavigationHost avayomi:NavigationHostManager.HostName="{x:Static avayomi:HostNames.Main}" />
+    <ContentControl an:RegionManager.RegionName="{x:Static avayomi:Regions.Main}" />
 </suki:SukiWindow>

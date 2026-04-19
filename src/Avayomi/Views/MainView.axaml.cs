@@ -1,20 +1,13 @@
-﻿using System;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avayomi.ViewModels;
-using SukiUI.Controls;
+﻿using Avayomi.ViewModels;
 
 namespace Avayomi.Views;
 
-public partial class MainView : UserControl<MainViewModel>
+public partial class MainView : UserControl<MainViewModel>, IViewNameProvider
 {
     public MainView()
     {
         InitializeComponent();
-
-        SideMenu.SelectionChanged += SideMenuOnSelectionChanged;
     }
 
-    private void SideMenuOnSelectionChanged(object? sender, SelectionChangedEventArgs e) { }
+    public static string ViewName => nameof(MainView);
 }

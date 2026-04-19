@@ -14,11 +14,6 @@ public sealed partial class AnimePlayerPageViewModel : PageViewModel
     [ObservableProperty]
     public partial string TestString { get; set; } = string.Empty;
 
-    public override void OnNavigatedTo(object? parameter)
-    {
-        TestString = Guid.CreateVersion7().ToString();
-    }
-
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

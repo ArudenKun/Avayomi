@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Threading.Tasks;
+using AsyncNavigation;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Humanizer;
 using Lucide.Avalonia;
 
@@ -12,6 +14,8 @@ public abstract partial class PageViewModel : ViewModel
             .Name.Replace("PageViewModel", string.Empty)
             .Humanize(LetterCasing.Title);
     }
+
+    protected bool AutoCleanup { get; set; } = true;
 
     /// <summary>
     /// The index of the page.
@@ -38,6 +42,18 @@ public abstract partial class PageViewModel : ViewModel
     /// Set to true to auto hide the page on the side menu.
     /// </summary>
     public virtual bool AutoHideOnSideMenu => false;
+
+    public override Task OnNavigatedFromAsync(NavigationContext context)
+    {
+        base.OnNavigatedFromAsync(context);
+
+        if (AutoCleanup)
+        {
+            RequestUnloadAsync();
+        }
+
+        return Task.CompletedTask;
+    }
 
     public override void OnLoaded()
     {

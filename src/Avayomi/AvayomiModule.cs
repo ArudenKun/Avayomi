@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AsyncNavigation.Abstractions;
 using Autofac;
 using Autofac.Core.Resolving.Pipeline;
 using Avalonia.Controls;
@@ -11,16 +12,17 @@ using Avayomi.Core;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.GraphQL;
 using Avayomi.Messaging;
-using Avayomi.Navigation.Extensions;
 using Avayomi.Providers;
 using Avayomi.Services.Settings;
 using Avayomi.ViewModels;
+using Avayomi.Views;
 using CommunityToolkit.Mvvm.Messaging;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using NeoSmart.Caching.Sqlite;
 using R3;
 using R3.ObservableEvents;
+using ServiceScan.SourceGenerator;
 using SQLitePCL;
 using SukiUI.Dialogs;
 using SukiUI.Toasts;
@@ -32,11 +34,10 @@ using ZiggyCreatures.Caching.Fusion;
 namespace Avayomi;
 
 [DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule))]
-public sealed class AvayomiModule : AbpModule
+public sealed partial class AvayomiModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
-        context.Services.AddConventionalRegistrar(new ViewModelConventionalRegistrar());
         ConfigureMessengerHandlers(context.Services);
     }
 
@@ -46,7 +47,9 @@ public sealed class AvayomiModule : AbpModule
             options.FilePath = AvayomiCoreConsts.Paths.SettingsPath
         );
 
-        context.Services.AddNavigationHost();
+        context.Services.AddNavigationSupport();
+        context.Services.RegisterRegionAdapter<SukiTransitioningContentRegionAdapter>();
+        RegisterViewAndViewModels(context.Services);
         context.Services.AddObjectAccessor<TopLevel>();
         context.Services.AddSingleton<TopLevel>(sp =>
             sp.GetRequiredService<IObjectAccessor<TopLevel>>().Value
@@ -116,4 +119,16 @@ public sealed class AvayomiModule : AbpModule
                         }
                     )
             );
+
+    [ScanForTypes(
+        AssignableTo = typeof(IView<>),
+        Handler = nameof(RegisterViewAndViewModelHandler)
+    )]
+    private static partial void RegisterViewAndViewModels(IServiceCollection services);
+
+    private static void RegisterViewAndViewModelHandler<TView, TViewModel>(
+        IServiceCollection services
+    )
+        where TView : Control, IViewNameProvider, IView
+        where TViewModel : ViewModel => services.RegisterView<TView, TViewModel>(TView.ViewName);
 }

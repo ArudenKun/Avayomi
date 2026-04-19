@@ -19,7 +19,6 @@
         <Setter Property="UseAlternativeHeaderStyle" Value="True" />
     </Style>
 
-    <StyleInclude Source="/Navigation/NavigationHost.axaml" />
     <Styles.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

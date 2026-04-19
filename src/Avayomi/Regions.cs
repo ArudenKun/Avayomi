@@ -1,6 +1,6 @@
 ﻿namespace Avayomi;
 
-public static class HostNames
+public static class Regions
 {
     public const string Main = nameof(Main);
 
