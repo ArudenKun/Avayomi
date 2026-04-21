@@ -1,0 +1,22 @@
+<Project>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="AvaloniaResourcesGenerator_Namespace" />
+    <CompilerVisibleProperty Include="AvaloniaResourcesGenerator_Modifier" />
+    <CompilerVisibleProperty Include="AvaloniaResourcesGenerator_ClassName" />
+    <CompilerVisibleProperty Include="AvaloniaResourcesGenerator_AddResourcesFolder" />
+  </ItemGroup>
+  <ItemGroup>
+    <CompilerVisibleItemMetadata
+      Include="AdditionalFiles"
+      MetadataName="AvaloniaResourcesGenerator_Resource"
+    />
+  </ItemGroup>
+  <PropertyGroup>
+    <AvaloniaResourcesGenerator_AddResourcesFolder>true</AvaloniaResourcesGenerator_AddResourcesFolder>
+  </PropertyGroup>
+  <ItemGroup Condition="$(AvaloniaResourcesGenerator_AddResourcesFolder)">
+    <AvaloniaResource Include="Resources\**\*.*" />
+    <AdditionalFiles Include="Resources\**\*.*" AvaloniaResourcesGenerator_Resource="true" />
+    <Compile Remove="Resources\**\*.*" />
+  </ItemGroup>
+</Project>
