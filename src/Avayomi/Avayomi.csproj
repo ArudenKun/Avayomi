@@ -45,7 +45,7 @@
     <PackageReference Include="Sortable.Avalonia" Version="2.1.1" />
     <PackageReference Include="SukiUI.Dock" Version="6.0.4-nightly20260401" />
     <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.5" />
-    <PackageReference Include="Volo.Abp.Autofac" Version="10.2.0" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="10.3.0" />
     <PackageReference
       Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson"
       Version="2.6.0"
@@ -55,9 +55,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Avayomi.Hosting\Avayomi.Hosting.csproj" />
     <ProjectReference Include="..\Avayomi.Providers\Avayomi.Providers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ViewModels\Interceptors\" />
   </ItemGroup>
 </Project>

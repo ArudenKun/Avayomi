@@ -11,6 +11,7 @@ using Avalonia.Platform.Storage;
 using Avayomi.Core;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.GraphQL;
+using Avayomi.Hosting;
 using Avayomi.Messaging;
 using Avayomi.Providers;
 using Avayomi.Services.Settings;
@@ -33,7 +34,7 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi;
 
-[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule))]
+[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule), typeof(AvayomiHostingModule))]
 public sealed partial class AvayomiModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)

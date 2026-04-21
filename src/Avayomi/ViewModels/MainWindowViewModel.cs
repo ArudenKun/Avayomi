@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
-using AsyncNavigation;
+using AsyncAwaitBestPractices;
 using AsyncNavigation.Core;
+using Avayomi.Extensions;
 using Avayomi.Messaging.Messages;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,7 +24,7 @@ public sealed partial class MainWindowViewModel : ViewModel
             mainRegion.Navigated += NavigationHostManagerOnHostChanged;
         }
 
-        _ = RegionManager.RequestNavigateAsync(Regions.Main, SplashView.ViewName, null, true);
+        RegionManager.RequestNavigateAsync<ShellView>(Regions.Main).SafeFireAndForget();
     }
 
     private void NavigationHostManagerOnHostChanged(object? sender, NavigationEventArgs e)
