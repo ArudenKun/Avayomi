@@ -16,26 +16,24 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AsyncAwaitBestPractices" Version="10.0.0" />
-    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.7.0" />
-    <PackageReference Include="AsyncNavigation.Avalonia" Version="2.0.0-beta" />
-    <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.1.5" />
-    <PackageReference Include="Avalonia.Controls.WebView" Version="11.4.0" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.14" />
+    <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.8.0" />
+    <PackageReference Include="AsyncNavigation.Avalonia" Version="2.0.1" />
+    <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Controls.WebView" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.0.1" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.14">
-      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
-      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Avalonia.Markup.Declarative" Version="12.0.1" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Duende.IdentityModel" Version="8.1.0" />
-    <PackageReference Include="HotAvalonia" Version="3.1.0" PrivateAssets="All" Publish="True" />
-    <PackageReference Include="Lucide.Avalonia" Version="0.2.3" />
+    <PackageReference Include="Flowery.NET" Version="2.0.0" />
+    <PackageReference Include="HeroIcons.Avalonia" Version="2.0.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.6" />
     <PackageReference Include="NeoSmart.Caching.Sqlite" Version="9.0.1" />
     <PackageReference Include="R3Extensions.Avalonia" Version="1.3.0" />
     <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
     <PackageReference Include="Serilog.Enrichers.Demystifier" Version="1.0.3" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
@@ -43,9 +41,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Sortable.Avalonia" Version="2.1.1" />
-    <PackageReference Include="SukiUI.Dock" Version="6.0.4-nightly20260401" />
-    <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.5" />
+    <PackageReference Include="Sortable.Avalonia" Version="2.2.0" />
+    <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.4" />
     <PackageReference Include="Volo.Abp.Autofac" Version="10.3.0" />
     <PackageReference
       Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson"
@@ -54,7 +51,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Avayomi.Hosting\Avayomi.Hosting.csproj" />
     <ProjectReference Include="..\Avayomi.Providers\Avayomi.Providers.csproj" />
     <ProjectReference
       Include="..\Avayomi.SourceGenerator\Avayomi.SourceGenerator.csproj"

@@ -11,7 +11,6 @@ using Avalonia.Platform.Storage;
 using Avayomi.Core;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.GraphQL;
-using Avayomi.Hosting;
 using Avayomi.Messaging;
 using Avayomi.Providers;
 using Avayomi.Services.Settings;
@@ -25,8 +24,6 @@ using R3;
 using R3.ObservableEvents;
 using ServiceScan.SourceGenerator;
 using SQLitePCL;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
 using Volo.Abp;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Modularity;
@@ -34,7 +31,7 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi;
 
-[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule), typeof(AvayomiHostingModule))]
+[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule))]
 public sealed partial class AvayomiModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
@@ -49,7 +46,6 @@ public sealed partial class AvayomiModule : AbpModule
         );
 
         context.Services.AddNavigationSupport();
-        context.Services.RegisterRegionAdapter<SukiTransitioningContentRegionAdapter>();
         RegisterViewAndViewModels(context.Services);
         context.Services.AddObjectAccessor<TopLevel>();
         context.Services.AddSingleton<TopLevel>(sp =>
@@ -64,10 +60,8 @@ public sealed partial class AvayomiModule : AbpModule
         );
         context.Services.AddSingleton<ILauncher>(sp => sp.GetRequiredService<TopLevel>().Launcher);
         context.Services.AddSingleton<IFocusManager>(sp =>
-            sp.GetRequiredService<TopLevel>().FocusManager!
+            sp.GetRequiredService<TopLevel>().FocusManager
         );
-        context.Services.AddSingleton<ISukiDialogManager, SukiDialogManager>();
-        context.Services.AddSingleton<ISukiToastManager, SukiToastManager>();
 
         context.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         context.Services.AddHttpClient();
@@ -130,6 +124,6 @@ public sealed partial class AvayomiModule : AbpModule
     private static void RegisterViewAndViewModelHandler<TView, TViewModel>(
         IServiceCollection services
     )
-        where TView : Control, IViewNameProvider, IView
-        where TViewModel : ViewModel => services.RegisterView<TView, TViewModel>(TView.ViewName);
+        where TView : class, IView
+        where TViewModel : class => services.RegisterView<TView, TViewModel>(typeof(TView).Name);
 }

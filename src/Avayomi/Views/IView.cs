@@ -3,8 +3,8 @@ using Avayomi.ViewModels;
 
 namespace Avayomi.Views;
 
-public interface IView<out TViewModel> : IView
+public interface IView<TViewModel> : IView
     where TViewModel : ViewModel
 {
-    TViewModel ViewModel { get; }
+    TViewModel? ViewModel { get; set; }
 }
