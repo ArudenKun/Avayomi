@@ -95,7 +95,7 @@ public sealed partial class AvayomiModule : AbpModule
 
     public override void OnApplicationShutdown(ApplicationShutdownContext context)
     {
-        context.ServiceProvider.GetRequiredService<ISettingsService>().Save();
+        //context.ServiceProvider.GetRequiredService<ISettingsService>().Save();
     }
 
     private static void ConfigureMessengerHandlers(IServiceCollection services) =>

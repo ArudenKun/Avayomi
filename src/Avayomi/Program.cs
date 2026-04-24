@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Volo.Abp;
 using Volo.Abp.Autofac;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.IO;
@@ -71,6 +72,14 @@ public static class Program
                             return;
 
                         sp.GetRequiredService<IThemeService>().Initialize();
+
+                        desktop.Exit += (_, _) =>
+                        {
+                            var abpApplication =
+                                sp.GetRequiredService<IAbpApplicationWithExternalServiceProvider>();
+                            abpApplication.Shutdown();
+                            abpApplication.Dispose();
+                        };
 
                         var mainWindow =
                             (Window?)
