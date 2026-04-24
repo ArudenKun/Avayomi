@@ -5,7 +5,6 @@ using Avalonia.Styling;
 using Avayomi.Styles;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Humanizer;
-using SukiUI.Enums;
 
 namespace Avayomi.Settings;
 
@@ -31,10 +30,6 @@ public sealed partial class AppearanceSettings : ObservableObject
 
     [ObservableProperty]
     public partial bool BackgroundTransitions { get; set; } = true;
-
-    [ObservableProperty]
-    public partial SukiBackgroundStyle BackgroundStyle { get; set; } =
-        SukiBackgroundStyle.GradientSoft;
 
     [ObservableProperty]
     public partial WindowState LastWindowState { get; set; } = WindowState.FullScreen;

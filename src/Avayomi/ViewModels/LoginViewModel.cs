@@ -5,6 +5,7 @@ using AsyncNavigation;
 using AsyncNavigation.Core;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
+using Avayomi.Extensions;
 using Avayomi.Services;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -39,7 +40,7 @@ public sealed partial class LoginViewModel : ViewModel
         var authenticated = _aniListService.IsAuthenticated;
         if (authenticated)
         {
-            RegionManager.RequestNavigateAsync(Regions.Main, MainView.ViewName).SafeFireAndForget();
+            RegionManager.RequestNavigate<MainView>(Regions.Main);
         }
     }
 
@@ -62,9 +63,8 @@ public sealed partial class LoginViewModel : ViewModel
                     await _aniListService.AuthenticateAsync(accessToken, RememberMe);
                     if (_aniListService.IsAuthenticated)
                     {
-                        await RegionManager.RequestNavigateAsync(
+                        await RegionManager.RequestNavigateAsync<MainView>(
                             Regions.Main,
-                            MainView.ViewName,
                             new NavigationParameters
                             {
                                 { "Auth", await _aniListService.GetAuthenticatedUserAsync() },
@@ -75,11 +75,11 @@ public sealed partial class LoginViewModel : ViewModel
                 }
 
                 await _aniListService.LogoutAsync();
-                ToastService.ShowToast(
-                    NotificationType.Warning,
-                    "Login Failed",
-                    "Login was cancelled or an error occured while logging in"
-                );
+                //ToastService.ShowToast(
+                //    NotificationType.Warning,
+                //    "Login Failed",
+                //    "Login was cancelled or an error occured while logging in"
+                //);
             }
             catch (TaskCanceledException)
             {

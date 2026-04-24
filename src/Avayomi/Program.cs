@@ -6,6 +6,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avayomi.Core;
 using Avayomi.Core.Extensions;
 using Avayomi.Hosting;
+using Avayomi.Hosting.SingleInstance;
 using Avayomi.Services;
 using Avayomi.Settings;
 using Avayomi.ViewModels;
@@ -27,6 +28,8 @@ namespace Avayomi;
 
 public static class Program
 {
+    private const string MutexId = "E10F8109-2ABF-4AF8-862D-CD4EC3D4C658";
+
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
@@ -44,6 +47,17 @@ public static class Program
             .CreateBootstrapLogger();
 
         builder.AddAutofac();
+        builder.AddSingleInstance(options =>
+        {
+            options.MutexId = MutexId;
+            options.WhenNotFirstInstance = (environment, logger) =>
+            {
+                logger.LogWarning(
+                    "Another instance of {Name} is already running",
+                    AvayomiCoreConsts.Name
+                );
+            };
+        });
         builder.AddAvaloniaHosting<App>(
             (sp, appBuilder) =>
             {
@@ -71,7 +85,7 @@ public static class Program
                         )
                             return;
 
-                        sp.GetRequiredService<IThemeService>().Initialize();
+                        //sp.GetRequiredService<IThemeService>().Initialize();
 
                         desktop.Exit += (_, _) =>
                         {

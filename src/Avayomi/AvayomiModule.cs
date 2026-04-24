@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AsyncNavigation.Abstractions;
@@ -25,8 +26,6 @@ using R3;
 using R3.ObservableEvents;
 using ServiceScan.SourceGenerator;
 using SQLitePCL;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
 using Volo.Abp;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Modularity;
@@ -49,7 +48,6 @@ public sealed partial class AvayomiModule : AbpModule
         );
 
         context.Services.AddNavigationSupport();
-        context.Services.RegisterRegionAdapter<SukiTransitioningContentRegionAdapter>();
         RegisterViewAndViewModels(context.Services);
         context.Services.AddObjectAccessor<TopLevel>();
         context.Services.AddSingleton<TopLevel>(sp =>
@@ -66,8 +64,6 @@ public sealed partial class AvayomiModule : AbpModule
         context.Services.AddSingleton<IFocusManager>(sp =>
             sp.GetRequiredService<TopLevel>().FocusManager!
         );
-        context.Services.AddSingleton<ISukiDialogManager, SukiDialogManager>();
-        context.Services.AddSingleton<ISukiToastManager, SukiToastManager>();
 
         context.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         context.Services.AddHttpClient();
@@ -130,6 +126,17 @@ public sealed partial class AvayomiModule : AbpModule
     private static void RegisterViewAndViewModelHandler<TView, TViewModel>(
         IServiceCollection services
     )
-        where TView : Control, IViewNameProvider, IView
-        where TViewModel : ViewModel => services.RegisterView<TView, TViewModel>(TView.ViewName);
+        where TView : Control, IView
+        where TViewModel : ViewModel
+    {
+        var viewType = typeof(TView);
+        var viewName = viewType.Name;
+        var viewAttribute = viewType.GetSingleAttributeOrNull<ViewAttribute>(false);
+        if (viewAttribute is not null)
+        {
+            viewName = viewAttribute.Name;
+        }
+
+        services.RegisterView<TView, TViewModel>(viewName);
+    }
 }

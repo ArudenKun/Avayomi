@@ -2,12 +2,10 @@
 
 namespace Avayomi.Views.Pages;
 
-public partial class SettingsPageView : UserControl<SettingsPageViewModel>, IViewNameProvider
+public partial class SettingsPageView : UserControl<SettingsPageViewModel>
 {
     public SettingsPageView()
     {
         InitializeComponent();
     }
-
-    public static string ViewName => nameof(SettingsPageView);
 }

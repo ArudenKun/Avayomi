@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AsyncNavigation;
 using Avayomi.Extensions;
 using Avayomi.Views;
@@ -9,11 +10,10 @@ public sealed class ShellViewModel : ViewModel
 {
     public override Task OnNavigatedToAsync(NavigationContext context)
     {
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(1000);
-            await RegionManager.RequestNavigateAsync<MainView>(Regions.Main);
-        });
+        RegionManager.RequestNavigate<MainView>(
+            Regions.Main,
+            delay: TimeSpan.FromMilliseconds(100)
+        );
         return Task.CompletedTask;
     }
 }

@@ -7,9 +7,7 @@ using AsyncNavigation.Abstractions;
 using AsyncNavigation.Core;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
-using Avayomi.Services;
 using Avayomi.Services.Settings;
-using Avayomi.Services.Toasts;
 using Avayomi.Settings;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -18,7 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using R3;
 using Volo.Abp.DependencyInjection;
-using IDialogService = Avayomi.Services.Dialogs.IDialogService;
 
 namespace Avayomi.ViewModels;
 
@@ -42,11 +39,11 @@ public abstract partial class ViewModel : ObservableValidator, INavigationAware,
     protected ISettingsService SettingsService =>
         ServiceProvider.GetRequiredService<ISettingsService>();
 
-    protected IToastService ToastService => ServiceProvider.GetRequiredService<IToastService>();
+    //protected IToastService ToastService => ServiceProvider.GetRequiredService<IToastService>();
 
-    protected IDialogService DialogService => ServiceProvider.GetRequiredService<IDialogService>();
+    //protected IDialogService DialogService => ServiceProvider.GetRequiredService<IDialogService>();
 
-    protected IThemeService ThemeService => ServiceProvider.GetRequiredService<IThemeService>();
+    //protected IThemeService ThemeService => ServiceProvider.GetRequiredService<IThemeService>();
 
     public GeneralSettings GeneralSettings => SettingsService.Get<GeneralSettings>();
 
@@ -105,7 +102,7 @@ public abstract partial class ViewModel : ObservableValidator, INavigationAware,
         // Logger.LogException(ex);
         if (shouldDisplay)
         {
-            ToastService.ShowExceptionToast(ex, "Error", ex.ToStringDemystified());
+            //ToastService.ShowExceptionToast(ex, "Error", ex.ToStringDemystified());
         }
 
         return shouldCatch;

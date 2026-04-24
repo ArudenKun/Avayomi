@@ -2,12 +2,10 @@
 
 namespace Avayomi.Views.Pages;
 
-public partial class AnimePlayerPageView : UserControl<AnimePlayerPageViewModel>, IViewNameProvider
+public partial class AnimePlayerPageView : UserControl<AnimePlayerPageViewModel>
 {
     public AnimePlayerPageView()
     {
         InitializeComponent();
     }
-
-    public static string ViewName => nameof(AnimePlayerPageView);
 }

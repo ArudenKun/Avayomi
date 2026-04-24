@@ -6,24 +6,19 @@ using AsyncNavigation;
 using AsyncNavigation.Core;
 using Avalonia.Collections;
 using Avalonia.Controls;
-using Avalonia.Controls.Notifications;
 using Avayomi.Core.AniList.Models.User;
-using Avayomi.Messaging.Messages;
+using Avayomi.Extensions;
 using Avayomi.Services;
 using Avayomi.ViewModels.Pages;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using Lucide.Avalonia;
-using Microsoft.Extensions.Logging;
 using ServiceScan.SourceGenerator;
-using SukiUI.Controls;
 using ZLinq;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMessage>
+public sealed partial class MainViewModel : ViewModel //, IRecipient<ChangePageMessage>
 {
     private readonly IAniListService _aniListService;
 
@@ -36,26 +31,13 @@ public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMess
             .OrderBy(x => x.Index)
             .ToList();
 
-        Pages.AddRange(
-            orderedPageViewModels.Select(x => new SukiSideMenuItem
-            {
-                Header = x.DisplayName,
-                IsVisible = x.IsVisibleOnSideMenu,
-                Icon = new LucideIcon
-                {
-                    Width = 20,
-                    Height = 20,
-                    Kind = x.IconKind,
-                },
-                Tag = x.GetType(),
-            })
-        );
+        Pages.AddRange(orderedPageViewModels);
     }
 
     [ObservableProperty]
-    public partial SukiSideMenuItem? Page { get; set; }
+    public partial PageViewModel? Page { get; set; }
 
-    public IAvaloniaList<SukiSideMenuItem> Pages { get; } = new AvaloniaList<SukiSideMenuItem>();
+    public IAvaloniaList<PageViewModel> Pages { get; } = new AvaloniaList<PageViewModel>();
 
     [ObservableProperty]
     public partial User? User { get; set; }
@@ -66,44 +48,43 @@ public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMess
 
         // Assigning PageItem instead of calling ChangePage directly.
         // This keeps the UI selection visually in sync with the current page.
-        Page = Pages.FirstOrDefault(x => x.IsVisible);
+        Page = Pages.FirstOrDefault(x => x.IsVisibleOnSideMenu);
     }
 
     [RelayCommand]
     private async Task LogoutAsync()
     {
         await _aniListService.LogoutAsync();
-        await RegionManager.RequestNavigateAsync(
+        await RegionManager.RequestNavigateAsync<LoginView>(
             Regions.Main,
-            LoginView.ViewName,
             new NavigationParameters { { "IsLogout", true } }
         );
     }
 
-    public void Receive(ChangePageMessage message)
-    {
-        var item = Pages.FirstOrDefault(x => x.Tag as Type == message.ViewModelType);
-        if (item is null)
-        {
-            ToastService.ShowToast(
-                NotificationType.Error,
-                "Navigation Error",
-                "An internal error occurred while navigating to the page."
-            );
-            return;
-        }
+    //public void Receive(ChangePageMessage message)
+    //{
+    //    var item = Pages.FirstOrDefault(x => x.Tag as Type == message.ViewModelType);
+    //    if (item is null)
+    //    {
+    //        ToastService.ShowToast(
+    //            NotificationType.Error,
+    //            "Navigation Error",
+    //            "An internal error occurred while navigating to the page."
+    //        );
+    //        return;
+    //    }
 
-        // Setting PageItem automatically triggers OnPageItemChanged -> ChangePage
-        Page = item;
-    }
+    //    // Setting PageItem automatically triggers OnPageItemChanged -> ChangePage
+    //    Page = item;
+    //}
 
-    partial void OnPageChanged(SukiSideMenuItem? value)
-    {
-        if (value?.Tag is not Type viewModelType)
-            return;
-        Logger.LogInformation("PageItemChange {Header}", value.Header);
-        ChangeContent(viewModelType);
-    }
+    //partial void OnPageChanged(SukiSideMenuItem? value)
+    //{
+    //    if (value?.Tag is not Type viewModelType)
+    //        return;
+    //    Logger.LogInformation("PageItemChange {Header}", value.Header);
+    //    ChangeContent(viewModelType);
+    //}
 
     private void ChangeContent(Type viewModelType)
     {

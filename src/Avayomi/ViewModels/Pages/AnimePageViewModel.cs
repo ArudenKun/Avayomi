@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Avalonia.Collections;
 using Avalonia.Controls.Notifications;
 using Avayomi.Services;
-using Avayomi.Services.Toasts;
 using Avayomi.ViewModels.Components;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -150,26 +149,26 @@ public sealed partial class AnimePageViewModel : PageViewModel
                 {
                     var search = Search;
                     var providerName = AnimeProvider;
-                    ToastService.ShowToast(
-                        NotificationType.Warning,
-                        "Search",
-                        $"Search for {Search} has been canceled",
-                        new ToastActionButton(
-                            "Retry",
-                            _ =>
-                            {
-                                Search = search;
-                                AnimeProvider = providerName;
-                                SubmitCommand.Execute(null);
-                            },
-                            true
-                        )
-                    );
+                    //ToastService.ShowToast(
+                    //    NotificationType.Warning,
+                    //    "Search",
+                    //    $"Search for {Search} has been canceled",
+                    //    new ToastActionButton(
+                    //        "Retry",
+                    //        _ =>
+                    //        {
+                    //            Search = search;
+                    //            AnimeProvider = providerName;
+                    //            SubmitCommand.Execute(null);
+                    //        },
+                    //        true
+                    //    )
+                    //);
                 }
                 catch (Exception ex)
                 {
                     Logger.LogWarning(ex, "An exception occured while searching");
-                    ToastService.ShowToast(NotificationType.Error, "Search", ex.Message);
+                    //ToastService.ShowToast(NotificationType.Error, "Search", ex.Message);
                 }
             },
             "Searching",

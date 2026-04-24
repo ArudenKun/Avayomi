@@ -2,12 +2,10 @@
 
 namespace Avayomi.Views;
 
-public partial class MainView : UserControl<MainViewModel>, IViewNameProvider
+public partial class MainView : UserControl<MainViewModel>
 {
     public MainView()
     {
         InitializeComponent();
     }
-
-    public static string ViewName => nameof(MainView);
 }

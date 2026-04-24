@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using AsyncNavigation.Abstractions;
+using Avalonia.Controls;
 using Avalonia.Threading;
+using Avayomi.Views;
 
 namespace Avayomi.Extensions;
 
@@ -51,7 +54,7 @@ public static class RegionManagerExtensions
                     replay,
                     cancellationToken
                 )
-                .SafeFireAndForget(ex => throw ex);
+                .SafeFireAndForget();
         });
 
     public static Task RequestNavigateAsync<TView>(
@@ -61,7 +64,7 @@ public static class RegionManagerExtensions
         bool replay = false,
         CancellationToken cancellationToken = default
     )
-        where TView : class, IView =>
+        where TView : Control, IView =>
         regionManager.RequestNavigateAsync(
             regionName,
             typeof(TView),
@@ -82,7 +85,13 @@ public static class RegionManagerExtensions
         var viewName = viewType.Name;
         if (!viewType.IsAssignableTo<IView>())
         {
-            throw new InvalidOperationException($"{viewName} is invalid");
+            throw new InvalidOperationException($"{viewName} does not implement IView");
+        }
+
+        var viewAttribute = viewType.GetSingleAttributeOrNull<ViewAttribute>(false);
+        if (viewAttribute is not null)
+        {
+            viewName = viewAttribute.Name;
         }
 
         return regionManager.RequestNavigateAsync(
