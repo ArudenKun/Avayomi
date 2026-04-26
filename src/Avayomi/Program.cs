@@ -1,26 +1,23 @@
 ﻿using System;
-using Autofac;
+using AsyncImageLoader;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avayomi.Core;
 using Avayomi.Core.Extensions;
-using Avayomi.Hosting;
-using Avayomi.Hosting.SingleInstance;
+using Avayomi.Logging;
 using Avayomi.Services;
+using Avayomi.Services.Settings;
 using Avayomi.Settings;
-using Avayomi.ViewModels;
-using HotAvalonia;
+using Avayomi.Utilities;
+using Avayomi.Views;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PleasantUI;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Volo.Abp;
-using Volo.Abp.Autofac;
-using Volo.Abp.DependencyInjection;
 using Volo.Abp.IO;
 using Volo.Abp.Modularity.PlugIns;
 
@@ -28,132 +25,109 @@ namespace Avayomi;
 
 public static class Program
 {
-    private const string MutexId = "E10F8109-2ABF-4AF8-862D-CD4EC3D4C658";
-
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
     public static void Main(string[] args)
     {
-        var builder = Host.CreateApplicationBuilder(args);
-
+        var settingsService = SettingsService.Create();
+        var loggingSwitch = new LoggingLevelSwitch(
+            settingsService.Get<LoggingSettings>().LogEventLevel
+        );
         Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.ControlledBy(loggingSwitch)
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.WithDemystifiedStackTraces()
+            .WriteTo.Async(c =>
+                c.File(
+                    AvayomiCoreConsts.Paths.LogsDir.Combine("log.txt"),
+                    outputTemplate: LoggingSettings.Template,
+                    retainedFileTimeLimit: 30.Days(),
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    shared: true
+                )
+            )
             .WriteTo.Async(c => c.Console(outputTemplate: LoggingSettings.Template))
-            .CreateBootstrapLogger();
+            .CreateLogger();
 
-        builder.AddAutofac();
-        builder.AddSingleInstance(options =>
+        var abpApplication = AbpApplicationFactory.Create<AvayomiModule>(options =>
         {
-            options.MutexId = MutexId;
-            options.WhenNotFirstInstance = (environment, logger) =>
-            {
-                logger.LogWarning(
-                    "Another instance of {Name} is already running",
-                    AvayomiCoreConsts.Name
-                );
-            };
-        });
-        builder.AddAvaloniaHosting<App>(
-            (sp, appBuilder) =>
-            {
-                var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-                appBuilder
-                    .UsePlatformDetect()
-                    .UseR3(ex =>
-                        loggerFactory
-                            .CreateLogger("R3")
-                            .LogError(ex, "An Unhandled R3 Exception occurred")
-                    )
-                    .UseHotReload()
-                    .LogToDelegate(s =>
-                        loggerFactory.CreateLogger("Avalonia").LogWarning("{Log}", s)
-                    )
-                    .With(new SkiaOptions { MaxGpuResourceSizeBytes = (long)512.Megabytes().Bytes })
-                    .AfterSetup(_ =>
-                    {
-                        if (appBuilder.Instance is not { } app)
-                            return;
-
-                        if (
-                            app.ApplicationLifetime
-                            is not IClassicDesktopStyleApplicationLifetime desktop
-                        )
-                            return;
-
-                        //sp.GetRequiredService<IThemeService>().Initialize();
-
-                        desktop.Exit += (_, _) =>
-                        {
-                            var abpApplication =
-                                sp.GetRequiredService<IAbpApplicationWithExternalServiceProvider>();
-                            abpApplication.Shutdown();
-                            abpApplication.Dispose();
-                        };
-
-                        var mainWindow =
-                            (Window?)
-                                app.DataTemplates[0]
-                                    .Build(sp.GetRequiredService<MainWindowViewModel>())
-                            ?? throw new InvalidOperationException("Could not find Main Window");
-                        TopLevel topLevel = desktop.MainWindow = mainWindow;
-                        sp.GetRequiredService<ObjectAccessor<TopLevel>>().Value = topLevel;
-                    });
-            }
-        );
-        builder.Services.AddSingleton<LoggingLevelSwitch>();
-        builder.Services.AddSerilog(
-            (sp, loggerConfiguration) =>
-                loggerConfiguration
-                    .MinimumLevel.ControlledBy(sp.GetRequiredService<LoggingLevelSwitch>())
-                    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-                    .Enrich.FromLogContext()
-                    .Enrich.WithDemystifiedStackTraces()
-                    .WriteTo.Async(c =>
-                        c.File(
-                            AvayomiCoreConsts.Paths.LogsDir.Combine("log.txt"),
-                            outputTemplate: LoggingSettings.Template,
-                            retainedFileTimeLimit: 30.Days(),
-                            rollingInterval: RollingInterval.Day,
-                            rollOnFileSizeLimit: true,
-                            shared: true
-                        )
-                    )
-                    .WriteTo.Async(c => c.Console(outputTemplate: LoggingSettings.Template))
-        );
-
-        var abpApplication = builder.Services.AddApplication<AvayomiModule>(options =>
-        {
+            options.UseAutofac();
+            options.Services.AddLogging(loggingBuilder =>
+                loggingBuilder.ClearProviders().AddSerilog(dispose: true)
+            );
+            options.Services.AddSingleton(loggingSwitch);
             var pluginDir = AvayomiCoreConsts.Paths.DataDir.Combine("Plugins");
             DirectoryHelper.CreateIfNotExists(pluginDir);
             options.PlugInSources.AddFolder(pluginDir);
         });
 
-        var app = builder.Build();
-        abpApplication.Initialize(app.Services);
-        app.Services.GetRequiredService<ILoggingService>().Initialize();
-        app.Run();
-    }
+        var lifetime = new ClassicDesktopStyleApplicationLifetime
+        {
+            Args = args,
+            ShutdownMode = ShutdownMode.OnMainWindowClose,
+        };
 
-    // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp() =>
-        AppBuilder.Configure<App>().UsePlatformDetect().LogToTrace();
+        abpApplication.Initialize();
 
-    // ReSharper disable once UnusedMethodReturnValue.Local
-    private static IHostApplicationBuilder AddAutofac(
-        this IHostApplicationBuilder builder,
-        Action<ContainerBuilder>? configure = null
-    )
-    {
-        var containerBuilder = new ContainerBuilder();
-        var serviceProviderFactory = new AbpAutofacServiceProviderFactory(containerBuilder);
-        builder.Services.AddObjectAccessor(containerBuilder);
-        builder.ConfigureContainer(serviceProviderFactory, configure);
-        return builder;
+        AppBuilder
+            .Configure<Application>()
+            .UsePlatformDetect()
+            .UseR3(ex =>
+                abpApplication
+                    .ServiceProvider.GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("R3")
+                    .LogError(ex, "An Unhandled R3 Exception occurred")
+            )
+            .UseViewInitializationStrategy(ViewInitializationStrategy.Lazy)
+            .UseComponentControlFactory(type =>
+                (Control)
+                    ActivatorUtilities.GetServiceOrCreateInstance(
+                        abpApplication.ServiceProvider,
+                        type
+                    )
+            )
+            .UseServiceProvider(abpApplication.ServiceProvider)
+            .UseHotReload()
+            .LogToSerilog()
+            .WithDeveloperTools()
+            .With(new SkiaOptions { MaxGpuResourceSizeBytes = (long)512.Megabytes().Bytes })
+            .AfterSetup(appBuilder =>
+            {
+                abpApplication.ServiceProvider.GetRequiredService<ILoggingService>().Initialize();
+
+                var replicantImageLoader = new ReplicantImageLoader(
+                    AvayomiCoreConsts.Paths.CacheDir.Combine("Images")
+                );
+                ImageLoader.AsyncImageLoader = replicantImageLoader;
+                ImageBrushLoader.AsyncImageLoader = replicantImageLoader;
+
+                if (appBuilder.Instance is not { } application)
+                    return;
+
+                application.Styles.Add(new PleasantTheme());
+            })
+            .SetupWithLifetime(lifetime);
+
+        lifetime.Exit += (_, _) =>
+        {
+            abpApplication.Shutdown();
+            abpApplication.Dispose();
+        };
+
+        lifetime.MainWindow = abpApplication.ServiceProvider.GetRequiredService<MainWindow>();
+
+        try
+        {
+            lifetime.Start(args);
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 }

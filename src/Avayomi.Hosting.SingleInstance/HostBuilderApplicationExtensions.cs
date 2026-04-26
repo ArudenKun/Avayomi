@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Avayomi.Hosting.SingleInstance.Internal;
+﻿using Avayomi.Hosting.SingleInstance.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -50,7 +47,7 @@ public static class HostBuilderApplicationExtensions
                         .AddHostedService<MutexLifetimeService>();
                 }
 
-                configureAction?.Invoke(mutexBuilder);
+                configureAction.Invoke(mutexBuilder);
             }
         );
     }
@@ -85,7 +82,7 @@ public static class HostBuilderApplicationExtensions
                 .AddHostedService<MutexLifetimeService>();
         }
 
-        configureAction?.Invoke(mutexBuilder);
+        configureAction.Invoke(mutexBuilder);
 
         return hostBuilder;
     }

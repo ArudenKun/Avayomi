@@ -47,6 +47,8 @@ public static class AvayomiCoreConsts
 
         public static string CacheDir { get; } = DataDir.Combine("Cache");
         public static string LogsDir { get; } = DataDir.Combine("Logs");
+
+        public static string ToolsDir { get; } = DataDir.Combine("Tools");
         public static string SettingsPath { get; } = DataDir.Combine("settings.json");
     }
 

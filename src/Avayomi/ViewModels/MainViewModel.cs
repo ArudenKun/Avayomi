@@ -1,55 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AsyncNavigation;
 using AsyncNavigation.Core;
-using Avalonia.Collections;
-using Avalonia.Controls;
 using Avayomi.Core.AniList.Models.User;
 using Avayomi.Extensions;
 using Avayomi.Services;
-using Avayomi.ViewModels.Pages;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ServiceScan.SourceGenerator;
-using ZLinq;
+using PleasantUI.Controls;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class MainViewModel : ViewModel //, IRecipient<ChangePageMessage>
+public sealed partial class MainViewModel : ViewModel
 {
     private readonly IAniListService _aniListService;
 
-    public MainViewModel(IEnumerable<PageViewModel> pageViewModels, IAniListService aniListService)
+    public MainViewModel(IAniListService aniListService)
     {
         _aniListService = aniListService;
-
-        var orderedPageViewModels = pageViewModels
-            .AsValueEnumerable()
-            .OrderBy(x => x.Index)
-            .ToList();
-
-        Pages.AddRange(orderedPageViewModels);
     }
 
     [ObservableProperty]
-    public partial PageViewModel? Page { get; set; }
-
-    public IAvaloniaList<PageViewModel> Pages { get; } = new AvaloniaList<PageViewModel>();
+    public partial NavigationViewItem? NavigationViewItem { get; set; }
 
     [ObservableProperty]
     public partial User? User { get; set; }
-
-    public override void OnLoaded()
-    {
-        base.OnLoaded();
-
-        // Assigning PageItem instead of calling ChangePage directly.
-        // This keeps the UI selection visually in sync with the current page.
-        Page = Pages.FirstOrDefault(x => x.IsVisibleOnSideMenu);
-    }
 
     [RelayCommand]
     private async Task LogoutAsync()
@@ -59,6 +34,14 @@ public sealed partial class MainViewModel : ViewModel //, IRecipient<ChangePageM
             Regions.Main,
             new NavigationParameters { { "IsLogout", true } }
         );
+    }
+
+    partial void OnNavigationViewItemChanged(
+        NavigationViewItem? oldValue,
+        NavigationViewItem? newValue
+    )
+    {
+        oldValue?.IsSelected = false;
     }
 
     //public void Receive(ChangePageMessage message)
@@ -86,43 +69,21 @@ public sealed partial class MainViewModel : ViewModel //, IRecipient<ChangePageM
     //    ChangeContent(viewModelType);
     //}
 
-    private void ChangeContent(Type viewModelType)
-    {
-        var itemDefinition = GetSideMenuItemDefinitions()
-            .FirstOrDefault(x => x.ViewModelType == viewModelType);
-        if (itemDefinition is null)
-            return;
-        RegionManager.RequestNavigateAsync(Regions.SideMenuMain, itemDefinition.ViewType.Name);
-    }
-
     public override async Task OnNavigatedToAsync(NavigationContext context)
     {
         await base.OnNavigatedToAsync(context);
 
-        User? user = null;
-
-        if (
-            context.Parameters is { } parameters
-            && parameters.TryGetValue<User>("Auth", out var navUser)
-        )
-        {
-            user = navUser;
-        }
-
-        user ??= await _aniListService.GetAuthenticatedUserAsync();
-        User = user;
+        // User? user = null;
+        //
+        // if (
+        //     context.Parameters is { } parameters
+        //     && parameters.TryGetValue<User>("Auth", out var navUser)
+        // )
+        // {
+        //     user = navUser;
+        // }
+        //
+        // user ??= await _aniListService.GetAuthenticatedUserAsync();
+        // User = user;
     }
-
-    [ScanForTypes(
-        AssignableTo = typeof(UserControl<>),
-        TypeNameFilter = "*PageView",
-        Handler = nameof(GetSideMenuItemDefinitionHandler)
-    )]
-    private static partial SideMenuItemDefinition[] GetSideMenuItemDefinitions();
-
-    private static SideMenuItemDefinition GetSideMenuItemDefinitionHandler<TView, TViewModel>()
-        where TView : Control
-        where TViewModel : PageViewModel => new(typeof(TView), typeof(TViewModel));
-
-    private sealed record SideMenuItemDefinition(Type ViewType, Type ViewModelType);
 }

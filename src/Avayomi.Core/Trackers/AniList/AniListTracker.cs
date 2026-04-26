@@ -1,10 +1,5 @@
-﻿using Avayomi.Core.AniList;
-using Avayomi.Core.Animes;
+﻿using Avayomi.Core.Animes;
 using Avayomi.Core.GraphQL;
-using GraphQL;
-using GraphQL.Client.Abstractions;
-using GraphQL.Client.Http;
-using GraphQL.Client.Serializer.SystemTextJson;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.Core.Trackers.AniList;
@@ -13,12 +8,7 @@ internal sealed class AniListTracker : ITracker, ISingletonDependency
 {
     private const string Url = "https://graphql.anilist.co";
 
-    private readonly IGraphQLClient _graphQlClient;
-
-    public AniListTracker(HttpClient httpClient)
-    {
-        _graphQlClient = new GraphQLHttpClient(Url, new SystemTextJsonSerializer());
-    }
+    public AniListTracker(HttpClient httpClient) { }
 
     public async Task<IReadOnlyList<TrackerInfoResult>> SearchAsync(
         string query,
@@ -70,17 +60,18 @@ internal sealed class AniListTracker : ITracker, ISingletonDependency
                 ),
             ],
         };
-        var request = new GraphQLRequest { Query = selection.ToJsonString() };
-        var response = await _graphQlClient.SendQueryAsync<AniListPagination<TrackerInfoResult>>(
-            request,
-            cancellationToken
-        );
-        if (!response.Errors.IsNullOrEmpty())
-        {
-            return new AniListPagination<TrackerInfoResult>(new AniListPageInfo(), []);
-        }
-
-        return response.Data;
+        // var request = new GraphQLRequest { Query = selection.ToJsonString() };
+        // var response = await _graphQlClient.SendQueryAsync<AniListPagination<TrackerInfoResult>>(
+        //     request,
+        //     cancellationToken
+        // );
+        // if (!response.Errors.IsNullOrEmpty())
+        // {
+        //     return new AniListPagination<TrackerInfoResult>(new AniListPageInfo(), []);
+        // }
+        //
+        // return response.Data;
+        return new AniListPagination<TrackerInfoResult>(new AniListPageInfo(), []);
     }
 
     public Task<TrackerInfoResult?> GetAsync(

@@ -56,8 +56,15 @@ public static class DispatchHelper
     }
 
     /// <inheritdoc cref="Dispatcher.Post(Action, DispatcherPriority)"/>>
-    public static void Post(Action callback, DispatcherPriority priority = default) =>
+    public static void Post(Action callback, DispatcherPriority priority = default)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            callback();
+            return;
+        }
         Dispatcher.UIThread.Post(callback, priority);
+    }
 
     /// <inheritdoc cref="Dispatcher.Post(Action,DispatcherPriority)"/>>
     public static async Task PostAsync(Func<Task> callback) =>

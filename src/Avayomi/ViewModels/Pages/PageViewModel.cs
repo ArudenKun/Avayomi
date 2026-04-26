@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 using AsyncNavigation;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Humanizer;
-using Lucide.Avalonia;
 
 namespace Avayomi.ViewModels.Pages;
 
@@ -18,19 +18,9 @@ public abstract partial class PageViewModel : ViewModel
     protected bool AutoCleanup { get; set; } = true;
 
     /// <summary>
-    /// The index of the page.
-    /// </summary>
-    public abstract int Index { get; }
-
-    /// <summary>
     /// The display name of the page.
     /// </summary>
     public virtual string DisplayName { get; }
-
-    /// <summary>
-    /// The icon of the page.
-    /// </summary>
-    public abstract LucideIconKind IconKind { get; }
 
     /// <summary>
     /// The visibility of the page on the side menu.

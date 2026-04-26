@@ -1,23 +1,47 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using AsyncAwaitBestPractices;
 using AsyncNavigation.Abstractions;
-using Avalonia.Controls;
-using Avalonia.Threading;
+using AsyncNavigation.Avalonia;
+using AsyncNavigation.Core;
+using Avayomi.Utilities;
 using Avayomi.Views;
 
 namespace Avayomi.Extensions;
 
 public static class RegionManagerExtensions
 {
+    public static T RegionManager_RegionName<T>(
+        this T control,
+        string regionName,
+        [CallerFilePath] string? callerFile = null,
+        [CallerLineNumber] int callerLine = 0
+    )
+        where T : Control =>
+        control._set(
+            () => RegionManager.SetRegionName(control, regionName),
+            callerFile,
+            callerLine
+        );
+
+    public static T RegionManager_PreferCache<T>(
+        this T control,
+        bool value,
+        [CallerFilePath] string? callerFile = null,
+        [CallerLineNumber] int callerLine = 0
+    )
+        where T : Control =>
+        control._set(() => RegionManager.SetPreferCache(control, value), callerFile, callerLine);
+
     public static void RequestNavigate<TView>(
         this IRegionManager regionManager,
         string regionName,
         INavigationParameters? navigationParameters = null,
         bool replay = false,
         TimeSpan? delay = null,
+        Action<NavigationResult>? onCompleted = null,
         CancellationToken cancellationToken = default
     )
         where TView : class, IView =>
@@ -27,6 +51,7 @@ public static class RegionManagerExtensions
             navigationParameters,
             replay,
             delay,
+            onCompleted,
             cancellationToken
         );
 
@@ -37,27 +62,35 @@ public static class RegionManagerExtensions
         INavigationParameters? navigationParameters = null,
         bool replay = false,
         TimeSpan? delay = null,
+        Action<NavigationResult>? onCompleted = null,
         CancellationToken cancellationToken = default
     ) =>
-        Dispatcher.UIThread.Post(async void () =>
+        DispatchHelper.Post(async void () =>
         {
-            if (delay is not null)
+            if (delay.HasValue)
             {
                 await Task.Delay(delay.Value, cancellationToken);
             }
 
-            regionManager
-                .RequestNavigateAsync(
+            try
+            {
+                var result = await regionManager.RequestNavigateAsync(
                     regionName,
                     viewType,
                     navigationParameters,
                     replay,
                     cancellationToken
-                )
-                .SafeFireAndForget();
+                );
+                onCompleted?.Invoke(result);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         });
 
-    public static Task RequestNavigateAsync<TView>(
+    public static Task<NavigationResult> RequestNavigateAsync<TView>(
         this IRegionManager regionManager,
         string regionName,
         INavigationParameters? navigationParameters = null,
@@ -73,7 +106,7 @@ public static class RegionManagerExtensions
             cancellationToken
         );
 
-    public static Task RequestNavigateAsync(
+    public static Task<NavigationResult> RequestNavigateAsync(
         this IRegionManager regionManager,
         string regionName,
         Type viewType,

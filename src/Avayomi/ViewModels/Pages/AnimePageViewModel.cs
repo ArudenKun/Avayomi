@@ -5,20 +5,20 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Collections;
-using Avalonia.Controls.Notifications;
+using Avalonia.Media;
 using Avayomi.Services;
 using Avayomi.ViewModels.Components;
+using Avayomi.Views.Pages;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lucide.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PleasantUI;
 using Raffinert.FuzzySharp;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.ViewModels.Pages;
 
-[Dependency(ServiceLifetime.Singleton)]
 public sealed partial class AnimePageViewModel : PageViewModel
 {
     private readonly IAnimeService _animeService;
@@ -29,10 +29,6 @@ public sealed partial class AnimePageViewModel : PageViewModel
 
         Animes = new AvaloniaList<AnimeCardViewModel>();
     }
-
-    public override int Index => 1;
-
-    public override LucideIconKind IconKind => LucideIconKind.Tv;
 
     public IAvaloniaList<AnimeCardViewModel> Animes { get; }
 

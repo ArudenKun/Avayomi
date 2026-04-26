@@ -1,5 +1,4 @@
 ﻿<UserControl
-    x:Class="Avayomi.Views.Pages.AnimePageView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
@@ -8,65 +7,64 @@
     xmlns:suki="https://github.com/kikipoulet/SukiUI"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    x:DataType="avayomi:AnimePageViewModel"
     mc:Ignorable="d">
-    <Grid RowDefinitions="Auto, *">
-        <StackPanel
-            Grid.Row="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Orientation="Horizontal">
-            <TextBox
-                MinWidth="100"
-                Text="{Binding Search}" />
-            <Button
-                Command="{Binding SubmitCommand}"
-                Content="Submit"
-                IsEnabled="{Binding !IsBusy}" />
-            <Button
-                Command="{Binding SubmitCancelCommand}"
-                Content="Cancel"
-                IsEnabled="{Binding IsBusy}" />
-            <ComboBox
-                ItemsSource="{Binding AnimeProviders}"
-                PlaceholderText="Providers"
-                SelectedItem="{Binding AnimeProvider}" />
-        </StackPanel>
-        <suki:BusyArea
-            Grid.Row="1"
-            BusyText="{Binding BusyText}"
-            IsBusy="{Binding IsBusy}">
-            <ScrollViewer
-                Name="PopularThisSeasonScroller"
-                Margin="25,0,0,0">
-                <ItemsRepeater
-                    ItemsSource="{Binding Animes}"
-                    ScrollViewer.IsScrollChainingEnabled="True">
-                    <ItemsRepeater.Layout>
-                        <UniformGridLayout
-                            ItemsStretch="Fill"
-                            MinColumnSpacing="15"
-                            MinRowSpacing="5"
-                            Orientation="Horizontal" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate>
-                            <ContentControl Content="{Binding}" />
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </ScrollViewer>
-        </suki:BusyArea>
-        <Grid
-            Grid.Row="1"
-            IsVisible="{Binding NoResultsFound}">
-            <TextBlock
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontSize="24"
-                FontWeight="Bold">
-                No Results Found
-            </TextBlock>
-        </Grid>
-    </Grid>
+    <!-- <Grid RowDefinitions="Auto, *"> -->
+    <!--  <StackPanel  -->
+    <!--  Grid.Row="0"  -->
+    <!--  HorizontalAlignment="Center"  -->
+    <!--  VerticalAlignment="Center"  -->
+    <!--  Orientation="Horizontal">  -->
+    <!--  <TextBox  -->
+    <!--  MinWidth="100"  -->
+    <!--  Text="{Binding Search}" />  -->
+    <!--  <Button  -->
+    <!--  Command="{Binding SubmitCommand}"  -->
+    <!--  Content="Submit"  -->
+    <!--  IsEnabled="{Binding !IsBusy}" />  -->
+    <!--  <Button  -->
+    <!--  Command="{Binding SubmitCancelCommand}"  -->
+    <!--  Content="Cancel"  -->
+    <!--  IsEnabled="{Binding IsBusy}" />  -->
+    <!--  <ComboBox  -->
+    <!--  ItemsSource="{Binding AnimeProviders}"  -->
+    <!--  PlaceholderText="Providers"  -->
+    <!--  SelectedItem="{Binding AnimeProvider}" />  -->
+    <!--     </StackPanel> -->
+    <!--  <suki:BusyArea  -->
+    <!--  Grid.Row="1"  -->
+    <!--  BusyText="{Binding BusyText}"  -->
+    <!--  IsBusy="{Binding IsBusy}">  -->
+    <!--  <ScrollViewer  -->
+    <!--  Name="PopularThisSeasonScroller"  -->
+    <!--  Margin="25,0,0,0">  -->
+    <!--  <ItemsRepeater  -->
+    <!--  ItemsSource="{Binding Animes}"  -->
+    <!--  ScrollViewer.IsScrollChainingEnabled="True">  -->
+    <!--                 <ItemsRepeater.Layout> -->
+    <!--  <UniformGridLayout  -->
+    <!--  ItemsStretch="Fill"  -->
+    <!--  MinColumnSpacing="15"  -->
+    <!--  MinRowSpacing="5"  -->
+    <!--  Orientation="Horizontal" />  -->
+    <!--                 </ItemsRepeater.Layout> -->
+    <!--                 <ItemsRepeater.ItemTemplate> -->
+    <!--                     <DataTemplate> -->
+    <!--                         <ContentControl Content="{Binding}" /> -->
+    <!--                     </DataTemplate> -->
+    <!--                 </ItemsRepeater.ItemTemplate> -->
+    <!--             </ItemsRepeater> -->
+    <!--         </ScrollViewer> -->
+    <!--     </suki:BusyArea> -->
+    <!--  <Grid  -->
+    <!--  Grid.Row="1"  -->
+    <!--  IsVisible="{Binding NoResultsFound}">  -->
+    <!--  <TextBlock  -->
+    <!--  HorizontalAlignment="Center"  -->
+    <!--  VerticalAlignment="Center"  -->
+    <!--  FontSize="24"  -->
+    <!--  FontWeight="Bold">  -->
+    <!--  No Results Found  -->
+    <!--         </TextBlock> -->
+    <!--     </Grid> -->
+    <!-- </Grid> -->
 </UserControl>

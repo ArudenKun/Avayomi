@@ -8,13 +8,14 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Antelcat.AutoGen.ComponentModel.Diagnostic;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.Services.Settings;
 
 [AutoExtractInterface]
-[ExposeServices([typeof(ISettingsService)])]
+[ExposeServices(typeof(ISettingsService))]
 internal sealed class SettingsService : ISettingsService, IDisposable, ISingletonDependency
 {
     private readonly ILogger<SettingsService> _logger;
@@ -42,7 +43,15 @@ internal sealed class SettingsService : ISettingsService, IDisposable, ISingleto
         };
     }
 
+    public static ISettingsService Create() =>
+        new SettingsService(
+            Options.Create(new SettingsServiceOptions()),
+            NullLogger<SettingsService>.Instance
+        );
+
     public string FilePath { get; }
+
+    public bool DisableSave { get; set; }
 
     public event EventHandler<SettingsErrorEventArgs>? ErrorOccurred;
 
@@ -52,6 +61,12 @@ internal sealed class SettingsService : ISettingsService, IDisposable, ISingleto
 
     public void Save()
     {
+        if (DisableSave)
+        {
+            _logger.LogInformation("Saving has been disabled");
+            return;
+        }
+
         var settingsList = _settings.ToArray(); // Snapshot of current loaded settings
         if (settingsList.Length < 1)
             return;

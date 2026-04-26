@@ -3,6 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <Nullable>enable</Nullable>
     <IsRoslynComponent>true</IsRoslynComponent>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>

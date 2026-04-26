@@ -1,6 +1,6 @@
 using PleasantUI.Controls;
 
-namespace Avayomi;
+namespace Avayomi.Views.Dialogs;
 
 public partial class ConfirmDialogView : ContentDialog
 {

@@ -1,12 +1,11 @@
 ﻿using System;
-using AsyncAwaitBestPractices;
-using AsyncNavigation.Core;
 using Avayomi.Extensions;
 using Avayomi.Messaging.Messages;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using NavigationEventArgs = AsyncNavigation.Core.NavigationEventArgs;
 
 namespace Avayomi.ViewModels;
 
