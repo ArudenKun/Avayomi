@@ -11,6 +11,7 @@ public sealed class MainView : View<MainViewModel>
     protected override object Build(MainViewModel vm) =>
         new Panel().Children(
             new NavigationView()
+                .ShowBackButton(true)
                 .SelectedItem(vm, x => x.NavigationViewItem, BindingMode.TwoWay)
                 .Items(
                     NavigationViewItem()

@@ -19,17 +19,12 @@ public sealed class SplashView : ViewBase
 
     protected override object Build() =>
         new Panel().Children(
-            new StackPanel()
+            new Image()
+                .Width(120)
+                .Height(120)
                 .HorizontalAlignment(HorizontalAlignment.Center)
                 .VerticalAlignment(VerticalAlignment.Center)
-                .Spacing(4)
-                .Children(
-                    new Image()
-                        .Width(120)
-                        .Height(120)
-                        .VerticalAlignment(VerticalAlignment.Center)
-                        .Source(AvaloniaResources.logo_png.AsBitmap())
-                ),
+                .Source(AvaloniaResources.logo_png.AsBitmap()),
             new StackPanel()
                 .Margin(40)
                 .HorizontalAlignment(HorizontalAlignment.Stretch)

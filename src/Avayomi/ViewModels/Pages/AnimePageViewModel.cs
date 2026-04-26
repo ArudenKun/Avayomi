@@ -5,17 +5,13 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Collections;
-using Avalonia.Media;
 using Avayomi.Services;
 using Avayomi.ViewModels.Components;
-using Avayomi.Views.Pages;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PleasantUI;
 using Raffinert.FuzzySharp;
-using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.ViewModels.Pages;
 
