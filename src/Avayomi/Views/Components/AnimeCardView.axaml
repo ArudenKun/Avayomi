@@ -9,80 +9,80 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <!-- <UserControl.Styles> -->
-    <!--     <Style Selector="avayomi|AnimeCardView avayomi|AnimeCardStatusButtonView"> -->
-    <!--         <Setter Property="Opacity" Value="0" /> -->
-    <!--         <Setter Property="RenderTransform"> -->
-    <!--             <Setter.Value> -->
-    <!--                 <TranslateTransform X="0" Y="0" /> -->
-    <!--             </Setter.Value> -->
-    <!--         </Setter> -->
-    <!--         <Setter Property="Transitions"> -->
-    <!--             <Transitions> -->
-    <!--  <DoubleTransition  -->
-    <!--  Property="Opacity"  -->
-    <!--  Duration="0:0:0.18" />  -->
-    <!--             </Transitions> -->
-    <!--         </Setter> -->
-    <!--     </Style> -->
-    <!--     <Style Selector="avayomi|AnimeCardView:pointerover avayomi|AnimeCardStatusButtonView"> -->
-    <!--         <Setter Property="Opacity" Value="1" /> -->
-    <!--         <Setter Property="RenderTransform"> -->
-    <!--             <Setter.Value> -->
-    <!--                 <TranslateTransform X="0" Y="0" /> -->
-    <!--             </Setter.Value> -->
-    <!--         </Setter> -->
-    <!--     </Style> -->
-    <!-- </UserControl.Styles> -->
-    <!--  <suki:BusyArea  -->
-    <!--  Background="Transparent"  -->
-    <!--  Cursor="Hand"  -->
-    <!--  IsBusy="{Binding IsCoverLoading}">  -->
-    <!--  <StackPanel  -->
-    <!--  Width="160"  -->
-    <!--  Spacing="8">  -->
-    <!--  <Border  -->
-    <!--  x:Name="ImageContainer"  -->
-    <!--  Background="#1E1E1E"  -->
-    <!--  ClipToBounds="True"  -->
-    <!--  CornerRadius="8">  -->
-    <!--  <Grid  -->
-    <!--  Width="160"  -->
-    <!--  Height="225"  -->
-    <!--  ColumnDefinitions="100,60">  -->
-    <!--  <Image  -->
-    <!--  x:Name="AnimeImage"  -->
-    <!--  Grid.ColumnSpan="2"  -->
-    <!--  asyncImageLoader:ImageLoader.IsLoading="{Binding IsCoverLoading,  -->
-    <!--  Mode=OneWayToSource}"  -->
-    <!--  asyncImageLoader:ImageLoader.Source="{Binding CoverUrl,  -->
-    <!--  Mode=OneWay}"  -->
-    <!--  Stretch="UniformToFill"  -->
-    <!--  ToolTip.Tip="Click to show details" />  -->
-    <!--  <Border  -->
-    <!--  Grid.Column="1"  -->
-    <!--  Margin="0,0,0,5"  -->
-    <!--  HorizontalAlignment="Center"  -->
-    <!--  VerticalAlignment="Bottom"  -->
-    <!--  Background="Transparent"  -->
-    <!--  IsVisible="{Binding IsAuthenticated}">  -->
-    <!--  <ContentControl  -->
-    <!--  HorizontalAlignment="Center"  -->
-    <!--  VerticalAlignment="Center"  -->
-    <!--  Content="{Binding StatusButton}" />  -->
-    <!--                 </Border> -->
-    <!--             </Grid> -->
-    <!--         </Border> -->
-    <!--  <TextBlock  -->
-    <!--  x:Name="AnimeTitle"  -->
-    <!--  MaxHeight="60"  -->
-    <!--  FontSize="13"  -->
-    <!--  FontWeight="Medium"  -->
-    <!--  Text="{Binding Title}"  -->
-    <!--  TextAlignment="Center"  -->
-    <!--  TextTrimming="CharacterEllipsis"  -->
-    <!--  TextWrapping="Wrap"  -->
-    <!--  ToolTip.Tip="{Binding #AnimeTitle.Text}" />  -->
-    <!--     </StackPanel> -->
-    <!-- </suki:BusyArea> -->
+    <UserControl.Styles>
+        <Style Selector="avayomi|AnimeCardView avayomi|AnimeCardStatusButtonView">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform X="0" Y="0" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition
+                        Property="Opacity"
+                        Duration="0:0:0.18" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="avayomi|AnimeCardView:pointerover avayomi|AnimeCardStatusButtonView">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform X="0" Y="0" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+    <suki:BusyArea
+        Background="Transparent"
+        Cursor="Hand"
+        IsBusy="{Binding IsCoverLoading}">
+        <StackPanel
+            Width="160"
+            Spacing="8">
+            <Border
+                x:Name="ImageContainer"
+                Background="#1E1E1E"
+                ClipToBounds="True"
+                CornerRadius="8">
+                <Grid
+                    Width="160"
+                    Height="225"
+                    ColumnDefinitions="100,60">
+                    <Image
+                        x:Name="AnimeImage"
+                        Grid.ColumnSpan="2"
+                        asyncImageLoader:ImageLoader.IsLoading="{Binding IsCoverLoading,
+                                                                         Mode=OneWayToSource}"
+                        asyncImageLoader:ImageLoader.Source="{Binding CoverUrl,
+                                                                      Mode=OneWay}"
+                        Stretch="UniformToFill"
+                        ToolTip.Tip="Click to show details" />
+                    <Border
+                        Grid.Column="1"
+                        Margin="0,0,0,5"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent"
+                        IsVisible="{Binding IsAuthenticated}">
+                        <ContentControl
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Content="{Binding StatusButton}" />
+                    </Border>
+                </Grid>
+            </Border>
+            <TextBlock
+                x:Name="AnimeTitle"
+                MaxHeight="60"
+                FontSize="13"
+                FontWeight="Medium"
+                Text="{Binding Title}"
+                TextAlignment="Center"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="Wrap"
+                ToolTip.Tip="{Binding #AnimeTitle.Text}" />
+        </StackPanel>
+    </suki:BusyArea>
 </UserControl>
