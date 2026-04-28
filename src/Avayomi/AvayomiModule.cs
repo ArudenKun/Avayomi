@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AsyncNavigation.Abstractions;
@@ -11,7 +12,6 @@ using Avalonia.Platform.Storage;
 using Avayomi.Core;
 using Avayomi.Core.Extensions;
 using Avayomi.Core.GraphQL;
-using Avayomi.Hosting;
 using Avayomi.Messaging;
 using Avayomi.Providers;
 using Avayomi.Services.Settings;
@@ -25,8 +25,6 @@ using R3;
 using R3.ObservableEvents;
 using ServiceScan.SourceGenerator;
 using SQLitePCL;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
 using Volo.Abp;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Modularity;
@@ -34,11 +32,12 @@ using ZiggyCreatures.Caching.Fusion;
 
 namespace Avayomi;
 
-[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule), typeof(AvayomiHostingModule))]
+[DependsOn(typeof(AvayomiCoreModule), typeof(AvayomiProvidersModule))]
 public sealed partial class AvayomiModule : AbpModule
 {
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
+        context.Services.AddConventionalRegistrar(new ViewModelConventionalRegistrar());
         ConfigureMessengerHandlers(context.Services);
     }
 
@@ -49,7 +48,6 @@ public sealed partial class AvayomiModule : AbpModule
         );
 
         context.Services.AddNavigationSupport();
-        context.Services.RegisterRegionAdapter<SukiTransitioningContentRegionAdapter>();
         RegisterViewAndViewModels(context.Services);
         context.Services.AddObjectAccessor<TopLevel>();
         context.Services.AddSingleton<TopLevel>(sp =>
@@ -64,10 +62,8 @@ public sealed partial class AvayomiModule : AbpModule
         );
         context.Services.AddSingleton<ILauncher>(sp => sp.GetRequiredService<TopLevel>().Launcher);
         context.Services.AddSingleton<IFocusManager>(sp =>
-            sp.GetRequiredService<TopLevel>().FocusManager!
+            sp.GetRequiredService<TopLevel>().FocusManager
         );
-        context.Services.AddSingleton<ISukiDialogManager, SukiDialogManager>();
-        context.Services.AddSingleton<ISukiToastManager, SukiToastManager>();
 
         context.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         context.Services.AddHttpClient();
@@ -95,7 +91,7 @@ public sealed partial class AvayomiModule : AbpModule
 
     public override void OnApplicationShutdown(ApplicationShutdownContext context)
     {
-        //context.ServiceProvider.GetRequiredService<ISettingsService>().Save();
+        context.ServiceProvider.GetRequiredService<ISettingsService>().Save();
     }
 
     private static void ConfigureMessengerHandlers(IServiceCollection services) =>
@@ -122,7 +118,7 @@ public sealed partial class AvayomiModule : AbpModule
             );
 
     [ScanForTypes(
-        AssignableTo = typeof(IView<>),
+        AssignableTo = typeof(NavigationUserControl<>),
         Handler = nameof(RegisterViewAndViewModelHandler)
     )]
     private static partial void RegisterViewAndViewModels(IServiceCollection services);
@@ -130,6 +126,20 @@ public sealed partial class AvayomiModule : AbpModule
     private static void RegisterViewAndViewModelHandler<TView, TViewModel>(
         IServiceCollection services
     )
-        where TView : Control, IViewNameProvider, IView
-        where TViewModel : ViewModel => services.RegisterView<TView, TViewModel>(TView.ViewName);
+        where TView : Control, IView
+        where TViewModel : ViewModel
+    {
+        var viewType = typeof(TView);
+        var viewName = viewType.Name;
+        var viewAttribute = viewType.GetSingleAttributeOrNull<ViewAttribute>(false);
+        if (viewAttribute is not null)
+        {
+            if (!viewAttribute.Name.IsNullOrEmpty())
+            {
+                viewName = viewAttribute.Name;
+            }
+        }
+
+        services.RegisterView<TView, TViewModel>(viewName);
+    }
 }

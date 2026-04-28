@@ -5,7 +5,6 @@
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:suki="https://github.com/kikipoulet/SukiUI"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="avayomi:AnimePageViewModel"
@@ -16,6 +15,7 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Orientation="Horizontal">
+            <!--  ReSharper disable Xaml.InvalidType  -->
             <TextBox
                 MinWidth="100"
                 Text="{Binding Search}" />
@@ -31,11 +31,15 @@
                 ItemsSource="{Binding AnimeProviders}"
                 PlaceholderText="Providers"
                 SelectedItem="{Binding AnimeProvider}" />
+            <!--  ReSharper restore Xaml.InvalidType  -->
+
         </StackPanel>
-        <suki:BusyArea
+        <!--  ReSharper disable Xaml.InvalidType  -->
+        <avayomi:BusyArea
             Grid.Row="1"
             BusyText="{Binding BusyText}"
             IsBusy="{Binding IsBusy}">
+            <!--  ReSharper restore Xaml.InvalidType  -->
             <ScrollViewer
                 Name="PopularThisSeasonScroller"
                 Margin="25,0,0,0">
@@ -56,7 +60,8 @@
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
             </ScrollViewer>
-        </suki:BusyArea>
+        </avayomi:BusyArea>
+        <!--  ReSharper disable once Xaml.InvalidType  -->
         <Grid
             Grid.Row="1"
             IsVisible="{Binding NoResultsFound}">

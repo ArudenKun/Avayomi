@@ -1,8 +1,6 @@
 ﻿using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using JetBrains.Annotations;
-using SukiUI.Controls;
-using SukiUI.Dialogs;
 
 namespace Avayomi.ViewModels.Dialogs;
 
@@ -14,12 +12,12 @@ public abstract partial class DialogViewModel<TResult> : ViewModel
 {
     private bool _isResultSet;
 
-    protected DialogViewModel()
-    {
-        Dialog = new SukiDialog();
-    }
-
-    protected ISukiDialog Dialog { get; private set; }
+    // protected DialogViewModel()
+    // {
+    //     Dialog = new SukiDialog();
+    // }
+    //
+    // protected ISukiDialog Dialog { get; private set; }
 
     public TResult? Result { get; private set; }
     public TaskCompletionSource<bool> Completion { get; private set; } = new();
@@ -44,13 +42,13 @@ public abstract partial class DialogViewModel<TResult> : ViewModel
         Result = result is TResult t ? t : default;
         Completion.SetResult(true);
         _isResultSet = true;
-        Dialog.Dismiss();
+        // Dialog.Dismiss();
     }
 
-    public void SetDialog(ISukiDialog dialog)
-    {
-        Dialog = dialog;
-    }
+    // public void SetDialog(ISukiDialog dialog)
+    // {
+    //     Dialog = dialog;
+    // }
 
     protected void Reset()
     {

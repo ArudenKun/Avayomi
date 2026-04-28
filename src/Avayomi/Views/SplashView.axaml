@@ -28,6 +28,7 @@
             <ProgressBar
                 Height="6"
                 IsIndeterminate="True" />
+            <!--  ReSharper disable once Xaml.InvalidType  -->
             <TextBlock
                 Margin="0,4,0,0"
                 HorizontalAlignment="Center"

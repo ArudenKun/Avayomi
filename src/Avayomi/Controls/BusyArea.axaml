@@ -1,0 +1,81 @@
+﻿<UserControl
+    x:Class="Avayomi.Controls.BusyArea"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:avayomi="https://github.com/arudenkun/avayomi">
+    <UserControl.Styles>
+        <Style Selector="avayomi|BusyArea[IsBusy=False] /template/ ContentPresenter#PART_Content">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="IsHitTestVisible" Value="True" />
+        </Style>
+        <Style Selector="avayomi|BusyArea[IsBusy=False] /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="avayomi|BusyArea[IsBusy=True] /template/ ContentPresenter#PART_Content">
+            <Setter Property="Opacity" Value="0.35" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        <Style Selector="avayomi|BusyArea[IsBusy=True] /template/ Border#PART_Overlay">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="IsHitTestVisible" Value="True" />
+        </Style>
+        <Style Selector="avayomi|BusyArea">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Panel>
+                        <ContentPresenter
+                            x:Name="PART_Content"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}">
+                            <ContentPresenter.Transitions>
+                                <Transitions>
+                                    <DoubleTransition
+                                        Property="Opacity"
+                                        Duration="0:0:0.3" />
+                                </Transitions>
+                            </ContentPresenter.Transitions>
+                        </ContentPresenter>
+                        <Border x:Name="PART_Overlay">
+                            <Border.Transitions>
+                                <Transitions>
+                                    <DoubleTransition
+                                        Property="Opacity"
+                                        Duration="0:0:0.3" />
+                                </Transitions>
+                            </Border.Transitions>
+                            <Panel>
+                                <Border
+                                    Background="{DynamicResource BackgroundColor1}"
+                                    Opacity="0.72" />
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                                    <!--  ReSharper disable once Xaml.InvalidType  -->
+                                    <ProgressRing
+                                        Width="96"
+                                        Height="96"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        IsIndeterminate="True"
+                                        Thickness="6" />
+                                    <!--  ReSharper disable Xaml.InvalidType  -->
+                                    <TextBlock
+                                        Margin="0,10,0,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="36"
+                                        FontWeight="DemiBold"
+                                        IsVisible="{TemplateBinding BusyText,
+                                                                    Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                        Text="{TemplateBinding BusyText}" />
+                                    <!--  ReSharper restore Xaml.InvalidType  -->
+                                </StackPanel>
+                            </Panel>
+                        </Border>
+                    </Panel>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+</UserControl>

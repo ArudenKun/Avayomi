@@ -6,37 +6,12 @@
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:suki="https://github.com/kikipoulet/SukiUI"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="avayomi:AnimeCardViewModel"
     mc:Ignorable="d">
-    <UserControl.Styles>
-        <Style Selector="avayomi|AnimeCardView avayomi|AnimeCardStatusButtonView">
-            <Setter Property="Opacity" Value="0" />
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <TranslateTransform X="0" Y="0" />
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition
-                        Property="Opacity"
-                        Duration="0:0:0.18" />
-                </Transitions>
-            </Setter>
-        </Style>
-        <Style Selector="avayomi|AnimeCardView:pointerover avayomi|AnimeCardStatusButtonView">
-            <Setter Property="Opacity" Value="1" />
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <TranslateTransform X="0" Y="0" />
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Styles>
-    <suki:BusyArea
+    <!--  ReSharper disable once Xaml.InvalidType  -->
+    <avayomi:BusyArea
         Background="Transparent"
         Cursor="Hand"
         IsBusy="{Binding IsCoverLoading}">
@@ -52,6 +27,7 @@
                     Width="160"
                     Height="225"
                     ColumnDefinitions="100,60">
+                    <!--  ReSharper disable Xaml.InvalidType  -->
                     <Image
                         x:Name="AnimeImage"
                         Grid.ColumnSpan="2"
@@ -61,20 +37,34 @@
                                                                       Mode=OneWay}"
                         Stretch="UniformToFill"
                         ToolTip.Tip="Click to show details" />
+                    <!--  ReSharper restore Xaml.InvalidType  -->
+                    <!--  ReSharper disable once Xaml.InvalidType  -->
                     <Border
                         Grid.Column="1"
-                        Margin="0,0,0,5"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Bottom"
-                        Background="Transparent"
-                        IsVisible="{Binding IsAuthenticated}">
-                        <ContentControl
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Content="{Binding StatusButton}" />
+                        Background="Transparent">
+                        <avayomi:FloatingActionButton AutoClose="False">
+                            <avayomi:FloatingActionButton.TriggerContent>
+                                <PathIcon Data="{x:Static MaterialIcons.Plus}" />
+                            </avayomi:FloatingActionButton.TriggerContent>
+                            <Button Background="{DynamicResource BackgroundColor1}">
+                                <PathIcon Data="{x:Static MaterialIcons.CalendarPlus}" />
+                            </Button>
+                            <Button Background="{DynamicResource BackgroundColor1}">
+                                <PathIcon Data="{x:Static MaterialIcons.Play}" />
+                            </Button>
+                            <Button Background="{DynamicResource BackgroundColor1}">
+                                <PathIcon Data="{x:Static MaterialIcons.Check}" />
+                            </Button>
+                            <Button Background="{DynamicResource BackgroundColor1}">
+                                <PathIcon Data="{x:Static MaterialIcons.TrashCan}" />
+                            </Button>
+                        </avayomi:FloatingActionButton>
                     </Border>
                 </Grid>
             </Border>
+            <!--  ReSharper disable once Xaml.InvalidType  -->
             <TextBlock
                 x:Name="AnimeTitle"
                 MaxHeight="60"
@@ -86,5 +76,5 @@
                 TextWrapping="Wrap"
                 ToolTip.Tip="{Binding #AnimeTitle.Text}" />
         </StackPanel>
-    </suki:BusyArea>
+    </avayomi:BusyArea>
 </UserControl>

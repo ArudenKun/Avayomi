@@ -7,13 +7,14 @@ using Avalonia.Controls.Templates;
 using Avayomi.ViewModels;
 using Avayomi.Views;
 using ServiceScan.SourceGenerator;
+using Volo.Abp.DependencyInjection;
 
 namespace Avayomi;
 
 /// <summary>
 /// Given a view model, returns the corresponding view if possible.
 /// </summary>
-public sealed partial class ViewLocator : IDataTemplate
+public sealed partial class ViewLocator : IDataTemplate, ISingletonDependency
 {
     private readonly ReadOnlyDictionary<Type, Func<ViewModel, Control>> _viewFactory;
 
@@ -54,11 +55,19 @@ public sealed partial class ViewLocator : IDataTemplate
 
     public bool Match(object? data) => data is ViewModel;
 
-    [ScanForTypes(AssignableTo = typeof(IView<>), Handler = nameof(GetViewDefinitionsHandler))]
+    [ScanForTypes(
+        AssignableTo = typeof(UserControl<>),
+        Handler = nameof(GetViewDefinitionsHandler)
+    )]
+    [ScanForTypes(
+        AssignableTo = typeof(PleasantWindow<>),
+        Handler = nameof(GetViewDefinitionsHandler)
+    )]
+    [ScanForTypes(AssignableTo = typeof(Window<>), Handler = nameof(GetViewDefinitionsHandler))]
     private static partial ViewDefinitions[] GetViewDefinitions();
 
     private static ViewDefinitions GetViewDefinitionsHandler<TView, TViewModel>()
-        where TView : Control, IView<TViewModel>, new()
+        where TView : Control, new()
         where TViewModel : ViewModel =>
         new(typeof(TViewModel), viewModel => new TView { DataContext = viewModel });
 

@@ -3,11 +3,12 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avayomi.Utilities;
 using Avayomi.ViewModels;
+using PleasantUI.Controls;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.Views;
 
-public abstract class Window<TViewModel> : Window, IView<TViewModel>, ITransientDependency
+public abstract class Window<TViewModel> : Window, ITransientDependency
     where TViewModel : ViewModel
 {
     public new TViewModel DataContext

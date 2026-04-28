@@ -2,86 +2,90 @@
     x:Class="Avayomi.Views.MainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:an="https://github.com/NeverMorewd/AsyncNavigation"
-    xmlns:asyncImageLoader="using:AsyncImageLoader"
     xmlns:avayomi="https://github.com/arudenkun/avayomi"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:suki="https://github.com/kikipoulet/SukiUI"
-    xmlns:sukiHelpers="clr-namespace:SukiUI.Helpers.ConditionalXAML;assembly=SukiUI"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="avayomi:MainViewModel"
     mc:Ignorable="d">
-    <suki:SukiSideMenu
-        Name="SideMenu"
-        IsMenuExpanded="True"
-        IsSearchEnabled="False"
+    <!--  ReSharper disable Xaml.InvalidType  -->
+    <NavigationView
+        BackButtonCommand="{Binding BackCommand}"
         ItemsSource="{Binding Pages}"
         SelectedItem="{Binding Page}"
-        SidebarToggleEnabled="False"
-        UseCustomContent="True">
-        <suki:SukiSideMenu.Content>
-            <ContentControl an:RegionManager.RegionName="{x:Static avayomi:Regions.SideMenuMain}" />
-        </suki:SukiSideMenu.Content>
-        <suki:SukiSideMenu.HeaderContent>
-            <StackPanel>
-                <Image
-                    Width="80"
-                    Height="80"
-                    Margin="30,30,30,30"
-                    Classes="AppIcon"
-                    Source="/Assets/logo.png" />
-            </StackPanel>
-        </suki:SukiSideMenu.HeaderContent>
-        <suki:SukiSideMenu.FooterContent>
-            <!--  ReSharper disable once Xaml.StyleClassNotFound  -->
-            <Button
-                Padding="12,8"
-                VerticalAlignment="Center"
-                HorizontalContentAlignment="Stretch"
-                VerticalContentAlignment="Center"
-                Classes="Basic">
-                <StackPanel
-                    HorizontalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="12">
-                    <Border
-                        Width="36"
-                        Height="36"
-                        ClipToBounds="True"
-                        CornerRadius="18">
-                        <Panel>
-                            <sukiHelpers:If Condition="{Binding User, Converter={x:Static ObjectConverters.IsNotNull}}">
-                                <Image
-                                    asyncImageLoader:ImageLoader.Source="{Binding User.Avatar.MediumImageUrl,
-                                                                                  Mode=OneWay,
-                                                                                  FallbackValue='Icon'}"
-                                    Stretch="UniformToFill" />
-                            </sukiHelpers:If>
-                            <sukiHelpers:If Condition="{Binding User, Converter={x:Static ObjectConverters.IsNull}}">
-                                <LucideIcon Kind="CircleUserRound" />
-                            </sukiHelpers:If>
-                        </Panel>
-                    </Border>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        Text="{Binding User.Name,
-                                       Mode=OneWay,
-                                       FallbackValue='User'}" />
-                </StackPanel>
-                <Button.Flyout>
-                    <MenuFlyout Placement="TopEdgeAlignedLeft">
-                        <MenuItem Header="Profile" />
-                        <Separator />
-                        <MenuItem
-                            Command="{Binding LogoutCommand}"
-                            Header="Logout" />
-                    </MenuFlyout>
-                </Button.Flyout>
-            </Button>
-        </suki:SukiSideMenu.FooterContent>
-    </suki:SukiSideMenu>
+        ShowBackButton="True" />
+    <!--  ReSharper restore Xaml.InvalidType  -->
+
+    <!--  <suki:SukiSideMenu  -->
+    <!--  Name="SideMenu"  -->
+    <!--  IsMenuExpanded="True"  -->
+    <!--  IsSearchEnabled="False"  -->
+    <!--  ItemsSource="{Binding Pages}"  -->
+    <!--  SelectedItem="{Binding Page}"  -->
+    <!--  SidebarToggleEnabled="False"  -->
+    <!--  UseCustomContent="True">  -->
+    <!--     <suki:SukiSideMenu.Content> -->
+    <!--         <ContentControl an:RegionManager.RegionName="{x:Static avayomi:Regions.SideMenuMain}" /> -->
+    <!--     </suki:SukiSideMenu.Content> -->
+    <!--     <suki:SukiSideMenu.HeaderContent> -->
+    <!--         <StackPanel> -->
+    <!--  <Image  -->
+    <!--  Width="80"  -->
+    <!--  Height="80"  -->
+    <!--  Margin="30,30,30,30"  -->
+    <!--  Classes="AppIcon"  -->
+    <!--  Source="/Assets/logo.png" />  -->
+    <!--         </StackPanel> -->
+    <!--     </suki:SukiSideMenu.HeaderContent> -->
+    <!--     <suki:SukiSideMenu.FooterContent> -->
+    <!--  ~1~  ReSharper disable once Xaml.StyleClassNotFound  @1@  -->
+    <!--  <Button  -->
+    <!--  Padding="12,8"  -->
+    <!--  VerticalAlignment="Center"  -->
+    <!--  HorizontalContentAlignment="Stretch"  -->
+    <!--  VerticalContentAlignment="Center"  -->
+    <!--  Classes="Basic">  -->
+    <!--  <StackPanel  -->
+    <!--  HorizontalAlignment="Center"  -->
+    <!--  Orientation="Horizontal"  -->
+    <!--  Spacing="12">  -->
+    <!--  <Border  -->
+    <!--  Width="36"  -->
+    <!--  Height="36"  -->
+    <!--  ClipToBounds="True"  -->
+    <!--  CornerRadius="18">  -->
+    <!--                     <Panel> -->
+    <!--                         <sukiHelpers:If Condition="{Binding User, Converter={x:Static ObjectConverters.IsNotNull}}"> -->
+    <!--  <Image  -->
+    <!--  asyncImageLoader:ImageLoader.Source="{Binding User.Avatar.MediumImageUrl,  -->
+    <!--  Mode=OneWay,  -->
+    <!--  FallbackValue='Icon'}"  -->
+    <!--  Stretch="UniformToFill" />  -->
+    <!--                         </sukiHelpers:If> -->
+    <!--                         <sukiHelpers:If Condition="{Binding User, Converter={x:Static ObjectConverters.IsNull}}"> -->
+    <!--                             <LucideIcon Kind="CircleUserRound" /> -->
+    <!--                         </sukiHelpers:If> -->
+    <!--                     </Panel> -->
+    <!--                 </Border> -->
+    <!--  <TextBlock  -->
+    <!--  VerticalAlignment="Center"  -->
+    <!--  FontSize="14"  -->
+    <!--  FontWeight="SemiBold"  -->
+    <!--  Text="{Binding User.Name,  -->
+    <!--  Mode=OneWay,  -->
+    <!--  FallbackValue='User'}" />  -->
+    <!--             </StackPanel> -->
+    <!--             <Button.Flyout> -->
+    <!--                 <MenuFlyout Placement="TopEdgeAlignedLeft"> -->
+    <!--                     <MenuItem Header="Profile" /> -->
+    <!--                     <Separator /> -->
+    <!--  <MenuItem  -->
+    <!--  Command="{Binding LogoutCommand}"  -->
+    <!--  Header="Logout" />  -->
+    <!--                 </MenuFlyout> -->
+    <!--             </Button.Flyout> -->
+    <!--         </Button> -->
+    <!--     </suki:SukiSideMenu.FooterContent> -->
+    <!-- </suki:SukiSideMenu> -->
 </UserControl>

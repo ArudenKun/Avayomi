@@ -9,109 +9,114 @@
     d:DesignWidth="800"
     x:DataType="avayomi:SettingsPageViewModel"
     mc:Ignorable="d">
-    <UserControl.Styles>
-        <Style Selector="TextBlock.SettingsRowHeader">
-            <Setter Property="Margin" Value="0,10,0,0" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="20" />
-        </Style>
-        <Style Selector="StackPanel.SettingsRow">
-            <Setter Property="Margin" Value="0, 12, 0,0" />
-            <Setter Property="Orientation" Value="Vertical" />
-            <Setter Property="Spacing" Value="6" />
-        </Style>
-        <Style Selector="TabControl">
-            <Setter Property="Template">
-                <ControlTemplate>
-                    <Border
-                        HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
-                        VerticalAlignment="{TemplateBinding VerticalAlignment}"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
-                        <DockPanel>
-                            <LayoutTransformControl
-                                Name="PART_LayoutTransform"
-                                DockPanel.Dock="{TemplateBinding TabStripPlacement}">
-                                <ItemsPresenter
-                                    Name="PART_ItemsPresenter"
-                                    ItemsPanel="{TemplateBinding ItemsPanel}" />
-                            </LayoutTransformControl>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ContentPresenter
-                                    Name="PART_SelectedContentHost"
-                                    Margin="{TemplateBinding Padding}"
-                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                    Content="{TemplateBinding SelectedContent}"
-                                    ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
-                            </ScrollViewer>
-                        </DockPanel>
-                    </Border>
-                </ControlTemplate>
-            </Setter>
-        </Style>
-    </UserControl.Styles>
-    <Grid
-        Margin="24,24,24,24"
-        RowDefinitions="Auto, *"
-        RowSpacing="12">
-        <DockPanel
-            Grid.Row="0"
-            LastChildFill="False">
-            <TextBlock
-                VerticalAlignment="Center"
-                DockPanel.Dock="Left"
-                FontSize="26"
-                Text="{Binding DisplayName}" />
-        </DockPanel>
-        <TabControl Grid.Row="1">
-            <TabItem Header="General">
-                <StackPanel Classes="SettingsRow">
-                    <avayomi:SettingsRow
-                        Header="LogLevel"
-                        IconKind="Logs">
-                        <ComboBox
-                            ItemsSource="{Binding LoggingSettings.LogEventLevel,
-                                                  Converter={x:Static avayomi:EnumToEnumerableConverter.Instance},
-                                                  Mode=OneTime}"
-                            PlaceholderText="LogLevel"
-                            SelectedItem="{Binding LoggingSettings.LogEventLevel}" />
-                    </avayomi:SettingsRow>
-                    <TextBlock
-                        Classes="SettingsRowHeader"
-                        Text="Updates" />
-                    <avayomi:SettingsRow
-                        Header="Check"
-                        IconKind="CircleArrowUp">
-                        <TextBox Watermark="Test" />
-                    </avayomi:SettingsRow>
-                </StackPanel>
-            </TabItem>
-            <TabItem Header="Appearance">
-                <StackPanel Classes="SettingsRow">
-                    <avayomi:SettingsRow
-                        Description="The theme to use"
-                        Header="Theme"
-                        IconKind="SunMoon">
-                        <ComboBox
-                            ItemsSource="{Binding AppearanceSettings.Theme,
-                                                  Converter={x:Static avayomi:EnumToEnumerableConverter.Instance},
-                                                  Mode=OneTime}"
-                            PlaceholderText="Theme"
-                            SelectedItem="{Binding AppearanceSettings.Theme}" />
-                    </avayomi:SettingsRow>
-                    <avayomi:SettingsRow
-                        Description="Test Description"
-                        Header="Theme Color"
-                        IconKind="Palette">
-                        <ComboBox
-                            ItemsSource="{Binding ColorThemes}"
-                            SelectedItem="{Binding AppearanceSettings.ThemeColor}" />
-                    </avayomi:SettingsRow>
-                </StackPanel>
-            </TabItem>
-        </TabControl>
-    </Grid>
+    <avayomi:BusyArea
+        BusyText="Testing..."
+        IsBusy="True">
+        <TextBlock Text="Setting Page Text" />
+    </avayomi:BusyArea>
+    <!-- <UserControl.Styles> -->
+    <!--     <Style Selector="TextBlock.SettingsRowHeader"> -->
+    <!--         <Setter Property="Margin" Value="0,10,0,0" /> -->
+    <!--         <Setter Property="FontWeight" Value="Bold" /> -->
+    <!--         <Setter Property="FontSize" Value="20" /> -->
+    <!--     </Style> -->
+    <!--     <Style Selector="StackPanel.SettingsRow"> -->
+    <!--         <Setter Property="Margin" Value="0, 12, 0,0" /> -->
+    <!--         <Setter Property="Orientation" Value="Vertical" /> -->
+    <!--         <Setter Property="Spacing" Value="6" /> -->
+    <!--     </Style> -->
+    <!--     <Style Selector="TabControl"> -->
+    <!--         <Setter Property="Template"> -->
+    <!--             <ControlTemplate> -->
+    <!--  <Border  -->
+    <!--  HorizontalAlignment="{TemplateBinding HorizontalAlignment}"  -->
+    <!--  VerticalAlignment="{TemplateBinding VerticalAlignment}"  -->
+    <!--  Background="{TemplateBinding Background}"  -->
+    <!--  BorderBrush="{TemplateBinding BorderBrush}"  -->
+    <!--  BorderThickness="{TemplateBinding BorderThickness}"  -->
+    <!--  CornerRadius="{TemplateBinding CornerRadius}">  -->
+    <!--                     <DockPanel> -->
+    <!--  <LayoutTransformControl  -->
+    <!--  Name="PART_LayoutTransform"  -->
+    <!--  DockPanel.Dock="{TemplateBinding TabStripPlacement}">  -->
+    <!--  <ItemsPresenter  -->
+    <!--  Name="PART_ItemsPresenter"  -->
+    <!--  ItemsPanel="{TemplateBinding ItemsPanel}" />  -->
+    <!--                         </LayoutTransformControl> -->
+    <!--                         <ScrollViewer VerticalScrollBarVisibility="Auto"> -->
+    <!--  <ContentPresenter  -->
+    <!--  Name="PART_SelectedContentHost"  -->
+    <!--  Margin="{TemplateBinding Padding}"  -->
+    <!--  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"  -->
+    <!--  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"  -->
+    <!--  Content="{TemplateBinding SelectedContent}"  -->
+    <!--  ContentTemplate="{TemplateBinding SelectedContentTemplate}" />  -->
+    <!--                         </ScrollViewer> -->
+    <!--                     </DockPanel> -->
+    <!--                 </Border> -->
+    <!--             </ControlTemplate> -->
+    <!--         </Setter> -->
+    <!--     </Style> -->
+    <!-- </UserControl.Styles> -->
+    <!--  <Grid  -->
+    <!--  Margin="24,24,24,24"  -->
+    <!--  RowDefinitions="Auto, *"  -->
+    <!--  RowSpacing="12">  -->
+    <!--  <DockPanel  -->
+    <!--  Grid.Row="0"  -->
+    <!--  LastChildFill="False">  -->
+    <!--  <TextBlock  -->
+    <!--  VerticalAlignment="Center"  -->
+    <!--  DockPanel.Dock="Left"  -->
+    <!--  FontSize="26"  -->
+    <!--  Text="{Binding DisplayName}" />  -->
+    <!--     </DockPanel> -->
+    <!--     <TabControl Grid.Row="1"> -->
+    <!--         <TabItem Header="General"> -->
+    <!--             <StackPanel Classes="SettingsRow"> -->
+    <!--  <avayomi:SettingsRow  -->
+    <!--  Header="LogLevel"  -->
+    <!--  IconKind="Logs">  -->
+    <!--  <ComboBox  -->
+    <!--  ItemsSource="{Binding LoggingSettings.LogEventLevel,  -->
+    <!--  Converter={x:Static avayomi:EnumToEnumerableConverter.Instance},  -->
+    <!--  Mode=OneTime}"  -->
+    <!--  PlaceholderText="LogLevel"  -->
+    <!--  SelectedItem="{Binding LoggingSettings.LogEventLevel}" />  -->
+    <!--                 </avayomi:SettingsRow> -->
+    <!--  <TextBlock  -->
+    <!--  Classes="SettingsRowHeader"  -->
+    <!--  Text="Updates" />  -->
+    <!--  <avayomi:SettingsRow  -->
+    <!--  Header="Check"  -->
+    <!--  IconKind="CircleArrowUp">  -->
+    <!--                     <TextBox Watermark="Test" /> -->
+    <!--                 </avayomi:SettingsRow> -->
+    <!--             </StackPanel> -->
+    <!--         </TabItem> -->
+    <!--         <TabItem Header="Appearance"> -->
+    <!--             <StackPanel Classes="SettingsRow"> -->
+    <!--  <avayomi:SettingsRow  -->
+    <!--  Description="The theme to use"  -->
+    <!--  Header="Theme"  -->
+    <!--  IconKind="SunMoon">  -->
+    <!--  <ComboBox  -->
+    <!--  ItemsSource="{Binding AppearanceSettings.Theme,  -->
+    <!--  Converter={x:Static avayomi:EnumToEnumerableConverter.Instance},  -->
+    <!--  Mode=OneTime}"  -->
+    <!--  PlaceholderText="Theme"  -->
+    <!--  SelectedItem="{Binding AppearanceSettings.Theme}" />  -->
+    <!--                 </avayomi:SettingsRow> -->
+    <!--  <avayomi:SettingsRow  -->
+    <!--  Description="Test Description"  -->
+    <!--  Header="Theme Color"  -->
+    <!--  IconKind="Palette">  -->
+    <!--  <ComboBox  -->
+    <!--  ItemsSource="{Binding ColorThemes}"  -->
+    <!--  SelectedItem="{Binding AppearanceSettings.ThemeColor}" />  -->
+    <!--                 </avayomi:SettingsRow> -->
+    <!--             </StackPanel> -->
+    <!--         </TabItem> -->
+    <!--     </TabControl> -->
+    <!-- </Grid> -->
 </UserControl>

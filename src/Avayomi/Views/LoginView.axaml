@@ -44,10 +44,12 @@
                     Text="Login" />
             </StackPanel>
         </Button>
+        <!--  ReSharper disable Xaml.InvalidType  -->
         <CheckBox
             HorizontalAlignment="Center"
             Content="Remember Me"
             IsChecked="{Binding RememberMe}"
             IsEnabled="{Binding !IsBusy}" />
+        <!--  ReSharper restore Xaml.InvalidType  -->
     </StackPanel>
 </UserControl>

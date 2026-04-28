@@ -1,15 +1,13 @@
 ﻿using System;
-using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avayomi.Utilities;
 using Avayomi.ViewModels;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using SukiUI.Controls;
+using PleasantUI.Controls;
 using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.Views;
 
-public abstract class SukiWindow<TViewModel> : SukiWindow, IView<TViewModel>, ITransientDependency
+public abstract class PleasantWindow<TViewModel> : PleasantWindow, ITransientDependency
     where TViewModel : ViewModel
 {
     public new TViewModel DataContext

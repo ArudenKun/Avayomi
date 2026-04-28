@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Antelcat.AutoGen.ComponentModel.Diagnostic;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Volo.Abp.DependencyInjection;
 
@@ -45,6 +46,12 @@ internal sealed class SettingsService : ISettingsService, IDisposable, ISingleto
     public string FilePath { get; }
 
     public event EventHandler<SettingsErrorEventArgs>? ErrorOccurred;
+
+    public static ISettingsService Create() =>
+        new SettingsService(
+            Options.Create(new SettingsServiceOptions()),
+            NullLogger<SettingsService>.Instance
+        );
 
     public T Get<T>()
         where T : class, new() =>

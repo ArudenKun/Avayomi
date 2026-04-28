@@ -2,12 +2,10 @@
 
 namespace Avayomi.Views.Components;
 
-public partial class AnimeCardView : UserControl<AnimeCardViewModel>, IViewNameProvider
+public partial class AnimeCardView : UserControl<AnimeCardViewModel>
 {
     public AnimeCardView()
     {
         InitializeComponent();
     }
-
-    public static string ViewName => nameof(AnimeCardView);
 }

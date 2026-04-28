@@ -1,8 +1,7 @@
-﻿using System.Threading.Tasks;
-using AsyncNavigation;
+﻿using System;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Humanizer;
-using Lucide.Avalonia;
 
 namespace Avayomi.ViewModels.Pages;
 
@@ -14,8 +13,6 @@ public abstract partial class PageViewModel : ViewModel
             .Name.Replace("PageViewModel", string.Empty)
             .Humanize(LetterCasing.Title);
     }
-
-    protected bool AutoCleanup { get; set; } = true;
 
     /// <summary>
     /// The index of the page.
@@ -30,7 +27,11 @@ public abstract partial class PageViewModel : ViewModel
     /// <summary>
     /// The icon of the page.
     /// </summary>
-    public abstract LucideIconKind IconKind { get; }
+    public abstract Geometry IconKind { get; }
+
+    public virtual Type? ParentViewModelType { get; } = null;
+    public virtual PageViewModel[] Leafs { get; } = [];
+    public virtual bool IsTopLevel => true;
 
     /// <summary>
     /// The visibility of the page on the side menu.
@@ -38,22 +39,12 @@ public abstract partial class PageViewModel : ViewModel
     [ObservableProperty]
     public partial bool IsVisibleOnSideMenu { get; protected set; } = true;
 
+    public bool IsBottom { get; protected set; } = false;
+
     /// <summary>
     /// Set to true to auto hide the page on the side menu.
     /// </summary>
     public virtual bool AutoHideOnSideMenu => false;
-
-    public override Task OnNavigatedFromAsync(NavigationContext context)
-    {
-        base.OnNavigatedFromAsync(context);
-
-        if (AutoCleanup)
-        {
-            RequestUnloadAsync();
-        }
-
-        return Task.CompletedTask;
-    }
 
     public override void OnLoaded()
     {

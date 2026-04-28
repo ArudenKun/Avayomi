@@ -1,13 +1,13 @@
 ﻿using System;
+using AsyncNavigation.Abstractions;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avayomi.Utilities;
 using Avayomi.ViewModels;
-using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.Views;
 
-public abstract class UserControl<TViewModel> : UserControl, ITransientDependency
+public abstract class NavigationUserControl<TViewModel> : UserControl, IView
     where TViewModel : ViewModel
 {
     public new TViewModel DataContext

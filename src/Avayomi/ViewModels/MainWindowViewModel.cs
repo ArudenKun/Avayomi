@@ -1,43 +1,15 @@
-﻿using System;
-using AsyncAwaitBestPractices;
-using AsyncNavigation.Core;
-using Avayomi.Extensions;
-using Avayomi.Messaging.Messages;
-using Avayomi.Views;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using SukiUI.Dialogs;
-using SukiUI.Toasts;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Volo.Abp.DependencyInjection;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class MainWindowViewModel : ViewModel
+[Dependency(ServiceLifetime.Singleton)]
+public sealed class MainWindowViewModel : ViewModel
 {
-    public required ISukiDialogManager DialogManager { get; init; }
-    public required ISukiToastManager ToastManager { get; init; }
-
-    public override void OnLoaded()
+    public MainWindowViewModel(ShellViewModel shellViewModel)
     {
-        if (RegionManager.TryGetRegion(Regions.Main, out var mainRegion))
-        {
-            mainRegion.Navigated += NavigationHostManagerOnHostChanged;
-        }
-
-        RegionManager.RequestNavigateAsync<ShellView>(Regions.Main).SafeFireAndForget();
+        ShellViewModel = shellViewModel;
     }
 
-    private void NavigationHostManagerOnHostChanged(object? sender, NavigationEventArgs e)
-    {
-        IsMainView = e.Context.ViewName == MainView.ViewName;
-    }
-
-    [ObservableProperty]
-    public partial bool IsMainView { get; set; }
-
-    [RelayCommand]
-    private void ChangePage(Type pageViewMoelType)
-    {
-        Messenger.Send(new ChangePageMessage(pageViewMoelType));
-    }
+    public ShellViewModel ShellViewModel { get; }
 }

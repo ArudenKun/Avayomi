@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AsyncNavigation;
 using AsyncNavigation.Core;
 using Avalonia.Collections;
 using Avalonia.Controls;
-using Avalonia.Controls.Notifications;
 using Avayomi.Core.AniList.Models.User;
+using Avayomi.Extensions;
 using Avayomi.Messaging.Messages;
 using Avayomi.Services;
 using Avayomi.ViewModels.Pages;
@@ -15,133 +14,102 @@ using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Lucide.Avalonia;
-using Microsoft.Extensions.Logging;
-using ServiceScan.SourceGenerator;
-using SukiUI.Controls;
+using Microsoft.Extensions.DependencyInjection;
+using PleasantUI.Controls;
 using ZLinq;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class MainViewModel : ViewModel, IRecipient<ChangePageMessage>
+public sealed partial class MainViewModel : NavigationViewModel, IRecipient<ChangePageMessage>
 {
     private readonly IAniListService _aniListService;
 
-    public MainViewModel(IEnumerable<PageViewModel> pageViewModels, IAniListService aniListService)
+    private readonly Stack<NavigationViewItem> _backStack = new();
+
+    public MainViewModel(
+        IEnumerable<PageViewModel> pageViewModels,
+        IAniListService aniListService,
+        IServiceProvider serviceProvider
+    )
     {
         _aniListService = aniListService;
 
-        var orderedPageViewModels = pageViewModels
-            .AsValueEnumerable()
-            .OrderBy(x => x.Index)
-            .ToList();
-
-        Pages.AddRange(
-            orderedPageViewModels.Select(x => new SukiSideMenuItem
+        var pages = pageViewModels.AsValueEnumerable().OrderBy(x => x.Index);
+        Pages.AddRange([
+            .. pages.Select(x =>
             {
-                Header = x.DisplayName,
-                IsVisible = x.IsVisibleOnSideMenu,
-                Icon = new LucideIcon
+                var navigationViewItem = new NavigationViewItem
                 {
-                    Width = 20,
-                    Height = 20,
-                    Kind = x.IconKind,
-                },
-                Tag = x.GetType(),
-            })
-        );
+                    Header = x.DisplayName,
+                    Icon = x.IconKind,
+                    Content = serviceProvider.GetRequiredService<ViewLocator>().CreateView(x),
+                    Tag = new Tag(x.GetType(), x),
+                };
+                if (!x.IsTopLevel)
+                {
+                    DockPanel.SetDock(navigationViewItem, Dock.Bottom);
+                }
+                return navigationViewItem;
+            }),
+        ]);
+        Page = Pages.FirstOrDefault();
     }
 
     [ObservableProperty]
-    public partial SukiSideMenuItem? Page { get; set; }
+    public partial NavigationViewItem? Page { get; set; }
 
-    public IAvaloniaList<SukiSideMenuItem> Pages { get; } = new AvaloniaList<SukiSideMenuItem>();
+    public IAvaloniaList<NavigationViewItem> Pages { get; } =
+        new AvaloniaList<NavigationViewItem>();
+
+    partial void OnPageChanged(NavigationViewItem? oldValue, NavigationViewItem? newValue)
+    {
+        if (oldValue is not null)
+        {
+            oldValue.Content = CreateContent(oldValue.Tag!.As<Tag>().ViewModel);
+            _backStack.Push(oldValue);
+        }
+    }
 
     [ObservableProperty]
     public partial User? User { get; set; }
-
-    public override void OnLoaded()
-    {
-        base.OnLoaded();
-
-        // Assigning PageItem instead of calling ChangePage directly.
-        // This keeps the UI selection visually in sync with the current page.
-        Page = Pages.FirstOrDefault(x => x.IsVisible);
-    }
 
     [RelayCommand]
     private async Task LogoutAsync()
     {
         await _aniListService.LogoutAsync();
-        await RegionManager.RequestNavigateAsync(
+        await RegionManager.RequestNavigateAsync<LoginView>(
             Regions.Main,
-            LoginView.ViewName,
             new NavigationParameters { { "IsLogout", true } }
         );
     }
 
+    [RelayCommand]
+    private async Task BackAsync()
+    {
+        Page = _backStack.Pop();
+    }
+
     public void Receive(ChangePageMessage message)
     {
-        var item = Pages.FirstOrDefault(x => x.Tag as Type == message.ViewModelType);
-        if (item is null)
+        var navigationViewItem = Pages.FirstOrDefault(x =>
+            x.Tag!.As<Tag>().ViewModelType == message.ViewModelType
+        );
+        if (navigationViewItem is null)
         {
-            ToastService.ShowToast(
-                NotificationType.Error,
-                "Navigation Error",
-                "An internal error occurred while navigating to the page."
-            );
+            // ToastService.ShowToast(
+            //     NotificationType.Error,
+            //     "Navigation Error",
+            //     "An internal error occurred while navigating to the page."
+            // );
             return;
         }
 
-        // Setting PageItem automatically triggers OnPageItemChanged -> ChangePage
-        Page = item;
+        navigationViewItem.Content = CreateContent(navigationViewItem.Tag!.As<Tag>().ViewModel);
+        Page = navigationViewItem;
     }
 
-    partial void OnPageChanged(SukiSideMenuItem? value)
-    {
-        if (value?.Tag is not Type viewModelType)
-            return;
-        Logger.LogInformation("PageItemChange {Header}", value.Header);
-        ChangeContent(viewModelType);
-    }
+    private Control CreateContent(PageViewModel viewModel) =>
+        ServiceProvider.GetRequiredService<ViewLocator>().CreateView(viewModel);
 
-    private void ChangeContent(Type viewModelType)
-    {
-        var itemDefinition = GetSideMenuItemDefinitions()
-            .FirstOrDefault(x => x.ViewModelType == viewModelType);
-        if (itemDefinition is null)
-            return;
-        RegionManager.RequestNavigateAsync(Regions.SideMenuMain, itemDefinition.ViewType.Name);
-    }
-
-    public override async Task OnNavigatedToAsync(NavigationContext context)
-    {
-        await base.OnNavigatedToAsync(context);
-
-        User? user = null;
-
-        if (
-            context.Parameters is { } parameters
-            && parameters.TryGetValue<User>("Auth", out var navUser)
-        )
-        {
-            user = navUser;
-        }
-
-        user ??= await _aniListService.GetAuthenticatedUserAsync();
-        User = user;
-    }
-
-    [ScanForTypes(
-        AssignableTo = typeof(UserControl<>),
-        TypeNameFilter = "*PageView",
-        Handler = nameof(GetSideMenuItemDefinitionHandler)
-    )]
-    private static partial SideMenuItemDefinition[] GetSideMenuItemDefinitions();
-
-    private static SideMenuItemDefinition GetSideMenuItemDefinitionHandler<TView, TViewModel>()
-        where TView : Control
-        where TViewModel : PageViewModel => new(typeof(TView), typeof(TViewModel));
-
-    private sealed record SideMenuItemDefinition(Type ViewType, Type ViewModelType);
+    private record Tag(Type ViewModelType, PageViewModel ViewModel);
 }

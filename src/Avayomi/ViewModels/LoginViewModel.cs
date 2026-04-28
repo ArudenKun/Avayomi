@@ -5,6 +5,7 @@ using AsyncNavigation;
 using AsyncNavigation.Core;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
+using Avayomi.Extensions;
 using Avayomi.Services;
 using Avayomi.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Avayomi.ViewModels;
 
-public sealed partial class LoginViewModel : ViewModel
+public sealed partial class LoginViewModel : NavigationViewModel
 {
     private readonly TopLevel _topLevel;
     private readonly IAniListService _aniListService;
@@ -32,15 +33,17 @@ public sealed partial class LoginViewModel : ViewModel
     [ObservableProperty]
     public partial bool RememberMe { get; set; }
 
-    public override async Task OnNavigatedToAsync(NavigationContext context)
+    public override Task OnNavigatedToAsync(NavigationContext context)
     {
-        await base.OnNavigatedToAsync(context);
+        base.OnNavigatedToAsync(context);
 
-        var authenticated = _aniListService.IsAuthenticated;
-        if (authenticated)
-        {
-            RegionManager.RequestNavigateAsync(Regions.Main, MainView.ViewName).SafeFireAndForget();
-        }
+        // var authenticated = _aniListService.IsAuthenticated;
+        // if (authenticated)
+        // {
+        //     RegionManager.RequestNavigate<MainView>(Regions.Main);
+        // }
+        RegionManager.RequestNavigate<MainView>(Regions.Main);
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -62,9 +65,8 @@ public sealed partial class LoginViewModel : ViewModel
                     await _aniListService.AuthenticateAsync(accessToken, RememberMe);
                     if (_aniListService.IsAuthenticated)
                     {
-                        await RegionManager.RequestNavigateAsync(
+                        await RegionManager.RequestNavigateAsync<MainView>(
                             Regions.Main,
-                            MainView.ViewName,
                             new NavigationParameters
                             {
                                 { "Auth", await _aniListService.GetAuthenticatedUserAsync() },
@@ -75,11 +77,11 @@ public sealed partial class LoginViewModel : ViewModel
                 }
 
                 await _aniListService.LogoutAsync();
-                ToastService.ShowToast(
-                    NotificationType.Warning,
-                    "Login Failed",
-                    "Login was cancelled or an error occured while logging in"
-                );
+                // ToastService.ShowToast(
+                //     NotificationType.Warning,
+                //     "Login Failed",
+                //     "Login was cancelled or an error occured while logging in"
+                // );
             }
             catch (TaskCanceledException)
             {

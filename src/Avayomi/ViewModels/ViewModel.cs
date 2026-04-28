@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
-using AsyncNavigation;
 using AsyncNavigation.Abstractions;
-using AsyncNavigation.Core;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
-using Avayomi.Services;
 using Avayomi.Services.Settings;
-using Avayomi.Services.Toasts;
 using Avayomi.Settings;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -18,12 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using R3;
 using Volo.Abp.DependencyInjection;
-using IDialogService = Avayomi.Services.Dialogs.IDialogService;
 
 namespace Avayomi.ViewModels;
 
 [PublicAPI]
-public abstract partial class ViewModel : ObservableValidator, INavigationAware, IDisposable
+public abstract partial class ViewModel : ObservableValidator, IDisposable, ITransientDependency
 {
     public required IServiceProvider ServiceProvider { protected get; init; }
     public required ITransientCachedServiceProvider CachedServiceProvider { protected get; init; }
@@ -42,11 +35,9 @@ public abstract partial class ViewModel : ObservableValidator, INavigationAware,
     protected ISettingsService SettingsService =>
         ServiceProvider.GetRequiredService<ISettingsService>();
 
-    protected IToastService ToastService => ServiceProvider.GetRequiredService<IToastService>();
+    // protected IToastService ToastService => ServiceProvider.GetRequiredService<IToastService>();
 
-    protected IDialogService DialogService => ServiceProvider.GetRequiredService<IDialogService>();
-
-    protected IThemeService ThemeService => ServiceProvider.GetRequiredService<IThemeService>();
+    // protected IDialogService DialogService => ServiceProvider.GetRequiredService<IDialogService>();
 
     public GeneralSettings GeneralSettings => SettingsService.Get<GeneralSettings>();
 
@@ -105,58 +96,11 @@ public abstract partial class ViewModel : ObservableValidator, INavigationAware,
         // Logger.LogException(ex);
         if (shouldDisplay)
         {
-            ToastService.ShowExceptionToast(ex, "Error", ex.ToStringDemystified());
+            // ToastService.ShowExceptionToast(ex, "Error", ex.ToStringDemystified());
         }
 
         return shouldCatch;
     }
-
-    #region Navigation
-
-    /// <inheritdoc/>
-    /// <remarks>Called only the first time a view is created and shown. Default implementation does nothing.</remarks>
-    public virtual Task InitializeAsync(NavigationContext context) => Task.CompletedTask;
-
-    /// <inheritdoc/>
-    /// <remarks>Called every time the view becomes the active view. Default implementation does nothing.</remarks>
-    public virtual Task OnNavigatedToAsync(NavigationContext context) => Task.CompletedTask;
-
-    /// <inheritdoc/>
-    /// <remarks>Called when navigating away from this view. Default implementation does nothing.</remarks>
-    public virtual Task OnNavigatedFromAsync(NavigationContext context) => Task.CompletedTask;
-
-    /// <inheritdoc/>
-    /// <remarks>
-    /// Controls whether a cached view instance can be reused for the incoming navigation request.
-    /// Default returns <see langword="true"/>, meaning the cached instance is always reused.
-    /// Override and return <see langword="false"/> to force creation of a new instance.
-    /// </remarks>
-    public virtual Task<bool> IsNavigationTargetAsync(NavigationContext context) =>
-        Task.FromResult(true);
-
-    /// <inheritdoc/>
-    /// <remarks>Called when the view is being removed from the region cache. Default implementation does nothing.</remarks>
-    public virtual Task OnUnloadAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-    /// <inheritdoc/>
-    /// <remarks>
-    /// Raise this event to request that the framework proactively removes this view from the region.
-    /// Use <see cref="RequestUnloadAsync"/> as a convenient helper to raise it.
-    /// </remarks>
-    public event AsyncEventHandler<AsyncEventArgs>? AsyncRequestUnloadEvent;
-
-    /// <summary>
-    /// Raises <see cref="AsyncRequestUnloadEvent"/> to request that the framework remove this view.
-    /// </summary>
-    protected Task RequestUnloadAsync(CancellationToken cancellationToken = default)
-    {
-        var handler = AsyncRequestUnloadEvent;
-        if (handler is not null)
-            return handler(this, new AsyncEventArgs(cancellationToken));
-        return Task.CompletedTask;
-    }
-
-    #endregion
 
     #region Disposal
 

@@ -22,15 +22,6 @@ public sealed partial class SplashViewModel : ViewModel
     [ObservableProperty]
     public partial string StatusText { get; set; } = "Initializing";
 
-    public override void OnLoaded() { }
-
-    public override Task OnNavigatedToAsync(NavigationContext context)
-    {
-        // base.OnNavigatedToAsync(context);
-        // StartAsync().SafeFireAndForget();
-        return Task.CompletedTask;
-    }
-
     private async Task StartAsync()
     {
         await Task.Delay(1000);

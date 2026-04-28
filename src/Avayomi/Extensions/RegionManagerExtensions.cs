@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AsyncAwaitBestPractices;
 using AsyncNavigation.Abstractions;
+using AsyncNavigation.Core;
 using Avalonia.Threading;
 
 namespace Avayomi.Extensions;
@@ -15,6 +16,7 @@ public static class RegionManagerExtensions
         INavigationParameters? navigationParameters = null,
         bool replay = false,
         TimeSpan? delay = null,
+        Action<NavigationResult>? onComplete = null,
         CancellationToken cancellationToken = default
     )
         where TView : class, IView =>
@@ -24,6 +26,7 @@ public static class RegionManagerExtensions
             navigationParameters,
             replay,
             delay,
+            onComplete,
             cancellationToken
         );
 
@@ -34,27 +37,28 @@ public static class RegionManagerExtensions
         INavigationParameters? navigationParameters = null,
         bool replay = false,
         TimeSpan? delay = null,
+        Action<NavigationResult>? onComplete = null,
         CancellationToken cancellationToken = default
     ) =>
-        Dispatcher.UIThread.Post(async void () =>
+        Dispatcher.UIThread.Invoke(async void () =>
         {
             if (delay is not null)
             {
                 await Task.Delay(delay.Value, cancellationToken);
             }
 
-            regionManager
-                .RequestNavigateAsync(
-                    regionName,
-                    viewType,
-                    navigationParameters,
-                    replay,
-                    cancellationToken
-                )
-                .SafeFireAndForget(ex => throw ex);
+            var result = await regionManager.RequestNavigateAsync(
+                regionName,
+                viewType,
+                navigationParameters,
+                replay,
+                cancellationToken
+            );
+
+            onComplete?.Invoke(result);
         });
 
-    public static Task RequestNavigateAsync<TView>(
+    public static Task<NavigationResult> RequestNavigateAsync<TView>(
         this IRegionManager regionManager,
         string regionName,
         INavigationParameters? navigationParameters = null,
@@ -70,7 +74,7 @@ public static class RegionManagerExtensions
             cancellationToken
         );
 
-    public static Task RequestNavigateAsync(
+    public static Task<NavigationResult> RequestNavigateAsync(
         this IRegionManager regionManager,
         string regionName,
         Type viewType,

@@ -6,14 +6,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Collections;
 using Avalonia.Controls.Notifications;
+using Avalonia.Media;
 using Avayomi.Services;
-using Avayomi.Services.Toasts;
 using Avayomi.ViewModels.Components;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lucide.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PleasantUI;
 using Raffinert.FuzzySharp;
 using Volo.Abp.DependencyInjection;
 
@@ -33,7 +33,7 @@ public sealed partial class AnimePageViewModel : PageViewModel
 
     public override int Index => 1;
 
-    public override LucideIconKind IconKind => LucideIconKind.Tv;
+    public override Geometry IconKind => MaterialIcons.Video;
 
     public IAvaloniaList<AnimeCardViewModel> Animes { get; }
 
@@ -150,26 +150,26 @@ public sealed partial class AnimePageViewModel : PageViewModel
                 {
                     var search = Search;
                     var providerName = AnimeProvider;
-                    ToastService.ShowToast(
-                        NotificationType.Warning,
-                        "Search",
-                        $"Search for {Search} has been canceled",
-                        new ToastActionButton(
-                            "Retry",
-                            _ =>
-                            {
-                                Search = search;
-                                AnimeProvider = providerName;
-                                SubmitCommand.Execute(null);
-                            },
-                            true
-                        )
-                    );
+                    // ToastService.ShowToast(
+                    //     NotificationType.Warning,
+                    //     "Search",
+                    //     $"Search for {Search} has been canceled",
+                    //     new ToastActionButton(
+                    //         "Retry",
+                    //         _ =>
+                    //         {
+                    //             Search = search;
+                    //             AnimeProvider = providerName;
+                    //             SubmitCommand.Execute(null);
+                    //         },
+                    //         true
+                    //     )
+                    // );
                 }
                 catch (Exception ex)
                 {
                     Logger.LogWarning(ex, "An exception occured while searching");
-                    ToastService.ShowToast(NotificationType.Error, "Search", ex.Message);
+                    // ToastService.ShowToast(NotificationType.Error, "Search", ex.Message);
                 }
             },
             "Searching",
